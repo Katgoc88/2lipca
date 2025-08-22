@@ -1,1661 +1,1234 @@
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ FUNDAMENT STRONY – MODUŁ BAZOWY (mod-fundament) █████
-  OPIS:
-  - Stała szerokość strony: 1340 px (fixed width).
-  - Duże ekrany → marginesy po bokach (centrowanie).
-  - Małe ekrany → proporcjonalne pomniejszenie całości (transform: scale).
-  - Minimalne style globalne: tylko tło i reset marginesów body/html.
-  - Paleta i gradient: złoto–beż metaliczny (bez czerni), zaakceptowany wariant.
-  - Izolacja nazw: prefiks .mod-fundament-*; brak globalnych id; brak !important.
-  - Samowystarczalny moduł: HTML + CSS + JS w jednym miejscu.
-  - Cleanup: root.modFundamentDestroy() usuwa listenery/obserwery.
-  JAK UŻYWAĆ:
-  - Wklej cały blok jako bazę strony. Wewnątrz .mod-fundament-canvas dodawaj kolejne moduły.
-  - Jeżeli usuwasz moduł z DOM, opcjonalnie wywołaj root.modFundamentDestroy() dla porządku.
--->
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <!-- ░░░░░░░░░░░░░░░░ META / PODSTAWY ░░░░░░░░░░░░░░░ -->
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STRONA RUTYNA START — Fundament</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RUTYNA — nowy start (1340 + HUD + Login)</title>
 
-  <!-- ░░░░░░░░░░░░░░░░ STYLE GLOBALNE (TYLKO FUNDAMENT) ░░░░░░░░░░░░░░░
-       UWAGA: Minimalne, dozwolone globalnie dla bazy (tło i reset marginesów). -->
+  <!-- ░░░ FUNDAMENT STRONY (mod-app) ░░░ -->
   <style>
-    /* ░░░░░░░░░░░░░░░░ TŁO STRONY – GRADIENT ZŁOTO–BEŻ (zaakceptowany) ░░░░░░░░░░░░░░░ */
-    html, body {height:100%; margin:0; padding:0;}
-    body {
-      /* Lekko metaliczny efekt przy użyciu wielowarstwowego gradientu (bez czerni). */
-      background:
-        radial-gradient(1200px 600px at 20% 0%, rgba(255,255,255,0.35), rgba(255,255,255,0) 60%),
-        linear-gradient(160deg, #f9e4b7 0%, #d4af37 28%, #b8860b 64%, #8b5e2b 100%);
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      /* Brak narzucania fontów/kolorów tekstu—tylko tło. */
-    }
+    body{ margin:0; background:#e6d4a6; color:#222; font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif; min-height:100vh; }
+    .mod-app-root{ --app-base:1340; --app-scale:1; --app-gap:16px; --app-shadow:0 6px 18px rgba(0,0,0,.08); overflow-x:clip; min-height:100vh; }
+    .mod-app-stage{ width:1340px; position:relative; left:50%; transform:translateX(-50%) scale(var(--app-scale)); transform-origin:top center; }
+    .mod-app-main{ width:1340px; margin:0 auto; }
+    .mod-app-plate{ border-radius:24px; border:1px solid rgba(255,255,255,.38); box-shadow:var(--app-shadow); background:linear-gradient(to bottom,#fdf1d5,#e6c98b); padding:22px 22px 24px; }
+    .mod-app-footer{ width:1340px; margin:36px auto 28px; }
+    .mod-footer{ border-radius:16px; border:1px solid rgba(255,255,255,.38); background:linear-gradient(to bottom,#fdf1d5,#e6c98b); padding:12px 16px; box-shadow:var(--app-shadow); }
+    .mod-footer small{opacity:.9}
   </style>
 
-  <!-- ░░░░░░░░░░░░░░░░ STYLE MODUŁU: mod-fundament ░░░░░░░░░░░░░░░ -->
+  <!-- ░░░ MODUŁ HUD (mod-hud) ░░░ -->
   <style>
-    /* STRUKTURA ZMIENNYCH (lokalne dla modułu) */
-    .mod-fundament{
-      --mod-fundament-base-width: 1340; /* px jako liczba do JS */
-      --mod-gold-light: #f9e4b7;
-      --mod-gold: #d4af37;
-      --mod-gold-deep: #b8860b;
-      --mod-brown-warm: #8b5e2b;
-    }
+    .mod-hud{ position:fixed; top:12px; left:50%; transform:translateX(-50%) scale(var(--app-scale)); transform-origin:top center; z-index:50; width:1340px; max-width:1340px; pointer-events:auto; }
+    .mod-hud-wrap{ border-radius:24px; border:1px solid rgba(255,255,255,.38); box-shadow:0 8px 24px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.35); background:#ffffffcc; padding:16px 18px; backdrop-filter:blur(.5px); }
+    .mod-hud-topbar{ display:flex; justify-content:center; gap:10px; margin:2px 0 12px; }
+    .mod-hud-btn{ appearance:none; border:1px solid rgba(0,0,0,.08); width:36px; height:36px; border-radius:10px; padding:0; display:grid; place-items:center; cursor:pointer; background:linear-gradient(180deg,#fae8b9,#ecd596); color:#3d2f12; box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 5px rgba(0,0,0,.08); }
+    .mod-hud-btn svg{ display:block; pointer-events:none; width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; transition:transform .18s ease; }
+    .mod-hud-btn:hover{ filter:brightness(1.03); }
+    .mod-hud-btn:active{ transform:translateY(1px); }
+    .mod-hud-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25), inset 0 1px 0 rgba(255,255,255,.7); }
+    .mod-hud-btn.toggle[aria-expanded="false"] svg{ transform:rotate(180deg); }
+    .mod-hud-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .mod-hud-grid[hidden]{ display:none; }
 
-    /* KONTENER MODUŁU – pełna wysokość, bez wycieków globalnych */
-    .mod-fundament{min-height:100dvh; position:relative; display:block;}
-
-    /* VIEWPORT: odpowiada za przewijanie dokumentu i centrowanie */
-    .mod-fundament-viewport{
-      width:100%; min-height:100dvh; display:flex; justify-content:center; align-items:flex-start; overflow:auto;
-      /* brak dodatkowych stylów wizualnych – fundament ma być neutralny */
-    }
-
-    /* SCALER: element skalowany transformacją; wysokość nadawana skryptem */
-    .mod-fundament-scaler{transform-origin: top center; width: max-content;}
-
-    /* CANVAS: właściwa „strona” o stałej szerokości 1340 px */
-    .mod-fundament-canvas{width:1340px; margin:0 auto;}
-
-    /* BLOK DEMO (możesz usunąć) – pokazuje marginesy na dużych ekranach */
-    .mod-fundament-demo{
-      margin:24px 0; padding:20px; border-radius:16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15));
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.35);
-      backdrop-filter: saturate(120%) blur(2px);
-      border: 1px solid rgba(255,255,255,0.35);
-    }
-    .mod-fundament-demo h1{margin:0 0 8px 0; font-weight:600;}
-    .mod-fundament-demo p{margin:0; line-height:1.5;}
+    /* ZEROWANIE "placeholderów" pod kafelkami */
+    .mod-hud-card{ padding:0; background:transparent; box-shadow:none; border:0; border-radius:0; height:auto; }
   </style>
+
+  <!-- ░░░ CHECKBOXY (globalne) ░░░ -->
+  <style>
+    .cb{ appearance:none; -webkit-appearance:none; -moz-appearance:none; width:36px; height:28px; border:2px solid #d32f2f; border-radius:4px; background:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; outline:none; vertical-align:middle; transition:background .15s ease,border-color .15s ease; margin:2px; font:700 13px/1 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; position:relative; box-sizing:border-box; }
+    .cb.daily,.cb.weekly,.cb.h24{ padding-right:16px; }
+    .cb::before{ content:""; position:relative; z-index:2; color:#c62828; }
+    .cb.daily::before{ content:"D"; } .cb.weekly::before{ content:"W"; } .cb.h24::before{ content:"24"; font-size:12px; } .cb.once::before{ content:"X"; }
+    .cb::after{ content:"❗"; position:absolute; top:50%; right:6px; transform:translateY(-50%); font-size:13px; color:#c62828; z-index:2; pointer-events:none; }
+    .cb:checked{ background:#2e7d32; border-color:#2e7d32; } .cb:checked::before{ color:#fff; } .cb:checked::after{ content:"✔"; color:#fff; font-size:14px; right:2px; }
+    .cb.once{ padding-right:0; } .cb.once::after{ content:""; } .cb.once::before{ content:"X"; color:#c62828; }
+    .cb.once:checked::before{ content:""; }
+    .cb.once:checked::after{ content:"✔"; color:#fff; font-size:14px; left:50%; right:auto; transform:translate(-50%,-50%); }
+  </style>
+
+  <!-- ░░░ NOTATKA + POPUP ░░░ -->
+  <style>
+    .note-card{width:280px; height:140px; background:#fdf7e3; border:1px solid #d4b06a; border-radius:10px; box-shadow:2px 2px 5px rgba(0,0,0,0.2); padding:8px; margin:6px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box;}
+    .note-header{display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:14px; gap:6px;}
+    .note-header input{border:none; background:transparent; font-weight:bold; font-size:14px; width:70%; outline:none;}
+    .note-actions{display:flex; gap:5px;}
+    .note-actions button{border:none; background:none; cursor:pointer; font-size:14px; line-height:1; padding:2px 4px;}
+    .note-text{flex:1; margin-top:6px; resize:none; border:none; outline:none; width:100%; height:100%; font-family:"Comic Sans MS","Patrick Hand","Caveat",cursive; font-size:14px; line-height:1.3; background:transparent; box-sizing:border-box; overflow:auto;}
+    .note-popup{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
+    .note-popup-content{background:#fffdf5; padding:15px; border-radius:10px; width:400px; max-width:90%; box-shadow:0 0 10px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:10px; box-sizing:border-box;}
+    .np-header{display:flex; align-items:center; justify-content:space-between;}
+    .np-title{font-weight:700;}
+    .np-actions{display:flex; align-items:center; gap:6px;}
+    .np-btn{border:none; background:none; cursor:pointer; font-size:16px; padding:4px 6px; border-radius:6px;}
+    .np-btn:hover{background:#f0ece2;}
+    .np-editor{position:relative; width:100%; min-height:160px;}
+    .np-editor textarea,.np-editor .np-preview{ position:absolute; inset:0; box-sizing:border-box; width:100%; height:100%; border:1px solid #ccc; border-radius:6px; background:#fff; overflow:auto; font-family:"Comic Sans MS","Patrick Hand","Caveat",cursive; font-size:14px; line-height:1.4; }
+    .np-editor textarea{resize:vertical; padding:6px;}
+    .np-preview{display:none; padding:10px; word-break:break-word; overflow-wrap:anywhere;}
+    .np-footer{display:flex; align-items:center; justify-content:space-between;}
+    .np-left{display:flex; align-items:center; gap:8px;}
+    .np-save{border:none; background:#2e7d32; color:#fff; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer;}
+    .np-save:hover{background:#276c2b;}
+    .np-confirm{display:none; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;}
+    .np-choice{border:none; padding:8px 12px; border-radius:8px; cursor:pointer;}
+    .np-primary{background:#1976d2; color:#fff;}
+    .np-warn{background:#b71c1c; color:#fff;}
+    .np-cancel{background:#e0e0e0; color:#333;}
+    .np-toast{ position:fixed; right:16px; bottom:16px; z-index:1100; background:rgba(33,33,33,.92); color:#fff; padding:8px 12px; border-radius:8px; font:600 13px/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; opacity:0; transform:translateY(8px); transition:opacity .2s ease, transform .2s ease; pointer-events:none; }
+    .np-toast--show{opacity:1; transform:translateY(0);}
+  </style>
+
+  <!-- ░░░ RESETY + WEEKLY ░░░ -->
+  <style>
+    .reset-card{ width:280px; height:140px; background:linear-gradient(to bottom,#fdf1d5,#e6c98b); border:1px solid #d2b679; border-radius:10px; padding:10px; margin:5px; box-shadow:1px 2px 4px rgba(0,0,0,0.2); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; }
+    .reset-card button{ display:block; width:100%; margin:4px 0; padding:8px; border:none; border-radius:6px; font-weight:700; color:#fff; cursor:pointer; transition:background .2s ease; }
+    .btn-daily{ background:#1976d2; } .btn-daily:hover{ background:#1565c0; }
+    .btn-once{ background:#6d4c41; } .btn-once:hover{ background:#5d4037; }
+    .btn-all{ background:#c62828; } .btn-all:hover{ background:#b71c1c; }
+
+    .reset-24h-card{ width:280px; height:140px; background:linear-gradient(to bottom,#fdf1d5,#e6c98b); border:1px solid #d2b679; border-radius:10px; padding:10px; margin:5px; box-shadow:1px 2px 4px rgba(0,0,0,0.2); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; }
+    .reset-24h-card .btn-24h{ background:#6d4c41; color:#fff; font-weight:700; border:none; border-radius:8px; padding:8px; cursor:pointer; transition:background .2s ease; width:100%; }
+    .reset-24h-card .btn-24h:hover{ background:#5d4037; }
+    .reset-24h-card .reset-info{ flex:1; overflow:auto; font-size:12px; line-height:1.25; background:rgba(255,255,255,.55); border-radius:6px; padding:6px 8px; }
+    .reset-24h-card .reset-info b{ font-weight:700; }
+
+    .reset-weekly-card{ width:280px; height:140px; background:linear-gradient(to bottom,#fdf1d5,#e6c98b); border:1px solid #d2b679; border-radius:10px; padding:10px; margin:5px; box-shadow:1px 2px 4px rgba(0,0,0,0.2); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; }
+    .reset-weekly-card .btn-weekly{ background:#6d4c41; color:#fff; font-weight:700; border:none; border-radius:8px; padding:8px; cursor:pointer; transition:background .2s ease; width:100%; }
+    .reset-weekly-card .btn-weekly:hover{ background:#5d4037; }
+    .reset-weekly-card .reset-info{ flex:1; overflow:auto; font-size:12px; line-height:1.25; background:rgba(255,255,255,.55); border-radius:6px; padding:6px 8px; }
+    .reset-weekly-card .reset-info b{ font-weight:700; }
+  </style>
+
+  <!-- ░░░ KALENDARZ (mod-calendar) ░░░ -->
+  <style>
+    .mod-calendar-card{ --mod-bg1:#fdf1d5; --mod-bg2:#e6c98b; --mod-border:#d2b679; --mod-shadow:rgba(0,0,0,.2); --mod-text:#3d342a; --mod-accent:#6d4c41; --mod-day-bg:rgba(255,255,255,.55);
+      width:280px; height:140px; margin:5px; background:linear-gradient(to bottom,var(--mod-bg1),var(--mod-bg2)); border:1px solid var(--mod-border); border-radius:10px; box-shadow:1px 2px 4px var(--mod-shadow); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; color:var(--mod-text); box-sizing:border-box; display:grid; grid-template-rows:18px 12px 1fr; padding:5px; gap:3px; overflow:hidden; }
+    .mod-calendar-header{display:grid;grid-template-columns:18px 1fr 18px;align-items:center;gap:3px}
+    .mod-calendar-nav{ border:none;background:var(--mod-day-bg);width:18px;height:18px;border-radius:6px; cursor:pointer;color:var(--mod-text);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:11px; }
+    .mod-calendar-title{text-align:center;font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none}
+    .mod-calendar-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+    .mod-calendar-week span{ display:block;text-align:center;font-size:9.5px;font-weight:700;background:var(--mod-day-bg); border-radius:6px;padding:1px 0;line-height:1.05; }
+    .mod-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:14px;gap:3px}
+    .mod-calendar-day{ display:flex;align-items:center;justify-content:center;font-size:10.5px;line-height:1; background:var(--mod-day-bg);border-radius:6px;user-select:none; }
+    .mod-calendar-day.is-out{opacity:.45}
+    .mod-calendar-day.is-today{background:#fff;outline:1.5px solid var(--mod-accent);color:#1e1e1e;font-weight:800}
+  </style>
+
+  <!-- ░░░ KALKULATOR (mod-calc) ░░░ -->
+  <style>
+    .mod-calc-card{
+      --mod-bg1:#fdf1d5; --mod-bg2:#e6c98b; --mod-border:#d2b679;
+      --mod-shadow:rgba(0,0,0,.2); --mod-text:#3d342a; --mod-accent:#6d4c41;
+      --mod-key:#fff; --mod-key-op:#6d4c41; --mod-key-op-h:#5d4037; --mod-key-eq:#2e7d32; --mod-key-eq-h:#276c2b;
+      width:280px; height:140px; margin:5px; background:linear-gradient(to bottom,var(--mod-bg1),var(--mod-bg2));
+      border:1px solid var(--mod-border); border-radius:10px; box-shadow:1px 2px 4px var(--mod-shadow);
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial; color:#3d342a; box-sizing:border-box;
+      display:grid; grid-template-rows:22px 1fr; gap:4px; padding:6px; overflow:hidden;
+    }
+    .mod-calc-display{ background:rgba(255,255,255,.75); border:1px solid #d7c397; border-radius:8px; padding:0 6px; font-weight:700; font-size:12px; text-align:right; white-space:nowrap; text-overflow:ellipsis; line-height:20px; height:22px; overflow:hidden; }
+    .mod-calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:16px; gap:3px; }
+    .mod-calc-btn{ border:none; border-radius:7px; background:var(--mod-key); color:#2c2c2c; font-weight:700; font-size:11px; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+    .mod-calc-btn:active{ transform:translateY(1px); }
+    .mod-calc-btn.op{ background:var(--mod-key-op); color:#fff; } .mod-calc-btn.op:hover{ background:var(--mod-key-op-h); }
+    .mod-calc-btn.eq{ background:var(--mod-key-eq); color:#fff; } .mod-calc-btn.eq:hover{ background:var(--mod-key-eq-h); }
+    .mod-calc-btn.span-2{ grid-column:span 2; }
+  </style>
+
+<!-- ░░░░░░░░░░░░ STYLE: TOOLTIPY (mod-tip-a • wariant ✭) – v2 (fixed) ░░░░░░░░░░░░ -->
+<style>
+  .mod-tip-a{ --mod-tip-a-fs:15px; --mod-tip-a-bg:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
+              --mod-tip-a-color:#2b1e0c; --mod-tip-a-border:1px solid rgba(0,0,0,.14); --mod-tip-a-radius:12px;
+              --mod-tip-a-shadow:0 8px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45);
+              --mod-tip-a-pad:10px; --mod-tip-a-gap:8px; --mod-tip-a-z:1000; position:relative; display:inline-block; }
+  .mod-tip-a__btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 2px;
+                   font-size:var(--mod-tip-a-fs); line-height:1; background:none; border:0; cursor:pointer; color:inherit; }
+  .mod-tip-a__btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.28); border-radius:8px; }
+
+  /* Dymek teraz jest przyklejany do okna (nie podlega przycinaniu rodziców) */
+  .mod-tip-a__bubble{
+    position:fixed; left:50%; top:0; transform:translateX(-50%);
+    z-index:var(--mod-tip-a-z); color:var(--mod-tip-a-color);
+    background:var(--mod-tip-a-bg); border:var(--mod-tip-a-border); border-radius:var(--mod-tip-a-radius);
+    box-shadow:var(--mod-tip-a-shadow); padding:var(--mod-tip-a-pad); font:400 13px/1.35 system-ui;
+    min-width:180px; max-width:min(420px, 72vw); white-space:normal; word-break:break-word;
+  }
+  .mod-tip-a__bubble[hidden]{ display:none; }
+
+  /* Strzałka – domyślnie dymek NAD ikonką (strzałka w dół) */
+  .mod-tip-a__bubble::after{
+    content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%) rotate(45deg);
+    width:10px; height:10px; background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
+    border-left:var(--mod-tip-a-border); border-bottom:var(--mod-tip-a-border);
+  }
+  /* Gdy brakuje miejsca u góry – dymek pod ikonką (strzałka w górę) */
+  .mod-tip-a__bubble[data-pos="below"]::after{
+    top:-10px; transform:translateX(-50%) rotate(225deg);
+  }
+
+  /* Wariant ostrzegawczy (na przyszłość) */
+  .mod-tip-a[data-variant="warn"] .mod-tip-a__bubble{ border-color:rgba(184,134,11,.45); }
+</style>
+
 </head>
+
+
+
+
+
+
+
+
+
+
 <body>
+  <div class="mod-app-root">
 
-  <!-- ░░░░░░░░░░░░░░░░ STRUKTURA MODUŁU: mod-fundament ░░░░░░░░░░░░░░░ -->
-  <div class="mod-fundament" data-module="mod-fundament">
-    <!-- VIEWPORT: przewijanie dokumentu i centrowanie zawartości -->
-    <div class="mod-fundament-viewport">
-      <!-- SCALER: skaluje canvas na małych ekranach -->
-      <div class="mod-fundament-scaler">
-        <!-- CANVAS: stała szerokość 1340 px; TU WKLEJAJ KOLEJNE MODUŁY -->
-        <main class="mod-fundament-canvas" data-base-width="1340">
-          <!-- ░░░░░░░░░░░░░░░░ SLOT NA TWOJĄ TREŚĆ / MODUŁY ░░░░░░░░░░░░░░░ -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░HUD - PRZYPIETY PASEK Z PRZYCISKAMI░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ MODUŁ: mod-hud-pinned (v3.3) — 1340px, grid 3+3, kalendarz 2-rows, notatki z ikonami 🔎📋🗑 █████
-     NOWE vs v3.2:
-     - Każda notatka ma mini-ikonki akcji: 🔎 (podgląd/edycja w popupie), 📋 (kopiuj), 🗑 (czyść z potwierdzeniem).
-     - Popup z edycją: textarea (edytuj), auto-linkowanie URL-i w trybie „podgląd”, kopiuj/usuń/zamknij.
-     - Kopiowanie: navigator.clipboard + fallback.
-     - Izolacja zdarzeń, sprzątanie, brak globali.
--->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- █████ HTML █████ -->
-<div class="mod-hud-pinned" data-module="mod-hud-pinned" aria-live="polite">
-  <div class="mod-hud-shell" role="region" aria-label="Quick panel" aria-expanded="true">
-    <div class="mod-hud-wrap">
-      <!-- █████ HEADER (bez tytułu) █████ -->
-      <div class="mod-hud-header">
-        <div class="mod-hud-spacer"></div>
-        <div class="mod-hud-actions">
-          <!-- ⏻ WYLOGUJ -->
-          <button class="mod-hud-btn mod-hud-logout" type="button" title="Sign out" aria-label="Sign out">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 2v8M7.05 7.05a7 7 0 1 0 9.9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+    <!-- HUD -->
+    <div class="mod-hud" data-module="mod-hud" aria-live="polite">
+      <div class="mod-hud-wrap" role="region" aria-label="HUD">
+        <div class="mod-hud-topbar">
+          <button type="button" class="mod-hud-btn logout" data-act="logout" title="Logout / Sign in" aria-label="Logout / Sign in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v8M7.05 7.05a7 7 0 1 0 9.9 0"/></svg>
           </button>
-          <!-- ZWIŃ/ROZWIŃ -->
-          <button class="mod-hud-toggle" type="button" aria-label="Collapse panel" title="Collapse/Expand">
-            <svg class="mod-hud-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" aria-controls="mod-hud-grid" title="Zwiń/Rozwiń HUD" aria-label="Zwiń/Rozwiń HUD">
+            <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
         </div>
-      </div>
 
-      <!-- █████ BODY █████ -->
-      <div class="mod-hud-body" id="mod-hud-body" role="group" aria-label="Quick panel content">
-        <div class="mod-hud-content">
-
-          <!-- █████ PANEL: RESETY + KALENDARZ + NOTATKI █████ -->
-          <section class="mod-reset-suite" data-module="mod-reset-suite" aria-label="Reset panel and calendar">
-            <div class="mod-reset-grid" role="group" aria-label="Resets, notes and calendar">
-              
-              <!-- [1] DAILY / ONCE / RESET ALL (górny rząd, kol.1) -->
-              <article class="mod-reset-card mod-reset-col1" aria-label="Daily / One-time / Reset all">
-                <div class="mod-reset-stack">
-                  <button type="button" class="btn btn-daily"  data-action="reset-type" data-type="daily">RESET DAILY</button>
-                  <button type="button" class="btn btn-once"   data-action="reset-type" data-type="once">RESET ONE TIME</button>
-                  <button type="button" class="btn btn-all"    data-action="reset-all">RESET ALL</button>
-                </div>
-              </article>
-
-              <!-- [2] 24h (górny rząd, kol.2) -->
-              <article class="mod-reset-card mod-reset-col2" aria-label="24 hours">
-                <div class="mod-reset-title">24 h</div>
-                <div class="mod-reset-controls">
-                  <button type="button" class="btn btn-h24" data-action="reset-type" data-type="h24">RESET 24H</button>
-                  <button type="button" class="btn btn-h24" data-action="save-24h">SAVE TIME</button>
-                </div>
-                <div class="mod-reset-info rs-info-24h" aria-live="polite">No saved time.</div>
-              </article>
-
-              <!-- [3] WEEKLY (górny rząd, kol.3) -->
-              <article class="mod-reset-card mod-reset-col3" aria-label="Weekly">
-                <div class="mod-reset-title">Weekly</div>
-                <div class="mod-reset-controls">
-                  <button type="button" class="btn btn-weekly" data-action="reset-type" data-type="weekly">RESET WEEKLY</button>
-                  <button type="button" class="btn btn-weekly" data-action="save-weekly">SAVE DATE</button>
-                </div>
-                <div class="mod-reset-info rs-info-weekly" aria-live="polite">No saved date.</div>
-              </article>
-
-              <!-- [4] CALENDAR (kol.4, SPAN 2 wiersze) -->
-              <article class="mod-reset-card mod-reset-col4" aria-label="Calendar">
-                <div class="mini-cal" data-cal="mounted"></div>
-              </article>
-
-              <!-- [5] NOTES: DAILY/ONCE/ALL (dolny rząd, kol.1) -->
-              <article class="mod-note-card mod-note-col1" aria-label="Notes for Daily/Once/All">
-                <div class="mod-note-head">
-                  <span>Notes — Daily/Once/All</span>
-                  <div class="mod-note-actions" role="group" aria-label="Note actions">
-                    <button class="note-btn btn-preview" type="button" title="Preview/Edit (popup)" aria-label="Preview/Edit">🔎</button>
-                    <button class="note-btn btn-copy"    type="button" title="Copy to clipboard" aria-label="Copy">📋</button>
-                    <button class="note-btn btn-clear"   type="button" title="Clear note" aria-label="Clear">🗑</button>
-                  </div>
-                </div>
-                <textarea class="mod-note-text" data-note-key="hud:note:daily" placeholder="Type your note…"></textarea>
-              </article>
-
-              <!-- [6] NOTES: 24h (dolny rząd, kol.2) -->
-              <article class="mod-note-card mod-note-col2" aria-label="Notes for 24h">
-                <div class="mod-note-head">
-                  <span>Notes — 24h</span>
-                  <div class="mod-note-actions" role="group" aria-label="Note actions">
-                    <button class="note-btn btn-preview" type="button" title="Preview/Edit (popup)" aria-label="Preview/Edit">🔎</button>
-                    <button class="note-btn btn-copy"    type="button" title="Copy to clipboard" aria-label="Copy">📋</button>
-                    <button class="note-btn btn-clear"   type="button" title="Clear note" aria-label="Clear">🗑</button>
-                  </div>
-                </div>
-                <textarea class="mod-note-text" data-note-key="hud:note:h24" placeholder="Type your note…"></textarea>
-              </article>
-
-              <!-- [7] NOTES: Weekly (dolny rząd, kol.3) -->
-              <article class="mod-note-card mod-note-col3" aria-label="Notes for Weekly">
-                <div class="mod-note-head">
-                  <span>Notes — Weekly</span>
-                  <div class="mod-note-actions" role="group" aria-label="Note actions">
-                    <button class="note-btn btn-preview" type="button" title="Preview/Edit (popup)" aria-label="Preview/Edit">🔎</button>
-                    <button class="note-btn btn-copy"    type="button" title="Copy to clipboard" aria-label="Copy">📋</button>
-                    <button class="note-btn btn-clear"   type="button" title="Clear note" aria-label="Clear">🗑</button>
-                  </div>
-                </div>
-                <textarea class="mod-note-text" data-note-key="hud:note:weekly" placeholder="Type your note…"></textarea>
-              </article>
-
+        <div class="mod-hud-grid" data-hud-grid id="mod-hud-grid" aria-live="polite">
+          <!-- SLOT 1 -->
+          <div class="mod-hud-card">
+            <div class="reset-card">
+              <button class="btn-daily" onclick="resetDaily()">RESET DAILY</button>
+              <button class="btn-once"  onclick="resetOnce()">RESET ONE TIME</button>
+              <button class="btn-all"   onclick="resetAll()">RESET ALL</button>
             </div>
-          </section>
-          <!-- ████ /PANEL ████ -->
+          </div>
 
-          <!-- █████ POPUP PREVIEW/EDIT — w obrębie modułu █████ -->
-          <div class="mod-note-popup" data-popup="hidden" aria-hidden="true" role="dialog" aria-label="Note preview and edit">
-            <div class="mnp-backdrop" data-close="1"></div>
-            <div class="mnp-window" role="document">
-              <div class="mnp-head">
-                <strong>Note</strong>
-                <div class="mnp-actions">
-                  <button class="mnp-btn mnp-copy" type="button" title="Copy" aria-label="Copy">📋</button>
-                  <button class="mnp-btn mnp-clear" type="button" title="Clear" aria-label="Clear">🗑</button>
-                  <button class="mnp-btn mnp-close" type="button" title="Close" aria-label="Close">✖</button>
+          <!-- SLOT 2 -->
+          <div class="mod-hud-card">
+            <div class="reset-24h-card">
+              <button class="btn-24h" onclick="reset24h()">RESET 24H</button>
+              <div id="info24h" class="reset-info">No data yet.</div>
+            </div>
+          </div>
+
+          <!-- SLOT 3 — WEEKLY -->
+          <div class="mod-hud-card">
+            <div class="reset-weekly-card">
+              <button class="btn-weekly" onclick="resetWeekly()">RESET WEEKLY</button>
+              <div id="infoWeekly" class="reset-info">No data yet.</div>
+            </div>
+          </div>
+
+          <!-- SLOT 4 — KALENDARZ -->
+          <div class="mod-hud-card">
+            <div class="mod-calendar-card" data-mod-calendar>
+              <div class="mod-calendar-header">
+                <button class="mod-calendar-nav" data-cal-prev aria-label="Previous month">‹</button>
+                <div class="mod-calendar-title" data-cal-title>Month YYYY</div>
+                <button class="mod-calendar-nav" data-cal-next aria-label="Next month">›</button>
+              </div>
+              <div class="mod-calendar-week" aria-hidden="true">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+              <div class="mod-calendar-grid" data-cal-grid></div>
+            </div>
+          </div>
+
+          <!-- SLOT 5 -->
+          <div class="mod-hud-card">
+            <div class="note-card">
+              <div class="note-header">
+                <input type="text" placeholder="Note title...">
+                <div class="note-actions">
+                  <button class="note-zoom"  title="Open">🔍</button>
+                  <button class="note-copy"  title="Copy">📋</button>
+                  <button class="note-clear" title="Clear">🗑️</button>
                 </div>
               </div>
-              <div class="mnp-body">
-                <!-- Tryb edycji -->
-                <textarea class="mnp-editor" placeholder="Edit your note…"></textarea>
-                <!-- Tryb podglądu (auto-linki) -->
-                <div class="mnp-preview" hidden></div>
+              <textarea class="note-text" placeholder="Write your note..."></textarea>
+            </div>
+          </div>
+
+          <!-- SLOT 6 -->
+          <div class="mod-hud-card">
+            <div class="note-card">
+              <div class="note-header">
+                <input type="text" placeholder="Note title...">
+                <div class="note-actions">
+                  <button class="note-zoom"  title="Open">🔍</button>
+                  <button class="note-copy"  title="Copy">📋</button>
+                  <button class="note-clear" title="Clear">🗑️</button>
+                </div>
               </div>
-              <div class="mnp-foot">
-                <div class="mnp-left">
-                  <label class="mnp-toggle"><input type="checkbox" class="mnp-mode"> <span>Preview mode</span></label>
+              <textarea class="note-text" placeholder="Write your note..."></textarea>
+            </div>
+          </div>
+
+          <!-- SLOT 7 -->
+          <div class="mod-hud-card">
+            <div class="note-card">
+              <div class="note-header">
+                <input type="text" placeholder="Note title...">
+                <div class="note-actions">
+                  <button class="note-zoom"  title="Open">🔍</button>
+                  <button class="note-copy"  title="Copy">📋</button>
+                  <button class="note-clear"  title="Clear">🗑️</button>
                 </div>
-                <div class="mnp-right">
-                  <button class="mnp-btn mnp-save" type="button" title="Save changes" aria-label="Save">Save</button>
-                </div>
+              </div>
+              <textarea class="note-text" placeholder="Write your note..."></textarea>
+            </div>
+          </div>
+
+          <!-- SLOT 8 — KALKULATOR -->
+          <div class="mod-hud-card">
+            <div class="mod-calc-card" data-mod-calc>
+              <div class="mod-calc-display" data-dsp>0</div>
+              <div class="mod-calc-grid">
+                <button class="mod-calc-btn" data-act="clear">C</button>
+                <button class="mod-calc-btn" data-act="back">←</button>
+                <button class="mod-calc-btn op" data-op="%">%</button>
+                <button class="mod-calc-btn op" data-op="÷">÷</button>
+                <button class="mod-calc-btn" data-num="7">7</button>
+                <button class="mod-calc-btn" data-num="8">8</button>
+                <button class="mod-calc-btn" data-num="9">9</button>
+                <button class="mod-calc-btn op" data-op="×">×</button>
+                <button class="mod-calc-btn" data-num="4">4</button>
+                <button class="mod-calc-btn" data-num="5">5</button>
+                <button class="mod-calc-btn" data-num="6">6</button>
+                <button class="mod-calc-btn op" data-op="−">−</button>
+                <button class="mod-calc-btn" data-num="1">1</button>
+                <button class="mod-calc-btn" data-num="2">2</button>
+                <button class="mod-calc-btn" data-num="3">3</button>
+                <button class="mod-calc-btn op" data-op="+">+</button>
+                <button class="mod-calc-btn span-2" data-num="0">0</button>
+                <button class="mod-calc-btn" data-act="dot">.</button>
+                <button class="mod-calc-btn eq" data-act="equal">=</button>
               </div>
             </div>
           </div>
-          <!-- ████ /POPUP ████ -->
-
         </div>
       </div>
-      <!-- /BODY -->
     </div>
-  </div>
-</div>
 
-<!-- █████ CSS █████ -->
+    <!-- PŁÓTNO -->
+    <div class="mod-app-stage">
+      <main class="mod-app-main">
+        <div class="mod-app-plate">
+
+          <!-- ░░░░░░░░░░░░░░░░░░░░ MODUŁ: BELKA + TABEL(E) (mod-tables-belt24) ░░░░░░░░░░░░░░░░░░░░ -->
+          <!-- █████ STYLE MODUŁU (lokalne, bez globali) █████ -->
+          <style>
+            /* ░░ STRUKTURA BELKI 24 SLOTÓW ░░ */
+            .mod-tables{ --slots:24; --gutter:16px; --half:calc(var(--gutter)/2);
+              --c-head-border:rgba(0,0,0,.14); --c-grid:rgba(0,0,0,.16);
+              --radius:14px; --fs-head:14px; --fs-cap:calc(var(--fs-head) * 2);
+              width:98%; margin:0 auto 18px; /* 98% szer. miejsca na zawartość, wycentrowana */
+            }
+            .mod-tables .mod-belt{ display:flex; flex-wrap:wrap; margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half)); }
+            .mod-tables .mod-belt-item{ padding-left:var(--half); padding-right:var(--half); flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots))); box-sizing:border-box; }
+
+            /* ░░ KARTA TABELI (ramka, przezroczyste tło tabeli) ░░ */
+            .mod-tables .mod-table-card{ border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.08); border:1px solid rgba(255,255,255,.38);
+              background:transparent; padding:10px; overflow:hidden; }
+
+            /* ░░ TABELA: pełne krawędzie (zewn. i wewn.), zaokrąglone na karcie ░░ */
+            .mod-tables .mod-tbl{ width:100%; table-layout:fixed; border-collapse:collapse; background:transparent; }
+            .mod-tables .mod-tbl caption{ text-align:left; font:italic 700 var(--fs-cap)/1.2 system-ui; margin:6px 0 10px; color:#2b1e0c; }
+            .mod-tables .mod-tbl thead th{ position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui; padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none; }
+            .mod-tables .mod-tbl td{ font:400 13px/1.35 system-ui; padding:8px 10px; vertical-align:top; }
+            .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:1px solid var(--c-grid); }
+
+            /* ░░ Wiersze ░░ */
+            .mod-tables .mod-tbl tbody tr:hover td{ background:rgba(255,255,255,.4); }
+
+            /* ░░ Zawijanie treści ░░ */
+            .mod-tables td{ word-break:break-word; overflow-wrap:anywhere; }
+
+            /* ░░ „Chipsy”/dodatki w komórkach ░░ */
+            .mod-tables .muted{ opacity:.85; }
+            .mod-tables .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+            .mod-tables .chip{ border-radius:999px; padding:2px 8px; background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.06); font:600 12px/1 system-ui; }
+
+            /* ░░ SORT – tylko dla kolumn z data-sort-col ░░ */
+            .mod-tables th[data-sort-col]{ cursor:pointer; }
+            .mod-tables .mod-sort-btn{ display:inline-flex; align-items:center; gap:8px; width:100%; }
+            .mod-tables .mod-sort-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25); border-radius:8px; }
+            .mod-tables .mod-sort-ind{ margin-left:auto; font-size:18px; line-height:1; color:#2b1e0c; opacity:1; }
+            .mod-tables th[aria-sort="none"] .mod-sort-ind{ color:#4a3a1c; opacity:.45; }
+
+            /* ░░ Styl 3. kolumny w TABELI 1 (tylko zawartość wierszy, bez nagłówka) ░░ */
+.mod-tables .mod-tbl tbody td:nth-child(2){
+  font-weight:bold;
+  font-size:15px; /* domyślnie 13px w td, tu +2 */
+}
+
+/* ░░ Styl 4. kolumny w TABELI 1 (tylko zawartość wierszy, bez nagłówka) ░░ */
+.mod-tables .mod-tbl tbody td:nth-child(3){
+    font-size:15px; /* domyślnie 13px w td, tu +2 */
+}
+
+<!-- ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ -->
 <style>
-  /* ░░░░ HUD: stałe 1340 px, brak driftu ░░░░ */
-  .mod-hud-pinned{ --mod-hud-z:200; --mod-hud-top:16px; --mod-hud-radius:16px; --mod-hud-pad:16px;
-    --mod-hud-shadow:0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.35);
-    --mod-hud-border:1px solid rgba(255,255,255,0.35);
-    --mod-hud-bg:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15));
-    --mod-hud-blur:saturate(120%) blur(2px);
-    --mod-hud-body-max:520px; --mod-hud-collapsed-h:40px; --mod-hud-lift:-36px;
-    position:fixed; inset:0 auto auto 0; z-index:var(--mod-hud-z); pointer-events:none; }
-  .mod-hud-shell{ position:fixed; top:var(--mod-hud-top); left:50%; width:1340px; margin-left:-670px; pointer-events:none; }
-  .mod-hud-wrap{ position:relative; width:1340px; box-sizing:border-box; border-radius:var(--mod-hud-radius);
-    box-shadow:var(--mod-hud-shadow); border:var(--mod-hud-border); backdrop-filter:var(--mod-hud-blur);
-    background:var(--mod-hud-bg); padding:var(--mod-hud-pad); pointer-events:auto; }
-  .mod-hud-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .mod-hud-actions{ display:flex; align-items:center; gap:8px; }
-  .mod-hud-btn,.mod-hud-toggle{ display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.45);
-    border-radius:10px; padding:6px 10px; cursor:pointer; background:rgba(255,255,255,0.25); transition:transform .15s, background .15s, border-color .15s, opacity .2s; }
-  .mod-hud-btn:hover,.mod-hud-toggle:hover{ transform:translateY(-1px); background:rgba(255,255,255,0.35); }
-  .mod-hud-icon{ display:block; transform-origin:center; transition:transform .2s; }
-  .mod-hud-body{ position:relative; overflow:hidden; transition:max-height .28s, opacity .28s, margin-top .28s; max-height:var(--mod-hud-body-max); opacity:1; margin-top:12px; }
-  .mod-hud-pinned.is-collapsed .mod-hud-body{ max-height:0; opacity:0; margin-top:0; }
-  .mod-hud-body::before{ content:""; display:block; height: calc(0px - var(--mod-hud-lift)); }
-
-  /* ░░░░ RESETY + KALENDARZ + NOTATKI ░░░░ */
-  .mod-reset-suite{ --daily-strong:#1976d2; --h24-strong:#7e57c2; --weekly-strong:#f9a825; --once-strong:#424242;
-    --glass-bg:linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));
-    --glass-brd:1px solid rgba(255,255,255,0.35); --glass-sh:0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.30);
-    --radius:14px; --pad:10px; --gap:12px; display:block; transform:translateY(var(--mod-hud-lift)); }
-  .mod-reset-grid{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--gap); width:100%; align-items:start; }
-  .mod-reset-card,.mod-note-card{ border-radius:var(--radius); border:var(--glass-brd); background:var(--glass-bg);
-    backdrop-filter:saturate(120%) blur(2px); box-shadow:var(--glass-sh); padding:var(--pad); }
-  .mod-reset-title{ font-weight:700; letter-spacing:.2px; text-align:center; margin-bottom:8px; }
-  .mod-reset-stack{ display:flex; flex-direction:column; gap:8px; }
-  .mod-reset-controls{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
-  .mod-reset-controls .btn{ width:100%; }
-  .mod-reset-info{ font-size:.92rem; line-height:1.4; text-align:center; border-radius:10px; padding:6px 8px; border:1px solid rgba(255,255,255,.4);
-    background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.1)); }
-  .mod-reset-info.overdue{ outline:2px solid #d32f2f; }
-  .mod-reset-suite .btn{ appearance:none; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; color:#fff;
-    box-shadow:0 2px 4px rgba(0,0,0,.08); transition:transform .05s, opacity .15s, filter .15s; }
-  .mod-reset-suite .btn:active{ transform:translateY(1px); }
-  .mod-reset-suite .btn:hover{ filter:brightness(1.05); }
-  .mod-reset-suite .btn-daily{ background:var(--daily-strong); }
-  .mod-reset-suite .btn-h24{ background:var(--h24-strong); }
-  .mod-reset-suite .btn-weekly{ background:var(--weekly-strong); color:#111; }
-  .mod-reset-suite .btn-once{ background:var(--once-strong); }
-  .mod-reset-suite .btn-all{ background:linear-gradient(180deg,#8b1e1e,#c62828); }
-  .mod-reset-col4{ grid-column:4; grid-row:1 / span 2; }
-
-  /* Mini-kalendarz — kompakt */
-  .mod-reset-suite .mini-cal{ font-family:inherit; font-size:11px; }
-  .mod-reset-suite .mini-cal .mc-head{ display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; }
-  .mod-reset-suite .mini-cal .mc-title{ font-weight:700; text-align:center; flex:1; }
-  .mod-reset-suite .mini-cal .mc-nav{ display:flex; gap:6px; }
-  .mod-reset-suite .mini-cal .mc-btn{ border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.28); padding:2px 6px; border-radius:7px; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
-  .mod-reset-suite .mini-cal .mc-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-  .mod-reset-suite .mini-cal .mc-cell{ padding:4px 0; text-align:center; border:1px solid rgba(255,255,255,.45); border-radius:7px; background:linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,.14)); }
-  .mod-reset-suite .mini-cal .mc-dow{ background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.22)); font-weight:700; }
-  .mod-reset-suite .mini-cal .mc-empty{ background:transparent; border:none; }
-  .mod-reset-suite .mini-cal .mc-today{ background:#fff; outline:2px solid #d4af37; font-weight:800; }
-
-  /* NOTATKI — kafel + mini-ikonki */
-  .mod-note-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
-  .mod-note-actions{ display:flex; gap:6px; }
-  .note-btn{ border:1px solid rgba(255,255,255,.45); background:rgba(255,255,255,.25); border-radius:8px; padding:2px 6px; cursor:pointer;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
-  .note-btn:hover{ background:rgba(255,255,255,.35); }
-  .mod-note-text{ width:100%; min-height:64px; resize:vertical; border:1px solid rgba(255,255,255,.45); border-radius:10px; padding:8px;
-    background:linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,.14)); color:inherit; font:inherit; outline:none; }
-  .mod-note-text:focus{ box-shadow:0 0 0 2px rgba(25,118,210,.35) inset; }
-
-  /* POPUP (w obrębie HUD) */
-  .mod-note-popup[aria-hidden="true"]{ display:none; }
-  .mod-note-popup{ position:absolute; inset:0; z-index:10; }
-  .mnp-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.25); }
-  .mnp-window{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:680px; max-width:calc(100% - 48px);
-    border-radius:14px; border:1px solid rgba(255,255,255,.45); background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
-    box-shadow:0 12px 28px rgba(0,0,0,.18); color:#111; }
-  .mnp-head,.mnp-foot{ display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid rgba(0,0,0,.08); }
-  .mnp-foot{ border-top:1px solid rgba(0,0,0,.08); border-bottom:none; }
-  .mnp-actions{ display:flex; gap:6px; }
-  .mnp-btn{ border:1px solid rgba(0,0,0,.18); background:#fff; border-radius:8px; padding:4px 8px; cursor:pointer; }
-  .mnp-btn:hover{ background:#f5f5f5; }
-  .mnp-body{ padding:10px 12px; }
-  .mnp-editor{ width:100%; min-height:180px; resize:vertical; border:1px solid rgba(0,0,0,.18); border-radius:8px; padding:8px; font:inherit; }
-  .mnp-preview{ width:100%; max-height:320px; overflow:auto; border:1px dashed rgba(0,0,0,.18); border-radius:8px; padding:10px; white-space:pre-wrap; word-wrap:break-word; }
-  .mnp-preview a{ color:#1976d2; text-decoration:underline; }
-  .mnp-toggle{ display:flex; align-items:center; gap:6px; user-select:none; }
-
-
-</style>
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ PATCH CSS: skalowanie HUD do 1340 px █████ -->
-<style>
-  /* STRUKTURA: HUD ma stałe 1340 px, ale skaluje się proporcjonalnie do okna */
-  .mod-hud-pinned{ --app-scale: 1; } /* wartość uzupełni JS */
-
-  .mod-hud-pinned .mod-hud-shell{
-    /* stały układ 1340 px z centrowaniem */
-    left: 50%; width: 1340px; margin-left: calc(-670px * var(--app-scale));
-    /* skalowanie całego HUD: teksty, ikony, odstępy – 1:1 */
-    transform: scale(var(--app-scale));
-    transform-origin: top center;
+  /* Grupa pigułek w komórce */
+  .mod-tables .mod-pairs{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  /* Pojedyncza pigułka: checkbox + nazwa + 🔗, wszystko razem */
+  .mod-tables .mod-pair{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:3px 8px; border-radius:999px; white-space:nowrap;
+    background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.10);
   }
 </style>
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ PATCH: stabilne centrowanie HUD przy skali █████ -->
-<style>
-  /* STRUKTURA: skala ustawiana w JS jako --app-scale (0–1) */
-  .mod-hud-pinned{ --app-scale: 1; }
-
-  /* ZAMIANA sposobu centrowania:
-     było: left:50% + margin-left: (-670px * scale)
-     jest: left:50% + transform: translateX(-50%) scale(scale)
-     → już nie „dryfuje” w prawo na wąskim oknie. */
-  .mod-hud-pinned .mod-hud-shell{
-    left: 50%;
-    width: 1340px;
-    margin-left: 0;                      /* nadpisuje starą wartość */
-    transform: translateX(-50%) scale(var(--app-scale));
-    transform-origin: top center;
-    will-change: transform;              /* płynniejsze przeliczenia */
-  }
-</style>
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-
-
-</style>
-
-<!-- █████ JS █████ -->
-<script>
-/* ░░░░ KAPSUŁA HUD — auth, toggle, offset, bez driftu ░░░░ */
-(function(){
-  const root = document.querySelector('.mod-hud-pinned'); if(!root) return;
-  const wrap   = root.querySelector('.mod-hud-wrap');
-  const body   = root.querySelector('.mod-hud-body');
-  const toggle = root.querySelector('.mod-hud-toggle');
-  const region = root.querySelector('.mod-hud-shell[role="region"]');
-  const logoutBtn = root.querySelector('.mod-hud-logout');
-  const canvas = document.querySelector('.mod-fundament-canvas');
-  let authRoot = document.querySelector('.mod-auth-login');
-
-  const AUTH_LS_KEY='app:auth:session', LS_KEY='mod-hud-pinned:state';
-  let authMO=null;
-
-  const getState=()=>localStorage.getItem(LS_KEY)||'expanded';
-  const setState=s=>localStorage.setItem(LS_KEY,s);
-
-  function applyCollapsedUI(c){ root.classList.toggle('is-collapsed',c); region.setAttribute('aria-expanded',c?'false':'true'); toggle.setAttribute('aria-label',c?'Expand panel':'Collapse panel'); }
-
-  function adjustCanvasOffset(){
-    if(!canvas||!wrap) return;
-    const topGap=parseInt(getComputedStyle(root).getPropertyValue('--mod-hud-top'))||0;
-    const collapsed=root.classList.contains('is-collapsed');
-    const collapsedH=parseInt(getComputedStyle(root).getPropertyValue('--mod-hud-collapsed-h'))||0;
-    const outerH=wrap.getBoundingClientRect().height;
-    const usedH=collapsed?(collapsedH+topGap):(outerH+topGap);
-    canvas.style.scrollMarginTop=(outerH+16)+'px';
-    canvas.style.paddingTop=(usedH+8)+'px';
-  }
-  let raf=null; const scheduleLayout=()=>{ if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(adjustCanvasOffset); };
-
-  function onToggle(){ const c=root.classList.toggle('is-collapsed'); setState(c?'collapsed':'expanded'); applyCollapsedUI(c); scheduleLayout(); }
-  function doLogout(){ if(authRoot&&authRoot.modAuth){ authRoot.modAuth.logout('manual'); } else { localStorage.removeItem(AUTH_LS_KEY); location.reload(); } }
-  function isAuthedNow(){ try{ const raw=localStorage.getItem(AUTH_LS_KEY); if(raw&&raw.length>10) return true; }catch(e){} if(document.documentElement.dataset.auth==='1') return true;
-    if(authRoot&&authRoot.modAuth&&typeof authRoot.modAuth.isAuthed==='function'){ try{ return !!authRoot.modAuth.isAuthed(); }catch(e){} } return false; }
-  function updateLogoutVisibility(){ const a=isAuthedNow(); if(logoutBtn){ logoutBtn.style.display=a?'':'none'; } }
-  function ensureAuthHooked(){
-    if(authRoot&&(authRoot.modAuth||authRoot.classList.contains('mod-auth-login'))){
-      try{
-        authRoot.addEventListener('app:auth:ready',updateLogoutVisibility);
-        authRoot.addEventListener('app:auth:login',updateLogoutVisibility);
-        authRoot.addEventListener('app:auth:logout',updateLogoutVisibility);
-      }catch(e){}
-      updateLogoutVisibility(); if(authMO){ authMO.disconnect(); authMO=null; } return;
-    }
-    if(!authMO){ authMO=new MutationObserver(()=>{ const n=document.querySelector('.mod-auth-login'); if(n){ authRoot=n; ensureAuthHooked(); } });
-      authMO.observe(document.documentElement,{childList:true,subtree:true}); }
-  }
-
-  toggle&&toggle.addEventListener('click',onToggle,{passive:true});
-  logoutBtn&&logoutBtn.addEventListener('click',doLogout,{passive:true});
-  window.addEventListener('resize',scheduleLayout,{passive:true});
-  window.addEventListener('orientationchange',scheduleLayout,{passive:true});
-  window.addEventListener('storage',(e)=>{ if(e.key===AUTH_LS_KEY) updateLogoutVisibility(); },{passive:true});
-  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) updateLogoutVisibility(); },{passive:true});
-  const ro=new ResizeObserver(scheduleLayout); if(wrap) ro.observe(wrap); if(canvas) ro.observe(canvas);
-
-  applyCollapsedUI(getState()==='collapsed'); ensureAuthHooked(); updateLogoutVisibility(); requestAnimationFrame(updateLogoutVisibility); setTimeout(updateLogoutVisibility,0);
-  scheduleLayout();
-
-  root.modHudPinnedDestroy=function(){
-    toggle&&toggle.removeEventListener('click',onToggle);
-    logoutBtn&&logoutBtn.removeEventListener('click',doLogout);
-    window.removeEventListener('resize',scheduleLayout);
-    window.removeEventListener('orientationchange',scheduleLayout);
-    window.removeEventListener('storage',(e)=>{ if(e.key===AUTH_LS_KEY) updateLogoutVisibility(); });
-    document.removeEventListener('visibilitychange',()=>{ if(!document.hidden) updateLogoutVisibility(); });
-    ro.disconnect(); if(authMO){ authMO.disconnect(); authMO=null; }
-    if(canvas){ canvas.style.paddingTop=''; canvas.style.scrollMarginTop=''; }
-    if(authRoot){
-      authRoot.removeEventListener('app:auth:ready',updateLogoutVisibility);
-      authRoot.removeEventListener('app:auth:login',updateLogoutVisibility);
-      authRoot.removeEventListener('app:auth:logout',updateLogoutVisibility);
-    }
-  };
-  root.dispatchEvent(new CustomEvent('app:mod-hud-pinned:ready',{bubbles:false}));
-})();
-
-/* ░░░░ KAPSUŁA RESETÓW + MINI‑KALENDARZ + NOTATKI z ikonami ░░░░ */
-(function(){
-  const root=document.querySelector('.mod-reset-suite'); if(!root) return;
-
-  /* ► Klucze LS (izolowane) */
-  const LS_STATE_KEY='app:cb:state:v1', LS_24H_KEY='app:cb:last-24h', LS_WEEKLY_KEY='app:cb:last-weekly', LEGACY_24H_KEY='last-24h', LEGACY_WK_KEY='last-weekly';
-  const NOTE_SEL='.mod-note-card .mod-note-text';
-
-  /* ► Checkboxes reset */
-  const readCbState=()=>{ try{ const raw=localStorage.getItem(LS_STATE_KEY); return raw?JSON.parse(raw):{}; }catch(e){ return {}; } };
-  const writeCbState=(map)=>{ try{ localStorage.setItem(LS_STATE_KEY,JSON.stringify(map||{})); }catch(e){} };
-  const findAllCbByType=(t)=>Array.from(document.querySelectorAll('input.cb.'+t));
-  function resetCbList(list){ const map=readCbState(); list.forEach(cb=>{ cb.checked=false; const id=cb.getAttribute('data-id'); if(id) delete map[id]; cb.dispatchEvent(new Event('change',{bubbles:false})); }); writeCbState(map); }
-
-  /* ► Timery UI */
-  const fmtDate=(d)=>d.toLocaleString('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-  function ago(from){ const ms=Date.now()-from.getTime(); const m=Math.floor(ms/60000), h=Math.floor(m/60), d=Math.floor(h/24); if(d>0) return `${d}d ${h%24}h`; if(h>0) return `${h}h ${m%60}m`; return `${m}m`; }
-  const box24h=root.querySelector('.rs-info-24h'), boxWk=root.querySelector('.rs-info-weekly');
-  function render24h(){ if(!box24h) return; const iso=localStorage.getItem(LS_24H_KEY)||localStorage.getItem(LEGACY_24H_KEY);
-    if(!iso){ box24h.textContent='No saved time.'; box24h.classList.remove('overdue'); return; }
-    const st=new Date(iso), nx=new Date(st.getTime()+24*60*60*1000);
-    box24h.innerHTML=`<div>Last time: <strong>${fmtDate(st)}</strong><br>Next: <strong>${fmtDate(nx)}</strong> • Passed: <strong>${ago(st)}</strong></div>`;
-    box24h.classList.toggle('overdue', Date.now()>=nx.getTime()); }
-  function renderWeekly(){ if(!boxWk) return; const iso=localStorage.getItem(LS_WEEKLY_KEY)||localStorage.getItem(LEGACY_WK_KEY);
-    if(!iso){ boxWk.textContent='No saved date.'; boxWk.classList.remove('overdue'); return; }
-    const st=new Date(iso), nx=new Date(st.getTime()+7*24*60*60*1000);
-    boxWk.innerHTML=`<div>Last start: <strong>${fmtDate(st)}</strong><br>Next: <strong>${fmtDate(nx)}</strong> • Passed: <strong>${ago(st)}</strong></div>`;
-    boxWk.classList.toggle('overdue', Date.now()>=nx.getTime()); }
-  function renderAll(){ render24h(); renderWeekly(); }
-
-  /* ► Mini calendar */
-  ;(function mountMiniCal(container){
-    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const dows=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; const today=new Date(); let y=today.getFullYear(), m=today.getMonth();
-    function render(){
-      container.innerHTML=`<div class="mc-head"><div class="mc-nav"><button type="button" class="mc-btn" data-calnav="-1">‹</button></div><div class="mc-title">${months[m]} ${y}</div><div class="mc-nav"><button type="button" class="mc-btn" data-calnav="1">›</button></div></div><div class="mc-grid"></div>`;
-      const grid=container.querySelector('.mc-grid'); dows.forEach(t=>{ const d=document.createElement('div'); d.className='mc-cell mc-dow'; d.textContent=t; grid.appendChild(d); });
-      const first=new Date(y,m,1), days=new Date(y,m+1,0).getDate(), start=(first.getDay()+6)%7;
-      for(let i=0;i<start;i++){ const e=document.createElement('div'); e.className='mc-cell mc-empty'; grid.appendChild(e); }
-      for(let d=1; d<=days; d++){ const cell=document.createElement('div'); const isToday=(y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate()); cell.className='mc-cell'+(isToday?' mc-today':''); cell.textContent=d; grid.appendChild(cell); }
-      container.querySelectorAll('[data-calnav]').forEach(b=>b.addEventListener('click',()=>{ const step=parseInt(b.getAttribute('data-calnav'),10); m+=step; if(m<0){m=11;y--;} if(m>11){m=0;y++;} render(); },{passive:true}));
-    }
-    render();
-  })(root.querySelector('.mini-cal[data-cal="mounted"]'));
-
-  /* ► Notatki: zapis/odczyt + mini-ikonki + popup */
-  const notes = Array.from(root.querySelectorAll(NOTE_SEL));
-  const debounces = new Map();
-  const saveNote=(key,val)=>{ try{ localStorage.setItem(key,val||''); }catch(e){} };
-  const loadNote=(key)=>{ try{ return localStorage.getItem(key)||''; }catch(e){ return ''; } };
-  notes.forEach(t=>{ const key=t.getAttribute('data-note-key'); t.value=loadNote(key);
-    t.addEventListener('input',()=>{ const prev=debounces.get(t); if(prev) clearTimeout(prev); const h=setTimeout(()=>saveNote(key,t.value),250); debounces.set(t,h); },{passive:true}); });
-
-  /* ► Utility: copy text */
-  async function copyText(text){
-    try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text||''); return true; } }catch(e){}
-    try{ const ta=document.createElement('textarea'); ta.value=text||''; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){ return false; }
-  }
-
-  /* ► Utility: escape + auto-link (safe) */
-  function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
-  function linkify(s){
-    const esc=escapeHTML(s);
-    const urlRe=/(https?:\/\/[^\s<]+)|(www\.[^\s<]+)/gi;
-    return esc.replace(urlRe,(m)=>{ const href=m.startsWith('http')?m:`https://${m}`; return `<a href="${href}" target="_blank" rel="noopener noreferrer">${m}</a>`; });
-  }
-
-  /* ► POPUP refs */
-  const popup = document.querySelector('.mod-note-popup');
-  const popBackdrop = popup.querySelector('.mnp-backdrop');
-  const popWin = popup.querySelector('.mnp-window');
-  const popEditor = popup.querySelector('.mnp-editor');
-  const popPreview = popup.querySelector('.mnp-preview');
-  const popMode = popup.querySelector('.mnp-mode');
-  const popBtnSave = popup.querySelector('.mnp-save');
-  const popBtnCopy = popup.querySelector('.mnp-copy');
-  const popBtnClear = popup.querySelector('.mnp-clear');
-  const popBtnClose = popup.querySelector('.mnp-close');
-
-  let activeTextarea=null; let lastFocus=null;
-
-  function openPopupFor(textarea){
-    activeTextarea=textarea; lastFocus=document.activeElement;
-    const val=textarea.value||'';
-    popEditor.value=val; popPreview.innerHTML=linkify(val); popMode.checked=false; popPreview.hidden=true; popEditor.hidden=false;
-    popup.setAttribute('aria-hidden','false'); popup.dataset.popup='shown';
-    setTimeout(()=>popEditor.focus(),0);
-  }
-  function closePopup(){
-    popup.setAttribute('aria-hidden','true'); popup.dataset.popup='hidden';
-    if(lastFocus && typeof lastFocus.focus==='function') lastFocus.focus();
-    activeTextarea=null;
-  }
-
-  function onPopupToggleMode(){
-    const isPreview=popMode.checked;
-    if(isPreview){ popPreview.innerHTML=linkify(popEditor.value||''); popPreview.hidden=false; popEditor.hidden=true; }
-    else { popEditor.hidden=false; popPreview.hidden=true; popEditor.focus(); }
-  }
-  function onPopupSave(){
-    if(!activeTextarea) return;
-    activeTextarea.value=popEditor.value||'';
-    const key=activeTextarea.getAttribute('data-note-key'); saveNote(key,activeTextarea.value);
-  }
-  async function onPopupCopy(){
-    const text = popMode.checked ? (activeTextarea?activeTextarea.value:popEditor.value) : popEditor.value;
-    await copyText(text||''); /* brak alertu — działamy cicho */
-  }
-  function onPopupClear(){
-    if(!activeTextarea) return;
-    if(!confirm('Clear this note?')) return;
-    activeTextarea.value=''; const key=activeTextarea.getAttribute('data-note-key'); saveNote(key,''); popEditor.value='';
-    if(!popMode.checked){ popEditor.focus(); } else { popPreview.innerHTML=''; }
-  }
-
-  /* ► Delegacja klików (resety + notatki) */
-  function onClick(e){
-    /* Reset buttons */
-    const btn=e.target.closest('button[data-action]'); 
-    if(btn){ const act=btn.dataset.action;
-      if(act==='reset-type'){ const type=btn.dataset.type; const list=findAllCbByType(type), total=list.length;
-        if(total===0){ alert(`Nothing to reset for ${type.toUpperCase()}.`); return; }
-        if(!confirm(`Reset ${type.toUpperCase()} checkboxes? (count: ${total})`)) return; resetCbList(list); return; }
-      if(act==='save-24h'){ localStorage.setItem(LS_24H_KEY,new Date().toISOString()); render24h(); return; }
-      if(act==='save-weekly'){ localStorage.setItem(LS_WEEKLY_KEY,new Date().toISOString()); renderWeekly(); return; }
-      if(act==='reset-all'){
-        const allCbs=Array.from(document.querySelectorAll('input.cb'));
-        const timers=(localStorage.getItem(LS_24H_KEY)||localStorage.getItem(LEGACY_24H_KEY)?1:0)+(localStorage.getItem(LS_WEEKLY_KEY)||localStorage.getItem(LEGACY_WK_KEY)?1:0);
-        if(allCbs.length===0 && timers===0){ alert('Nothing to reset.'); return; }
-        if(!confirm(`Reset ALL (Daily, One-time, 24h, Weekly) and clear saved times?\n(checkboxes: ${allCbs.length}, saved timers: ${timers})`)) return;
-        resetCbList(allCbs);
-        localStorage.removeItem(LS_24H_KEY); localStorage.removeItem(LS_WEEKLY_KEY); localStorage.removeItem(LEGACY_24H_KEY); localStorage.removeItem(LEGACY_WK_KEY);
-        renderAll(); return;
-      }
-    }
-
-    /* Note mini icons */
-    const actBtn=e.target.closest('.note-btn'); if(actBtn){
-      const card=actBtn.closest('.mod-note-card'); const ta=card.querySelector('.mod-note-text'); if(!ta) return;
-      if(actBtn.classList.contains('btn-preview')){ openPopupFor(ta); return; }
-      if(actBtn.classList.contains('btn-copy')){ copyText(ta.value||''); return; }
-      if(actBtn.classList.contains('btn-clear')){ if(confirm('Clear this note?')){ ta.value=''; const key=ta.getAttribute('data-note-key'); saveNote(key,''); } return; }
-    }
-  }
-  root.addEventListener('click',onClick,{passive:true});
-
-  /* ► Popup listeners */
-  popBackdrop.addEventListener('click',closePopup,{passive:true});
-  popBtnClose.addEventListener('click',closePopup,{passive:true});
-  popBtnSave.addEventListener('click',onPopupSave,{passive:true});
-  popBtnCopy.addEventListener('click',onPopupCopy,{passive:true});
-  popBtnClear.addEventListener('click',onPopupClear,{passive:true});
-  popMode.addEventListener('change',onPopupToggleMode,{passive:true});
-  document.addEventListener('keydown',(e)=>{ if(popup.dataset.popup==='shown' && e.key==='Escape'){ closePopup(); } },{passive:true});
-
-  /* ► Init */
-  let interval=setInterval(renderAll,60*1000); renderAll();
-
-  /* ► Sprzątanie modułu */
-  root.modResetSuiteDestroy=function(){
-    root.removeEventListener('click',onClick);
-    clearInterval(interval);
-    debounces.forEach(h=>clearTimeout(h)); debounces.clear();
-    popBackdrop.removeEventListener('click',closePopup);
-    popBtnClose.removeEventListener('click',closePopup);
-    popBtnSave.removeEventListener('click',onPopupSave);
-    popBtnCopy.removeEventListener('click',onPopupCopy);
-    popBtnClear.removeEventListener('click',onPopupClear);
-    popMode.removeEventListener('change',onPopupToggleMode);
-    document.removeEventListener('keydown',(e)=>{ if(popup.dataset.popup==='shown' && e.key==='Escape'){ closePopup(); } });
-  };
-})();
-</script>
-
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ PATCH JS: Prawdziwe przypięcie HUD do viewportu (portal do <body>) █████ -->
-<script>
-/* ░░░░ HUD PORTAL → <body> (zapobiega odklejaniu przy scrollu) ░░░░ */
-(function(){
-  const SEL = '.mod-hud-pinned';
-  function mountToBody(){
-    const hud = document.querySelector(SEL);
-    if(!hud || hud.parentElement === document.body) return;
-    document.body.appendChild(hud); /* przeniesienie bez zmiany stylów i logiki */
-  }
-  /* uruchom od razu + po załadowaniu DOM (gdyby HUD wstrzyknął się później) */
-  try{ mountToBody(); }catch(e){}
-  document.addEventListener('DOMContentLoaded', mountToBody, { once:true, passive:true });
-})();
-</script>
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ PATCH JS: obliczanie skali HUD względem 1340 px █████ -->
-<script>
-/* ░░░░ HUD scale controller — skaluje HUD tak jak resztę strony ░░░░ */
-(function(){
-  const HUD_SEL = '.mod-hud-pinned';
-  const BASE = 1340; // bazowa szerokość projektu
-
-  function updateScale(){
-    const hud = document.querySelector(HUD_SEL); if(!hud) return;
-    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    // Skala: do 1 na szerokich oknach, poniżej 1340 px — proporcjonalnie w dół
-    const s = Math.min(1, vw / BASE);
-    hud.style.setProperty('--app-scale', String(s));
-  }
-
-  // start + reagowanie na zmiany
-  updateScale();
-  window.addEventListener('resize', updateScale, {passive:true});
-  window.addEventListener('orientationchange', updateScale, {passive:true});
-  // gdyby fonty/OS zmieniły DPI
-  window.matchMedia?.('(resolution: 2dppx)').addEventListener?.('change', updateScale, {passive:true});
-})();
-</script>
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░KONIEC HUD - PRZYPIETY PASEK Z PRZYCISKAMI░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-
-          <!-- ░░░░░░░░░░░░░░░░ /SLOT ░░░░░░░░░░░░░░░ -->
-
-
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░LINIA KOTWICA░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ MODUŁ: mod-content-anchor — stała linia/kotwica pod HUD █████ -->
-<!-- Wklej pod HUD w <main class="mod-fundament-canvas">, jako pierwszy element treści. -->
-<div class="mod-content-anchor" data-module="mod-content-anchor" aria-hidden="true">
-  <div class="mod-content-anchor-line" title="Content starts below"></div>
-</div>
-
-<style>
-  .mod-content-anchor{ margin: 6px 0 10px; }
-  .mod-content-anchor-line{
-    height:0; border-top:1px solid rgba(255,255,255,.55);
-    box-shadow: 0 1px 0 rgba(0,0,0,.06);
-    opacity:.9;
-  }
-</style>
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░LINIA KOTWICA░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░ -->
-<!-- █████ MODUŁ: mod-cb-core-demo — testowe checkboxy + trwały zapis █████
-  UMIEJSCOWIENIE: w treści (między HUD a stopką).
-  ZAŁOŻENIA:
-  - 3×4 checkboxy (daily, weekly, h24, once) – tylko do testów.
-  - Wygląd checkboxów IDENTYCZNY jak w Twoim CSS (zakodowany tutaj, ale OSKSOPOWANY).
-  - Trwały zapis: localStorage 'app:cb:state:v1' (mapa {data-id:bool}).
-  - Izolacja: wszystko w .mod-cb-core; brak globalnych id; cleanup root.modCbCoreDestroy().
--->
-<!-- ░░░░░░░░░░░░░░░░ -->
-
-<!-- █████ HTML █████ -->
-<section class="mod-cb-core" data-module="mod-cb-core" aria-label="Checkboxes demo">
-  <header class="mod-cb-head">Checkboxes — demo set</header>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
+
+          </style>
+
+          <!-- █████ STRUKTURA: BELKA 24 SLOTY (układ 18 + 6), tabele jako „pasażerowie” █████ -->
+          <section class="mod-tables" data-module="mod-tables-belt24" aria-label="Zestaw tabel (belka 24)">
+            <div class="mod-belt">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <!-- ░░░ TABELA 1 – 18 SLOTÓW ░░░ -->
+              <div class="mod-belt-item" style="--span:18">
+                <div class="mod-table-card">
+                  <table class="mod-tbl" data-sortable="true">
+                    <caption>PROJEKTY</caption>
+
+                    <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
+                    <colgroup>
+                      <col style="width:2%"><col style="width:2%"><col style="width:16%"><col style="width:74%">
+                      <col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%">
+                    </colgroup>
+
+                    <thead>
+                      <!-- (colspan) 2 + 1 + 1 + 6 • sort tylko na NAZWA -->
+                      <tr>
+                        <th colspan="2"></th>
+                        <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                          <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+                        </th>
+                        <th colspan="1">SZCZEGÓŁY</th> 
+                        <th colspan="6"> </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+
+<!-- ---------------------MICRO 3------------------------------------- -->
+<tr>
+  <td colspan="2"> </td>
+  <td colspan="1">MICRO 3</td>
+  <td colspan="1" class="muted">
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://micro3.io/">Micro 3</a>
+        <a href="https://micro3.io/" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
+  </td>
+  <td colspan="6"> </td>
+</tr>
 
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
+<!-- ---------------------INTRACT------------------------------------- -->
+<tr>
+  <td colspan="2"> </td>
+  <td colspan="1">INTRACT</td>
+  <td colspan="1" class="muted">
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://quest.intract.io/achievements">Intract</a>
+        <a href="https://quest.intract.io/achievements" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
+  </td>
+  <td colspan="6"> </td>
+</tr>
 
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <td colspan="1">OPEN SEA</td>
+  <td colspan="1" class="muted">
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://opensea.io/rewards">Open Sea</a>
+        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://opensea.io/">Home</a>
+        <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://opensea.io/rewards">Rewards</a>
+        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
+    <div>
+      <label>
+        <input type="checkbox" class="cb daily">
+        <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a>
+        <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a>
+      </label>
     </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-
-<div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-
-  <div class="mod-cb-grid">
-    <!-- DAILY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">DAILY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test1-daily"> test1 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test2-daily"> test2 daily</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb daily" data-id="test3-daily"> test3 daily</label>
-    </div>
-
-    <!-- WEEKLY -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">WEEKLY</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test1-weekly"> test1 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test2-weekly"> test2 weekly</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb weekly" data-id="test3-weekly"> test3 weekly</label>
-    </div>
-
-    <!-- 24H -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">24H</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test1-h24"> test1 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test2-h24"> test2 24h</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb h24" data-id="test3-h24"> test3 24h</label>
-    </div>
-
-    <!-- ONE TIME -->
-    <div class="mod-cb-card">
-      <div class="mod-cb-title">ONE TIME</div>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test1-once"> test1 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test2-once"> test2 one time</label>
-      <label class="mod-cb-row"><input type="checkbox" class="cb once" data-id="test3-once"> test3 one time</label>
-    </div>
-  </div>
-</section>
-
-<!-- █████ CSS █████ -->
-<style>
-  /* ░░ STYL DEMO KART (lekko „glass”, spójny z HUD) ░░ */
-  .mod-cb-core{
-    --glass-bg: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));
-    --glass-brd: 1px solid rgba(255,255,255,0.35);
-    --glass-sh:  0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.30);
-    --radius: 14px; --pad: 12px; --gap: 12px;
-    display:block; margin: 14px 0 20px;
-  }
-  .mod-cb-head{ font-weight:800; letter-spacing:.2px; margin:0 0 8px 0; opacity:.9; }
-  .mod-cb-grid{ display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--gap); }
-  .mod-cb-card{
-    border-radius: var(--radius); border: var(--glass-brd); background: var(--glass-bg);
-    box-shadow: var(--glass-sh); padding: var(--pad);
-  }
-  .mod-cb-title{ font-weight:700; text-align:center; margin-bottom:8px; }
-  .mod-cb-row{ display:block; margin: 6px 0; }
-
-  /* ░░ TWOJE CHECKBOXY – OSKSOPOWANE DO .mod-cb-core ░░ */
-  .mod-cb-core input[type="checkbox"].cb{
-    appearance:none; -webkit-appearance:none;
-    width:22px; height:22px;
-    border:2px solid #d32f2f; border-radius:4px;
-    display:inline-grid; place-items:center;
-    position:relative; cursor:pointer;
-    margin-right:6px; vertical-align:middle;
-    transition:background .15s ease, border-color .15s ease, color .15s ease;
-  }
-  .mod-cb-core input.cb:checked{ border-color:#2e7d32; }
-
-  .mod-cb-core input.cb::after{
-    font-weight:700; line-height:1; user-select:none; color:#c62828;
-  }
-  .mod-cb-core input.cb:checked::after{ color:#2e7d32; }
-
-  .mod-cb-core input.cb:checked::before{
-    content:"✔"; position:absolute; user-select:none;
-    font-size:14px; line-height:1; color:#2e7d32; transform:translateY(-1px);
-  }
-
-  .mod-cb-core input.cb.once            { background:#ffffff; }
-  .mod-cb-core input.cb.once:checked    { background:#e6e6e6; }
-  .mod-cb-core input.cb.once::after     { content:"X"; }
-  .mod-cb-core input.cb.once:checked::after{ content:""; }
-
-  .mod-cb-core input.cb.daily           { background:#cfe7ff; }
-  .mod-cb-core input.cb.daily:checked   { background:#5da8ff; }
-  .mod-cb-core input.cb.daily::after    { content:"D"; font-size:13px; }
-
-  .mod-cb-core input.cb.weekly          { background:#fff0a6; }
-  .mod-cb-core input.cb.weekly:checked  { background:#ffd54d; }
-  .mod-cb-core input.cb.weekly::after   { content:"W"; font-size:13px; }
-
-  .mod-cb-core input.cb.h24             { background:#e8d5ff; }
-  .mod-cb-core input.cb.h24:checked     { background:#c79aff; }
-  .mod-cb-core input.cb.h24::after      { content:"24"; font-size:12px; }
-</style>
-
-<!-- █████ JS █████ -->
-<script>
-(function(){
-  const root = document.querySelector('.mod-cb-core'); if(!root) return;
-
-  const LS_STATE_KEY = 'app:cb:state:v1';
-
-  function readMap(){ try{ const raw = localStorage.getItem(LS_STATE_KEY); return raw?JSON.parse(raw):{}; }catch(e){ return {}; } }
-  function writeMap(map){ try{ localStorage.setItem(LS_STATE_KEY, JSON.stringify(map||{})); }catch(e){} }
-
-  function onChange(e){
-    const cb = e.target;
-    if(!(cb instanceof HTMLInputElement) || !cb.classList.contains('cb')) return;
-    const id = cb.getAttribute('data-id'); if(!id) return;
-    const map = readMap(); map[id] = cb.checked; writeMap(map);
-  }
-
-  function hydrate(){
-    const map = readMap();
-    root.querySelectorAll('input.cb[data-id]').forEach(cb=>{
-      const id = cb.getAttribute('data-id');
-      if(id in map) cb.checked = !!map[id];
-    });
-  }
-
-  root.addEventListener('change', onChange);
-  hydrate();
-
-  root.modCbCoreDestroy = function(){
-    root.removeEventListener('change', onChange);
-  };
-})();
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░STOPKA░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ MODUŁ: mod-footer-copyright — prosta stopka © (EN) █████
-  OPIS:
-  - Wewnątrz canvasa (1340px), lekka karta w stylu „demo”.
-  - Tekst po angielsku: “© {year} {owner} — All rights reserved.”
-  - Rok ustawia się automatycznie; właściciel i licencja z atrybutów data-*.
-  - Izolacja: prefiks .mod-footer-*; brak globalnych id; brak !important.
-  - Cleanup: root.modFooterDestroy() (rezerwowe; nie ma listenerów do zdejmowania).
-  JAK UŻYWAĆ:
-  - Wklej ten blok tuż PRZED </main> (wewnątrz .mod-fundament-canvas).
-  - Podmień data-owner="Katgo&DW" na swoją nazwę (opcjonalnie data-license).
--->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- █████ HTML █████ -->
-<div class="mod-footer-copyright" data-module="mod-footer-copyright"
-     data-owner="Katgo&DW" data-license="All rights reserved.">
-  <footer class="mod-footer-wrap" role="contentinfo" aria-label="Site footer">
-    <div class="mod-footer-line">
-      <span class="mod-footer-copy">
-        &copy; <span class="mod-footer-year">2025</span>
-        <span class="mod-footer-owner">YKatgo&DW</span>
-        — <span class="mod-footer-license">All rights reserved.</span>
+  </td>
+  <td colspan="6"> </td>
+</tr>
+
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <td colspan="1">OPEN SEA</td>
+  <td colspan="1" class="muted">
+    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+    <span> | </span>
+    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
+    <span> | </span>
+    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+    <span> | </span>
+    <span><label><input type="checkbox" class="cb daily"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
+  </td>
+  <td colspan="6"> </td>
+</tr>
+
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <td colspan="1">OPEN SEA</td>
+<td colspan="1" class="muted">
+  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+  <span> ║ </span>
+  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
+  <span> ║ </span>
+  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+  <span> ║║ </span>
+  <span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
+</td>
+<td colspan="6"> </td>
+
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+<td colspan="1">OPEN SEA</td>
+<td colspan="1" class="muted">
+  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
+</td>
+<td colspan="6"> </td>
+
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <td colspan="1">OPEN SEA</td>
+<td colspan="1" class="muted">
+  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
+  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
+</td>
+<td colspan="6"> </td>
+
+<!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <!-- ---------------------OPEN SEA------------------------------------- -->
+<tr>
+  <td colspan="2">
+    <span class="mod-tip-a" data-variant="info" data-width="280">
+      <button type="button" class="mod-tip-a__btn" aria-expanded="false" aria-hidden="true">✭</button>
+      <span class="mod-tip-a__bubble" role="tooltip" hidden>
+        👉daily misje<br>
+        👉śledźcie wpisy i nie róbcie na własną rękę
+      </span>
+    </span>
+  </td>
+  <td colspan="1">OPEN SEA</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a></label>
+        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a></label>
+        <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a></label>
+        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a></label>
+        <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a>
       </span>
     </div>
-  </footer>
-</div>
-
-<!-- █████ CSS █████ -->
-<style>
-  .mod-footer-copyright{
-    --mod-gold-light: #f9e4b7;
-    --mod-gold: #d4af37;
-    --mod-gold-deep: #b8860b;
-    --mod-brown-warm: #8b5e2b;
-
-    --mod-radius: 16px;
-    --mod-pad-y: 10px;
-    --mod-pad-x: 14px;
-    --mod-shadow: 0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.35);
-    --mod-border: 1px solid rgba(255,255,255,0.35);
-    --mod-bg: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15));
-
-    display:block; margin: 24px 0 32px;
-  }
-
-  .mod-footer-wrap{
-    border-radius: var(--mod-radius);
-    box-shadow: var(--mod-shadow);
-    border: var(--mod-border);
-    background: var(--mod-bg);
-    backdrop-filter: saturate(120%) blur(2px);
-    padding: var(--mod-pad-y) var(--mod-pad-x);
-  }
-
-  .mod-footer-line{ display:flex; justify-content:center; align-items:center; }
-  .mod-footer-copy{
-    font-size: 0.92rem; line-height: 1.4; letter-spacing: .2px; opacity: .92;
-    color: #2b1e0c; /* ciemny, ciepły ton czytelny na tle */
-  }
-
-  /* Zero wycieków: nie stylujemy globalnych tagów, tylko nasze klasy */
-</style>
-
-<!-- █████ JS █████ -->
-<script>
-(function(){
-  const root = document.querySelector('.mod-footer-copyright'); if(!root) return;
-
-  const yearEl    = root.querySelector('.mod-footer-year');
-  const ownerEl   = root.querySelector('.mod-footer-owner');
-  const licenseEl = root.querySelector('.mod-footer-license');
-
-  // Ustaw aktualny rok i teksty z data-*
-  try{
-    const y = new Date().getFullYear();
-    yearEl.textContent = y;
-
-    const owner = (root.dataset.owner || 'Your Name').trim();
-    if(owner) ownerEl.textContent = owner;
-
-    const lic = (root.dataset.license || 'All rights reserved.').trim();
-    if(lic) licenseEl.textContent = lic;
-  }catch(e){ /* no-op */ }
-
-  // Cleanup API (rezerwowo – tu nie ma listenerów globalnych)
-  root.modFooterDestroy = function(){ /* nothing to cleanup */ };
-
-  // Zdarzenie informacyjne (namespacowane)
-  root.dispatchEvent(new CustomEvent('app:mod-footer:ready', {bubbles:false}));
-})();
-</script>
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░STOPKA KONIEC░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+  </td>
+  <td colspan="6"> </td>
+</tr>
 
 
 
-        </main>
+
+
+
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <!-- ░░░ TABELA 2 – 6 SLOTÓW ░░░ -->
+              <div class="mod-belt-item" style="--span:6">
+                <div class="mod-table-card">
+                  <table class="mod-tbl" data-sortable="true">
+                    <caption>FAUCETY</caption>
+
+                    <!-- Kolumn 5: 1% + 2% + 88% + 4% + 5% -->
+                    <colgroup>
+                      <col style="width:1%"><col style="width:2%"><col style="width:88%"><col style="width:4%"><col style="width:5%">
+                    </colgroup>
+
+                    <thead>
+                      <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA -->
+                      <tr>
+                        <th colspan="2">ID</th>
+                        <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                          <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+                        </th>
+                        <th colspan="2">IP</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <!-- DRUGI WIERSZ TESTOWY -->
+                      <tr>
+                        <td colspan="2">19<br>9</td>
+                        <td colspan="1">Gocka <span class="muted">checkbox</span> <input type="checkbox" class="cb h24"></td>
+                        <td colspan="2">88<br>8</td>
+                      </tr>
+                      <!-- TRZECI WIERSZ TESTOWY -->
+                      <tr>
+                        <td colspan="2">19<br>9</td>
+                        <td colspan="1">Stasik <span class="muted">checkbox</span> <input type="checkbox" class="cb once"></td>
+                        <td colspan="2">88<br>8</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </section>
+          <!-- ░░░ KONIEC MODUŁU: BELKA + TABEL(E) (mod-tables-belt24) ░░░ -->
+
+          <!-- (oryginalna treść zostaje pod belką) -->
+          <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">Twoja treść</h1>
+          <p style="margin:0 0 10px 0;opacity:.9">Ściągawka checkboxów (D/W/24/X) + przykładowa notatka jako element budulcowy.</p>
+          <div>
+            <input type="checkbox" class="cb daily">
+            <input type="checkbox" class="cb weekly">
+            <input type="checkbox" class="cb h24">
+            <input type="checkbox" class="cb once">
+          </div>
+          <div style="margin-top:14px">
+            <div class="note-card">
+              <div class="note-header">
+                <input type="text" placeholder="Note title...">
+                <div class="note-actions">
+                  <button class="note-zoom" title="Open">🔍</button>
+                  <button class="note-copy" title="Copy">📋</button>
+                  <button class="note-clear" title="Clear">🗑️</button>
+                </div>
+              </div>
+              <textarea class="note-text" placeholder="Write your note..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="mod-app-footer">
+          <footer class="mod-footer" role="contentinfo" aria-label="Stopka">
+            <small>© 2025 Katgo&DW — All rights reserved.</small>
+          </footer>
+        </div>
+      </main>
+    </div>
+
+    <!-- POPUP NOTATEK -->
+    <div id="note-popup" class="note-popup" aria-hidden="true">
+      <div class="note-popup-content" role="dialog" aria-modal="true" aria-labelledby="np-title">
+        <div class="np-header">
+          <div id="np-title" class="np-title">Note</div>
+          <div class="np-actions">
+            <button class="np-btn np-copy" title="Copy">📋</button>
+            <button class="np-btn np-clear" title="Clear">🗑️</button>
+            <button class="np-btn np-close" title="Close">✖</button>
+          </div>
+        </div>
+        <div class="np-editor">
+          <textarea id="note-popup-text"></textarea>
+          <div id="note-popup-preview" class="np-preview"></div>
+        </div>
+        <div class="np-footer">
+          <div class="np-left">
+            <input type="checkbox" id="np-preview-toggle">
+            <label for="np-preview-toggle">Preview mode</label>
+          </div>
+          <button class="np-save">Save</button>
+        </div>
+        <div class="np-confirm">
+          <span>Unsaved changes.</span>
+          <button class="np-choice np-primary">Save &amp; close</button>
+          <button class="np-choice np-warn">Close without saving</button>
+          <button class="np-choice np-cancel">Cancel</button>
+        </div>
       </div>
     </div>
+    <div id="np-toast" class="np-toast" aria-live="polite"></div>
+
+    <!-- MODUŁ LOGOWANIA (bez zmian) -->
+    <div class="mod-auth-login" data-module="mod-auth-login" aria-live="polite" hidden>
+      <div class="mod-auth-backdrop" aria-hidden="true"></div>
+      <section class="mod-auth-card" role="dialog" aria-modal="true" aria-labelledby="mod-auth-title">
+        <header class="mod-auth-head"><h2 id="mod-auth-title" class="mod-auth-title">Sign in</h2></header>
+        <form class="mod-auth-form" autocomplete="off">
+          <label class="mod-auth-label">
+            <span>Password</span>
+            <div class="mod-auth-inputwrap">
+              <input type="password" class="mod-auth-input" name="password" placeholder="••••••••••••" required inputmode="text" />
+              <button type="button" class="mod-auth-eye" aria-label="Show/Hide password" title="Show/Hide">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3.5A3.5 3.5 0 1 0 12 16a3.5 3.5 0 0 0 0-7Z"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <div class="mod-auth-actions"><button type="submit" class="mod-auth-submit">Sign in</button></div>
+          <p class="mod-auth-error" role="alert" aria-live="assertive"></p>
+        </form>
+        <footer class="mod-auth-foot"><small>Private site • Password required.</small></footer>
+      </section>
+    </div>
+
+    <style>
+      .mod-auth-login{ --mod-auth-z:9999; --mod-auth-top-gap:0px; --mod-gold-light:#f9e4b7; --mod-gold:#d4af37; --mod-gold-deep:#b8860b; --mod-brown-warm:#8b5e2b; }
+      .mod-auth-backdrop{ position:fixed; inset:0; z-index:var(--mod-auth-z); background:radial-gradient(800px 400px at 20% 0%, rgba(255,255,255,0.25), rgba(255,255,255,0) 60%), rgba(0,0,0,0.35); backdrop-filter:blur(3px) saturate(115%); }
+      .mod-auth-card{ position:fixed; z-index:calc(var(--mod-auth-z) + 1); left:50%; top:max(var(--mod-auth-top-gap),12vh); transform:translateX(-50%); width:min(420px, calc(100vw - 32px)); border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25)); box-shadow:0 12px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.45); border:1px solid rgba(255,255,255,0.55); padding:18px 16px; color:#2b1e0c; }
+      .mod-auth-title{margin:0 0 10px 0;font-weight:700;letter-spacing:.2px;}
+      .mod-auth-label{display:block;margin:10px 0 12px;}
+      .mod-auth-inputwrap{position:relative;display:flex;align-items:center;}
+      .mod-auth-input{ flex:1; padding:10px 38px 10px 12px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.8); outline:none; }
+      .mod-auth-input:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.2); }
+      .mod-auth-eye{ position:absolute; right:8px; display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; border:1px solid rgba(0,0,0,.1); background:rgba(255,255,255,.6); cursor:pointer; }
+      .mod-auth-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+      .mod-auth-submit{ padding:10px 14px; border-radius:12px; cursor:pointer; border:1px solid rgba(255,255,255,0.6); background:linear-gradient(180deg,var(--mod-gold) 0%, var(--mod-gold-deep) 100%); color:#fff; font-weight:600; box-shadow:0 3px 10px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
+      .mod-auth-submit:hover{filter:brightness(1.03);} .mod-auth-submit:active{transform:translateY(1px);}
+      .mod-auth-error{min-height:18px;color:#8b1e1e;margin:10px 0 0;}
+      .mod-auth-foot{margin-top:12px;opacity:.8;text-align:center;}
+      .mod-auth-login[hidden]{display:none;} .mod-auth-login.is-hidden{display:none;}
+    </style>
   </div>
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <!-- ░░░░░░░░░░░░░░░░ SKRYPT MODUŁU: skalowanie + cleanup ░░░░░░░░░░░░░░░ -->
+  <!-- SKRYPTY APLIKACJI (HUD + skala) -->
   <script>
-    /* KAPSUŁA JS – brak śmiecenia w window */
-    (function(){
-      const root = document.querySelector('.mod-fundament'); if(!root) return;
-      const viewport = root.querySelector('.mod-fundament-viewport');
-      const scaler  = root.querySelector('.mod-fundament-scaler');
-      const canvas  = root.querySelector('.mod-fundament-canvas');
-      const BASE = Number(canvas?.dataset.baseWidth || root?.style.getPropertyValue('--mod-fundament-base-width') || 1340);
-
-      /* Debounce via rAF – płynne i lekkie */
-      let frame = null;
-      const applyScale = () => {
-        frame && cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-          const scale = Math.min(1, vw / BASE);
-          scaler.style.transform = 'scale(' + scale + ')';
-          /* Wysokość skalera = wysokość canvasu * skala, dzięki czemu przewijanie jest poprawne */
-          const h = canvas.offsetHeight * scale;
-          scaler.style.height = h + 'px';
-        });
-      };
-
-      /* Reakcja na zmianę rozmiaru i orientacji */
-      const onResize = () => applyScale();
-      window.addEventListener('resize', onResize, { passive:true });
-      window.addEventListener('orientationchange', onResize, { passive:true });
-
-      /* Obserwuj zmiany wysokości treści (gdy dołożysz moduły) */
-      const ro = new ResizeObserver(applyScale);
-      ro.observe(canvas);
-
-      /* Inicjalizacja */
-      applyScale();
-
-      /* Cleanup API – do wywołania, jeśli kiedyś usuniesz moduł z DOM */
-      root.modFundamentDestroy = function(){
-        window.removeEventListener('resize', onResize);
-        window.removeEventListener('orientationchange', onResize);
-        ro.disconnect();
-        scaler.style.transform = '';
-        scaler.style.height = '';
-      };
-
-      /* Nazwane, namespacowane zdarzenia (w razie przyszłej rozbudowy) */
-      root.dispatchEvent(new CustomEvent('app:mod-fundament:ready', {bubbles:false, detail:{baseWidth:BASE}}));
-    })();
+  (function(){
+    const root=document.querySelector('.mod-app-root');
+    const hud=document.querySelector('.mod-hud');
+    const main=document.querySelector('.mod-app-main');
+    const toggle=hud.querySelector('[data-act="toggle"]');
+    const power=hud.querySelector('[data-act="logout"]');
+    const grid=hud.querySelector('[data-hud-grid]');
+    const auth=document.querySelector('.mod-auth-login');
+    const BASE=1340;
+    function computeScale(){ return Math.min(1, window.innerWidth/BASE); }
+    function applyScale(){ const s=computeScale(); root.style.setProperty('--app-scale', String(s)); const hudH=hud.getBoundingClientRect().height; const gap=parseFloat(getComputedStyle(root).getPropertyValue('--app-gap'))||16; main.style.marginTop=(hudH+gap)+'px'; }
+    function toggleHud(){ const hidden=grid.hasAttribute('hidden'); if(hidden){ grid.removeAttribute('hidden'); toggle.setAttribute('aria-expanded','true'); } else { grid.setAttribute('hidden',''); toggle.setAttribute('aria-expanded','false'); } requestAnimationFrame(applyScale); }
+    function onPower(){ if(!auth || !auth.modAuth) return; if(auth.modAuth.isAuthed()){ auth.modAuth.logout('manual'); } else { auth.hidden=false; auth.classList.remove('is-hidden'); const inp=auth.querySelector('.mod-auth-input'); inp && inp.focus({preventScroll:true}); } }
+    window.addEventListener('resize', applyScale, {passive:true});
+    toggle.addEventListener('click', toggleHud);
+    power.addEventListener('click', onPower);
+    document.addEventListener('DOMContentLoaded', applyScale, {once:true});
+  })();
   </script>
 
-  <!-- ░░░░░░░░░░░░░░░░ NOSCRIPT (FALLBACK) ░░░░░░░░░░░░░░░
-       Bez JS strona pozostanie w 1340 px, co może skutkować poziomym przewijaniem na małych ekranach.
-       To zamierzony kompromis wersji „fixed width”. -->
-  <noscript>
-    <div style="max-width:1340px;margin:16px auto;padding:12px;background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.08);border-radius:8px;">
-      Twoja przeglądarka ma wyłączony JavaScript. Strona działa, ale bez automatycznego skalowania do węższych ekranów.
-    </div>
-  </noscript>
+  <!-- LOGIKA NOTATEK -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const popup=document.getElementById("note-popup");
+    const content=popup.querySelector(".note-popup-content");
+    const txt=document.getElementById("note-popup-text");
+    const preview=document.getElementById("note-popup-preview");
+    const btnCopy=content.querySelector(".np-copy");
+    const btnClear=content.querySelector(".np-clear");
+    const btnClose=content.querySelector(".np-close");
+    const btnSave=content.querySelector(".np-save");
+    const chkPreview=document.getElementById("np-preview-toggle");
+    const confirmBar=content.querySelector(".np-confirm");
+    const optSaveClose=confirmBar.querySelector(".np-primary");
+    const optCloseNoSave=confirmBar.querySelector(".np-warn");
+    const optCancel=confirmBar.querySelector(".np-cancel");
+    const toast=document.getElementById("np-toast");
 
+    let activeNote=null, original="", dirty=false, toastTimer=null;
 
+    const showToast=(msg)=>{ toast.textContent=msg; toast.classList.add("np-toast--show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove("np-toast--show"),1200); };
+    const linkify=(s)=>{ const esc=(t)=>t.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); return esc(s).replace(/https?:\/\/\S+/g,m=>`<a href="${m}" target="_blank" rel="noopener noreferrer">${m}</a>`); };
+    const openPopup=(noteTextarea)=>{ activeNote=noteTextarea; original=noteTextarea.value; txt.value=original; preview.innerHTML=linkify(original); dirty=false; chkPreview.checked=false; preview.style.display="none"; txt.style.display="block"; confirmBar.style.display="none"; popup.style.display="flex"; };
+    const hardClose=()=>{ popup.style.display="none"; confirmBar.style.display="none"; };
+    const doSave=()=>{ if(activeNote){ activeNote.value=txt.value; original=txt.value; dirty=false; preview.innerHTML=linkify(original); showToast("Saved"); } };
 
+    document.querySelectorAll(".note-card").forEach(card=>{
+      const textarea=card.querySelector(".note-text"); const input=card.querySelector("input");
+      card.querySelector(".note-zoom").addEventListener("click",()=>openPopup(textarea));
+      card.querySelector(".note-copy").addEventListener("click",()=>{ navigator.clipboard.writeText(textarea.value).then(()=>showToast("Copied!")); });
+      card.querySelector(".note-clear").addEventListener("click",()=>{ if(confirm("Clear this note? This cannot be undone.")){ textarea.value=""; input.value=""; showToast("Cleared"); } });
+    });
 
+    txt.addEventListener("input",()=>{ dirty=(txt.value!==original); if(chkPreview.checked) preview.innerHTML=linkify(txt.value); });
+    btnCopy.addEventListener("click",()=>{ navigator.clipboard.writeText(txt.value).then(()=>showToast("Copied!")); });
+    btnClear.addEventListener("click",()=>{ if(confirm("Clear popup content? This cannot be undone.")){ txt.value=""; preview.innerHTML=""; dirty=(txt.value!==original); showToast("Cleared"); } });
+    btnSave.addEventListener("click",()=>{ doSave(); });
+    chkPreview.addEventListener("change",()=>{ if(chkPreview.checked){ preview.innerHTML=linkify(txt.value); txt.style.display="none"; preview.style.display="block"; } else { txt.style.display="block"; preview.style.display="none"; } });
 
+    btnClose.addEventListener("click",()=>{ if(!dirty){ hardClose(); return; } confirmBar.style.display="flex"; });
+    optSaveClose.addEventListener("click",()=>{ doSave(); hardClose(); });
+    optCloseNoSave.addEventListener("click",()=>{ hardClose(); });
+    optCancel.addEventListener("click",()=>{ confirmBar.style.display="none"; });
 
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░MODUŁ LOGOWANIA░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-<!-- █████ MODUŁ: mod-auth-login — login overlay (EN UI) █████
-  ZMIANY: tylko teksty UI → po angielsku. Logika/zdarzenia/klucze bez zmian.
-  API:
-    - root.modAuth.isAuthed()
-    - root.modAuth.login(plainPassword)
-    - root.modAuth.logout(reason='manual')  → czyści sesję i odświeża stronę
-  Zdarzenia:
-    - app:auth:ready  | app:auth:login  | app:auth:logout
--->
-<!-- ░░░░░░░░░░░░░░░░░░░░ -->
-
-<!-- █████ STRUKTURA HTML █████ -->
-<div class="mod-auth-login" data-module="mod-auth-login" aria-live="polite" hidden>
-  <!-- BACKDROP -->
-  <div class="mod-auth-backdrop" aria-hidden="true"></div>
-
-  <!-- CARD -->
-  <section class="mod-auth-card" role="dialog" aria-modal="true" aria-labelledby="mod-auth-title">
-    <header class="mod-auth-head">
-      <h2 id="mod-auth-title" class="mod-auth-title">Sign in</h2>
-    </header>
-
-    <form class="mod-auth-form" autocomplete="off">
-      <label class="mod-auth-label">
-        <span>Password</span>
-        <div class="mod-auth-inputwrap">
-          <input type="password" class="mod-auth-input" name="password" placeholder="••••••••••••" required inputmode="text" />
-          <button type="button" class="mod-auth-eye" aria-label="Show/Hide password" title="Show/Hide">
-            <!-- Eye icon -->
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3.5A3.5 3.5 0 1 0 12 16a3.5 3.5 0 0 0 0-7Z"/>
-            </svg>
-          </button>
-        </div>
-      </label>
-
-      <div class="mod-auth-actions">
-        <button type="submit" class="mod-auth-submit">Sign in</button>
-      </div>
-
-      <p class="mod-auth-error" role="alert" aria-live="assertive"></p>
-    </form>
-
-    <footer class="mod-auth-foot">
-      <small>Private site • Password required.</small>
-    </footer>
-  </section>
-</div>
-
-<!-- █████ STYLE █████ -->
-<style>
-  /* ROOT + LOCAL VARS */
-  .mod-auth-login{
-    --mod-auth-z: 9999; /* above HUD */
-    --mod-auth-top-gap: 0px; /* if you want space below HUD, override this */
-    --mod-gold-light: #f9e4b7; --mod-gold: #d4af37; --mod-gold-deep: #b8860b; --mod-brown-warm: #8b5e2b;
-  }
-
-  /* OVERLAY */
-  .mod-auth-backdrop{
-    position: fixed; inset: 0; z-index: var(--mod-auth-z);
-    background:
-      radial-gradient(800px 400px at 20% 0%, rgba(255,255,255,0.25), rgba(255,255,255,0) 60%),
-      rgba(0,0,0,0.35);
-    backdrop-filter: blur(3px) saturate(115%);
-  }
-
-  /* CARD */
-  .mod-auth-card{
-    position: fixed; z-index: calc(var(--mod-auth-z) + 1);
-    left: 50%; top: max(var(--mod-auth-top-gap), 12vh); transform: translateX(-50%);
-    width: min(420px, calc(100vw - 32px));
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25));
-    box-shadow: 0 12px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.45);
-    border: 1px solid rgba(255,255,255,0.55);
-    padding: 18px 16px;
-    color: #2b1e0c;
-  }
-
-  .mod-auth-title{margin: 0 0 10px 0; font-weight: 700; letter-spacing: 0.2px;}
-
-  .mod-auth-label{display:block; margin: 10px 0 12px;}
-  .mod-auth-inputwrap{position: relative; display:flex; align-items:center;}
-  .mod-auth-input{
-    flex:1; padding: 10px 38px 10px 12px; border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.12);
-    outline: none;
-    background: rgba(255,255,255,0.8);
-  }
-  .mod-auth-input:focus{border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,.2);}
-  .mod-auth-eye{
-    position:absolute; right:8px; display:inline-flex; align-items:center; justify-content:center;
-    width:28px; height:28px; border-radius:8px; border:1px solid rgba(0,0,0,.1);
-    background: rgba(255,255,255,.6); cursor:pointer;
-  }
-
-  .mod-auth-actions{display:flex; justify-content:flex-end; gap:8px; margin-top: 8px;}
-  .mod-auth-submit{
-    padding:10px 14px; border-radius:12px; cursor:pointer;
-    border:1px solid rgba(255,255,255,0.6);
-    background: linear-gradient(180deg, var(--mod-gold) 0%, var(--mod-gold-deep) 100%);
-    color:#fff; font-weight:600;
-    box-shadow: 0 3px 10px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);
-  }
-  .mod-auth-submit:hover{filter: brightness(1.03);}
-  .mod-auth-submit:active{transform: translateY(1px);}
-
-  .mod-auth-error{min-height: 18px; color:#8b1e1e; margin: 10px 0 0;}
-
-  .mod-auth-foot{margin-top:12px; opacity:.8; text-align:center;}
-
-  /* Visibility states */
-  .mod-auth-login[hidden]{display:none;}
-  .mod-auth-login.is-hidden{display:none;}
-</style>
-
-<!-- █████ SKRYPT █████ -->
-<script>
-/* Encapsulated module (no window pollution) */
-(function(){
-  const root = document.querySelector('.mod-auth-login'); if(!root) return;
-
-  /* ===== CONFIG (unchanged) ===== */
-  const PASSWORD_HASH_HEX = "036fc05c721aba986b4ecd7f194061ae87640cd5c6967f73820c0f0b5cb998ce"; // SHA-256 of password
-  const LS_KEY = "app:auth:session";
-  const TOKEN_PREFIX = "katgo:";
-
-  /* ===== SHA-256 helper ===== */
-  async function sha256Hex(input){
-    const enc = new TextEncoder().encode(input);
-    const buf = await crypto.subtle.digest('SHA-256', enc);
-    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-
-  /* ===== Token generation (password-bound) ===== */
-  async function makeSessionToken(password){
-    const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-    const saltHex = [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
-    const base = password + "::" + navigator.userAgent + "::" + saltHex + "::" + Date.now();
-    const token = await sha256Hex(base);
-    const sig = await sha256Hex(token + "::" + PASSWORD_HASH_HEX);
-    return TOKEN_PREFIX + token + "." + sig;
-  }
-
-  /* ===== DOM refs ===== */
-  const backdrop = root.querySelector('.mod-auth-backdrop');
-  const card     = root.querySelector('.mod-auth-card');
-  const form     = root.querySelector('.mod-auth-form');
-  const input    = root.querySelector('.mod-auth-input');
-  const eye      = root.querySelector('.mod-auth-eye');
-  const errEl    = root.querySelector('.mod-auth-error');
-
-  /* ===== Show/Hide overlay ===== */
-  function showOverlay(){ root.hidden = false; root.classList.remove('is-hidden'); input?.focus({preventScroll:true}); }
-  function hideOverlay(){ root.classList.add('is-hidden'); }
-
-  /* ===== Session helpers ===== */
-  function readSession(){
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw) return null;
-      if(!raw.startsWith(TOKEN_PREFIX) || raw.split('.').length!==2) return null;
-      return raw;
-    }catch(e){ return null; }
-  }
-  function writeSession(token){ localStorage.setItem(LS_KEY, token); }
-  function clearSession(){ localStorage.removeItem(LS_KEY); }
-
-  /* ===== Public API ===== */
-  root.modAuth = {
-    isAuthed(){ return !!readSession(); },
-    async login(plain){
-      const hash = await sha256Hex(plain);
-      if(hash !== PASSWORD_HASH_HEX) throw new Error("Invalid password");
-      const token = await makeSessionToken(plain);
-      writeSession(token);
-      hideOverlay();
-      document.documentElement.dataset.auth = "1";
-      root.dispatchEvent(new CustomEvent('app:auth:login', {bubbles:false, detail:{token}}));
-      return true;
-    },
-    logout(reason='manual'){
-      clearSession();
-      document.documentElement.dataset.auth = "0";
-      root.dispatchEvent(new CustomEvent('app:auth:logout', {bubbles:false, detail:{reason}}));
-      location.reload();
-    }
-  };
-
-  /* ===== Form handling ===== */
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    errEl.textContent = "";
-    const val = (input.value || "").trim();
-    if(!val){ errEl.textContent = "Enter the password."; return; }
-    try{
-      await root.modAuth.login(val);
-    }catch(err){
-      errEl.textContent = "Incorrect password.";
-      input.select();
-    }
+    popup.addEventListener("click",(e)=>{ if(e.target===popup){ if(!dirty) hardClose(); else confirmBar.style.display="flex"; } });
+    document.addEventListener("keydown",(e)=>{ if(popup.style.display==="flex" && e.key==="Escape"){ if(!dirty) hardClose(); else confirmBar.style.display="flex"; } });
   });
+  </script>
 
-  /* ===== Eye toggle ===== */
-  eye.addEventListener('click', ()=>{
-    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-    input.setAttribute('type', type);
-  });
+  <!-- LOGIKA: RESETY (Daily/Once/All + 24H + WEEKLY) -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    window.resetDaily=()=>{ if(!confirm("Reset DAILY?\nThis will clear all DAILY checkboxes.")) return; document.querySelectorAll('.cb.daily').forEach(cb=>cb.checked=false); };
+    window.resetOnce =()=>{ if(!confirm("Reset ONE TIME?\nThis will clear all ONE-TIME checkboxes.")) return; document.querySelectorAll('.cb.once').forEach(cb=>cb.checked=false); };
+    window.resetAll  =()=>{ if(!confirm("RESET ALL?\nThis will clear ALL checkboxes and remove saved 24h/weekly timers.")) return;
+      document.querySelectorAll('.cb').forEach(cb=>cb.checked=false);
+      localStorage.removeItem("timer24h"); localStorage.removeItem("timerWeekly");
+      const info24=document.getElementById("info24h"); if(info24) info24.textContent="No data yet.";
+      const infoW=document.getElementById("infoWeekly"); if(infoW) infoW.textContent="No data yet.";
+      try{ if(typeof updateInfo24h==='function') updateInfo24h(); }catch(e){}
+      try{ if(typeof updateInfoWeekly==='function') updateInfoWeekly(); }catch(e){}
+    };
 
-  /* ===== Init ===== */
-  (function init(){
-    const has = readSession();
-    if(has){
-      hideOverlay();
-      document.documentElement.dataset.auth = "1";
-    }else{
-      showOverlay();
-      document.documentElement.dataset.auth = "0";
+    const info24h=document.getElementById("info24h");
+    window.reset24h=()=>{ if(!confirm("Reset 24h?\nThis will clear all 24h checkboxes and restart the 24h timer.")) return;
+      document.querySelectorAll('.cb.h24').forEach(cb=>cb.checked=false);
+      localStorage.setItem("timer24h", new Date().toISOString()); updateInfo24h();
+    };
+    function updateInfo24h(){ if(!info24h) return; const saved=localStorage.getItem("timer24h"); if(!saved){ info24h.textContent="No data yet."; return; }
+      const last=new Date(saved); const next=new Date(last.getTime()+24*60*60*1000); const now=new Date();
+      const diffMs=now-last; const diffH=Math.floor(diffMs/3600000); const diffM=Math.floor((diffMs%3600000)/60000);
+      info24h.innerHTML=[`Last time: <b>${last.toLocaleString()}</b>`,`Next: ${next.toLocaleString()}`,`Passed: <b>${diffH}h ${diffM}m</b>`].join('<br>');
     }
-    root.dispatchEvent(new CustomEvent('app:auth:ready', {bubbles:false}));
+    updateInfo24h(); window.updateInfo24h=updateInfo24h;
+
+    const infoWeekly=document.getElementById("infoWeekly");
+    window.resetWeekly=()=>{ if(!confirm("Reset weekly?\nThis will clear all weekly checkboxes and restart the weekly timer.")) return;
+      document.querySelectorAll('.cb.weekly').forEach(cb=>cb.checked=false);
+      localStorage.setItem("timerWeekly", new Date().toISOString()); updateInfoWeekly();
+    };
+    function updateInfoWeekly(){ if(!infoWeekly) return; const saved=localStorage.getItem("timerWeekly"); if(!saved){ infoWeekly.textContent="No data yet."; return; }
+      const last=new Date(saved); const next=new Date(last.getTime()+7*24*60*60*1000); const now=new Date();
+      const diffMs=now-last; const diffH=Math.floor(diffMs/3600000); const diffM=Math.floor((diffMs%3600000)/60000);
+      infoWeekly.innerHTML=`Last start: <b>${last.toLocaleString()}</b><br>Next: ${next.toLocaleString()}<br>Passed: <b>${diffH}h ${diffM}m</b>`;
+    }
+    updateInfoWeekly(); window.updateInfoWeekly=updateInfoWeekly;
+  });
+  </script>
+
+  <!-- LOGIKA KALENDARZA -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('[data-mod-calendar]').forEach((root)=>{
+      const t=new Date(); const state={ todayY:t.getFullYear(), todayM:t.getMonth(), todayD:t.getDate(), viewY:t.getFullYear(), viewM:t.getMonth() };
+      const titleEl=root.querySelector('[data-cal-title]'); const gridEl=root.querySelector('[data-cal-grid]');
+      const prevBtn=root.querySelector('[data-cal-prev]'); const nextBtn=root.querySelector('[data-cal-next]');
+      const render=()=>{ const first=new Date(state.viewY,state.viewM,1); const start=(first.getDay()+6)%7;
+        const dim=new Date(state.viewY,state.viewM+1,0).getDate(); const dimPrev=new Date(state.viewY,state.viewM,0).getDate();
+        titleEl.textContent=first.toLocaleString('en-US',{month:'long',year:'numeric'});
+        const cells=[]; for(let i=start-1;i>=0;i--) cells.push({d:dimPrev-i,out:true,y:state.viewY,m:state.viewM-1});
+        for(let d=1; d<=dim; d++) cells.push({d,out:false,y:state.viewY,m:state.viewM});
+        while(cells.length<42){ const nextDay=cells.length-(start+dim)+1; cells.push({d:nextDay,out:true,y:state.viewY,m:state.viewM+1}); }
+        gridEl.innerHTML=''; cells.forEach(({d,out,y,m})=>{ const el=document.createElement('div'); el.className='mod-calendar-day'+(out?' is-out':''); el.textContent=d;
+          if(!out && y===state.todayY && m===state.todayM && d===state.todayD) el.classList.add('is-today'); gridEl.appendChild(el); });
+      };
+      prevBtn.addEventListener('click',()=>{ const m=state.viewM-1; state.viewM=(m+12)%12; state.viewY+=(m<0?-1:0); render(); },{passive:true});
+      nextBtn.addEventListener('click',()=>{ const m=state.viewM+1; state.viewM=m%12; state.viewY+=(m>11?1:0); render(); },{passive:true});
+      render();
+    });
+  });
+  </script>
+
+  <!-- LOGIKA KALKULATORA -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('[data-mod-calc]').forEach((root)=>{
+      const dsp=root.querySelector('[data-dsp]');
+      let a=null, op=null, entering=true;
+      const getVal=()=>parseFloat(dsp.textContent.replace(',', '.'))||0;
+      const show=(v)=>{ const s=(Number.isFinite(v)?v:0).toString(); dsp.textContent=s; };
+      const inputNum=(n)=>{ if(entering || dsp.textContent==="0") dsp.textContent=n; else dsp.textContent+=n; entering=false; };
+      const inputDot=()=>{ if(entering){ dsp.textContent="0."; entering=false; } else if(!dsp.textContent.includes('.')) dsp.textContent+='.'; };
+      const clearAll=()=>{ a=null; op=null; entering=true; show(0); };
+      const backspace=()=>{ if(entering) return; const s=dsp.textContent; dsp.textContent=s.length>1?s.slice(0,-1):"0"; if(dsp.textContent==="0") entering=true; };
+      const applyOp=(operator)=>{ const b=getVal(); if(op===null){ a=b; } else { let r=a;
+        switch(op){ case '+': r=a+b; break; case '−': r=a-b; break; case '×': r=a*b; break; case '÷': r=(b===0?NaN:a/b); break; }
+        if(!Number.isFinite(r)){ show("Error"); a=null; op=null; entering=true; return; } a=r; show(a); } op=operator; entering=true; };
+      const percent=()=>{ if(a!==null && !entering){ const b=getVal(); show(a*b/100); entering=false; } else if(a===null && !entering){ const b=getVal(); show(b/100); } };
+      const equal=()=>{ if(op===null) return; const b=getVal(); let r=a; switch(op){ case '+': r=a+b; break; case '−': r=a-b; break; case '×': r=a*b; break; case '÷': r=(b===0?NaN:a/b); break; }
+        if(!Number.isFinite(r)){ show("Error"); a=null; op=null; entering=true; return; } show(r); a=null; op=null; entering=true; };
+
+      root.addEventListener('click',(e)=>{ const t=e.target.closest('.mod-calc-btn'); if(!t) return;
+        if(t.dataset.num){ inputNum(t.dataset.num); return; }
+        if(t.dataset.act==='dot'){ inputDot(); return; }
+        if(t.dataset.act==='clear'){ clearAll(); return; }
+        if(t.dataset.act==='back'){ backspace(); return; }
+        if(t.dataset.act==='equal'){ equal(); return; }
+        if(t.dataset.op==='%'){ percent(); return; }
+        const map={'+':'+','−':'−','×':'×','÷':'÷'}; const operator=map[t.dataset.op]; if(operator) applyOp(operator);
+      }, {passive:true});
+
+      root.addEventListener('keydown',(e)=>{ const k=e.key;
+        if(/\d/.test(k)){ inputNum(k); return; }
+        if(k==='.'||k===','){ inputDot(); return; }
+        if(k==='Backspace'){ backspace(); return; }
+        if(k==='Escape'){ clearAll(); return; }
+        if(k==='Enter'||k==='='){ equal(); return; }
+        if(k==='+') applyOp('+');
+        if(k==='-') applyOp('−');
+        if(k==='*') applyOp('×');
+        if(k==='/') applyOp('÷');
+        if(k==='%') percent();
+      });
+      root.tabIndex=0;
+    });
+  });
+  </script>
+
+  <!-- SKRYPT LOGOWANIA -->
+  <script>
+  (function(){
+    const root=document.querySelector('.mod-auth-login'); if(!root) return;
+    const PASSWORD_HASH_HEX="036fc05c721aba986b4ecd7f194061ae87640cd5c6967f73820c0f0b5cb998ce";
+    const LS_KEY="app:auth:session"; const TOKEN_PREFIX="katgo:";
+    async function sha256Hex(input){ const enc=new TextEncoder().encode(input); const buf=await crypto.subtle.digest('SHA-256', enc); return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+    async function makeSessionToken(password){ const saltBytes=crypto.getRandomValues(new Uint8Array(16)); const saltHex=[...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''); const base=password+"::"+navigator.userAgent+"::"+saltHex+"::"+Date.now(); const token=await sha256Hex(base); const sig=await sha256Hex(token+"::"+PASSWORD_HASH_HEX); return TOKEN_PREFIX+token+"."+sig; }
+    const form=root.querySelector('.mod-auth-form'); const input=root.querySelector('.mod-auth-input'); const eye=root.querySelector('.mod-auth-eye'); const errEl=root.querySelector('.mod-auth-error');
+    function showOverlay(){ root.hidden=false; root.classList.remove('is-hidden'); input?.focus({preventScroll:true}); }
+    function hideOverlay(){ root.classList.add('is-hidden'); }
+    function readSession(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return null; if(!raw.startsWith(TOKEN_PREFIX)||raw.split('.').length!==2) return null; return raw; }catch(e){ return null; } }
+    function writeSession(token){ localStorage.setItem(LS_KEY, token); }
+    function clearSession(){ localStorage.removeItem(LS_KEY); }
+    root.modAuth={ isAuthed(){ return !!readSession(); },
+      async login(plain){ const hash=await sha256Hex(plain); if(hash!==PASSWORD_HASH_HEX) throw new Error("Invalid password"); const token=await makeSessionToken(plain); writeSession(token); hideOverlay(); document.documentElement.dataset.auth="1"; root.dispatchEvent(new CustomEvent('app:auth:login',{bubbles:false,detail:{token}})); return true; },
+      logout(reason='manual'){ clearSession(); document.documentElement.dataset.auth="0"; root.dispatchEvent(new CustomEvent('app:auth:logout',{bubbles:false,detail:{reason}})); location.reload(); }
+    };
+    form.addEventListener('submit', async (e)=>{ e.preventDefault(); errEl.textContent=""; const val=(input.value||"").trim(); if(!val){ errEl.textContent="Enter the password."; return; } try{ await root.modAuth.login(val); } catch(err){ errEl.textContent="Incorrect password."; input.select(); } });
+    eye.addEventListener('click', ()=>{ const type=input.getAttribute('type')==='password' ? 'text' : 'password'; input.setAttribute('type', type); });
+    (function init(){ const has=readSession(); if(has){ hideOverlay(); document.documentElement.dataset.auth="1"; } else { showOverlay(); document.documentElement.dataset.auth="0"; } root.dispatchEvent(new CustomEvent('app:auth:ready',{bubbles:false})); })();
   })();
+  </script>
 
-  /* ===== Cleanup ===== */
-  root.modAuthDestroy = function(){
-    delete document.documentElement.dataset.auth;
+  <!-- ░░░ MODUŁ SORTOWANIA TABEL (mod-tables-sort) – JEDEN, REUŻYWALNY ░░░ -->
+  <script>
+  (function(){
+    const SCOPE='.mod-tables';
+
+    // Zwraca tekst z "bazowej" kolumny (liczonej bez colspanów) dla danego wiersza.
+    function getCellTextForBaseIndex(row, baseIndex){
+      let pos=1;
+      for(const cell of row.cells){
+        const span=Number(cell.getAttribute('colspan')||1);
+        const start=pos, end=pos+span-1;
+        if(baseIndex>=start && baseIndex<=end){
+          return cell.textContent.trim();
+        }
+        pos+=span;
+      }
+      return '';
+    }
+
+    // Porównanie z polską lokalizacją, naturalne liczby, bez wrażliwości na case.
+    function compareTextPL(a,b,dir=1){
+      return dir * a.localeCompare(b, 'pl', {sensitivity:'base', numeric:true});
+    }
+
+    function clearOtherStates(th){
+      const thead=th.closest('thead'); if(!thead) return;
+      thead.querySelectorAll('th[aria-sort]').forEach(el=>{
+        if(el!==th){ el.setAttribute('aria-sort','none');
+          const ind=el.querySelector('.mod-sort-ind'); if(ind) ind.textContent='▸';
+        }
+      });
+    }
+
+    function setState(th,dir){
+      const ind=th.querySelector('.mod-sort-ind');
+      if(dir>0){ th.setAttribute('aria-sort','ascending'); if(ind) ind.textContent='▲'; }
+      else { th.setAttribute('aria-sort','descending'); if(ind) ind.textContent='▼'; }
+    }
+
+    function sortTableByBaseColumn(table, baseIndex, dir){
+      const tbody=table.tBodies[0]; if(!tbody) return;
+      const rows=[...tbody.rows];
+      const withKeys=rows.map((tr,i)=>({ tr, key:getCellTextForBaseIndex(tr, baseIndex), idx:i }));
+      withKeys.sort((A,B)=>{
+        const r=compareTextPL(A.key,B.key,dir);
+        return r!==0 ? r : A.idx - B.idx; // stabilny sort
+      });
+      const frag=document.createDocumentFragment();
+      withKeys.forEach(({tr})=>frag.appendChild(tr));
+      tbody.appendChild(frag);
+    }
+
+    function handleActivate(th){
+      const table=th.closest('table'); if(!table) return;
+      const baseIndex=parseInt(th.getAttribute('data-sort-col'),10)||1;
+      const state=th.getAttribute('aria-sort')||'none';
+      const dir = (state==='ascending') ? -1 : 1; // 2-stanowy toggle
+      clearOtherStates(th);
+      setState(th,dir);
+      sortTableByBaseColumn(table, baseIndex, dir);
+    }
+
+    function onClick(e){
+      const th=e.target.closest('th[data-sort-col]'); if(!th) return;
+      e.preventDefault();
+      handleActivate(th);
+    }
+    function onKey(e){
+      if(!(e.key==='Enter' || e.key===' ')) return;
+      const th=e.target.closest('th[data-sort-col]'); if(!th) return;
+      e.preventDefault();
+      handleActivate(th);
+    }
+
+    document.addEventListener('click', onClick, {passive:false});
+    document.addEventListener('keydown', onKey);
+  })();
+  </script>
+
+<!-- ░░░░░░░░░░░░ SKRYPT: TOOLTIPY (mod-tip-a • wariant ✭) – v2 (fixed) ░░░░░░░░░░░░ -->
+<script>
+(()=>{'use strict';
+  const ROOT='.mod-tip-a', BTN='.mod-tip-a__btn', BUB='.mod-tip-a__bubble';
+  const uid=()=> 'mod-tip-a-'+Math.random().toString(36).slice(2);
+
+  const closeAll=(except=null)=>{
+    document.querySelectorAll(ROOT+'.is-open').forEach(t=>{
+      if(except && t===except) return;
+      const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
+      if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+      t.classList.remove('is-open');
+    });
   };
+
+  // Pozycjonowanie względem okna (bubble ma position:fixed)
+  const position=(tip)=>{
+    const btn=tip.querySelector(BTN), bub=tip.querySelector(BUB);
+    if(!btn || !bub) return;
+    const gap=parseInt(getComputedStyle(tip).getPropertyValue('--mod-tip-a-gap'))||8;
+    // najpierw pokaż, żeby znać rozmiar
+    bub.hidden=false;
+    // środek przycisku
+    const r=btn.getBoundingClientRect();
+    const cx=r.left + (r.width/2);
+    // domyślnie nad przyciskiem
+    let top=r.top - gap - bub.offsetHeight;
+    let below=false;
+    if(top < 8){ top = r.bottom + gap; below=true; } // jeśli kolizja z górną krawędzią, pokaż pod
+    // ustaw pozycję
+    bub.style.left = cx+'px';
+    bub.style.top  = top+'px';
+    // korekty boczne przy krawędziach
+    const brect=bub.getBoundingClientRect();
+    const pad=8;
+    if(brect.left < pad)   bub.style.left = (cx + (pad - brect.left))+'px';
+    if(brect.right > (window.innerWidth - pad)) bub.style.left = (cx - (brect.right - (window.innerWidth - pad)))+'px';
+    // strzałka: góra/dół
+    if(below) bub.setAttribute('data-pos','below'); else bub.removeAttribute('data-pos');
+  };
+
+  const toggle=(tip)=>{
+    const btn=tip.querySelector(BTN), bub=tip.querySelector(BUB);
+    if(!btn || !bub) return;
+    const willOpen = tip.classList.toggle('is-open');
+    if(willOpen){
+      if(!bub.id) bub.id=uid();
+      btn.setAttribute('aria-controls',bub.id);
+      btn.setAttribute('aria-expanded','true');
+      position(tip);
+      document.dispatchEvent(new CustomEvent('app:mod-tip-a:opened',{detail:{tip}}));
+    }else{
+      btn.setAttribute('aria-expanded','false');
+      bub.hidden=true;
+      document.dispatchEvent(new CustomEvent('app:mod-tip-a:closed',{detail:{tip}}));
+    }
+  };
+
+  const onClick=(e)=>{
+    const btn=e.target.closest(BTN);
+    if(btn){ const tip=btn.closest(ROOT); if(tip){ e.stopPropagation(); closeAll(tip); toggle(tip); } return; }
+    if(!e.target.closest(ROOT)) closeAll();
+  };
+  const onKey=(e)=>{ if(e.key==='Escape') closeAll(); };
+  const onScroll=()=> closeAll();
+
+  const initExisting=()=>{
+    document.querySelectorAll(ROOT).forEach(t=>{
+      const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
+      if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+    });
+  };
+
+  const observeNew=()=>{
+    const mo=new MutationObserver((muts)=>{
+      muts.forEach(m=>{
+        m.addedNodes && m.addedNodes.forEach(node=>{
+          if(!(node instanceof Element)) return;
+          if(node.matches && node.matches(ROOT)){
+            const btn=node.querySelector(BTN), bub=node.querySelector(BUB);
+            if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+          }
+          node.querySelectorAll && node.querySelectorAll(ROOT).forEach(t=>{
+            const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
+            if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+          });
+        });
+      });
+    });
+    mo.observe(document.documentElement,{subtree:true, childList:true});
+    document.addEventListener('app:mod-tip-a:destroy', ()=>{
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('scroll', onScroll, true);
+      mo.disconnect();
+    }, {once:true});
+  };
+
+  document.addEventListener('click', onClick, true);
+  document.addEventListener('keydown', onKey, true);
+  window.addEventListener('scroll', onScroll, true);
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{ initExisting(); observeNew(); });
+  }else{ initExisting(); observeNew(); }
 })();
 </script>
-
-
-<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░MODUŁ LOGOWANIA KONIEC░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 </body>
