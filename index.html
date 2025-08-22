@@ -606,6 +606,127 @@
 
 
 
+<!-- ░░░░░░░░░░░░░░░░░ MODUŁ: BELKA 4 SLOTY – UKŁAD + KOLORY PER NOTATKA (mod-notes-belt4) ░░░░░░░░░░░░░░░░░ -->
+<!-- █████ STYLE (layout belki + dziedziczenie koloru z --note-fg tylko w tej belce) █████ -->
+<style>
+  /* ░░ KONTENER BELKI 4 SLOTY ░░ */
+  .mod-notes-belt4{
+    --slots:4; --gutter:16px; --half:calc(var(--gutter)/2);
+    --w-page:1340px;               /* stała szerokość strony – zgodnie z ustaleniami */
+    width:var(--w-page);
+    margin:0 auto 18px;
+  }
+  .mod-notes-belt4 .mod-belt{
+    display:flex; flex-wrap:wrap;
+    margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half));
+  }
+  .mod-notes-belt4 .mod-belt-item{
+    padding-left:var(--half); padding-right:var(--half);
+    flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots)));
+    box-sizing:border-box;
+  }
+
+  /* ░░ KOLOR TEKSTU PER NOTATKA (dziedziczenie z --note-fg) ░░ */
+  .mod-notes-belt4 .note-card,
+  .mod-notes-belt4 .note-card a,
+  .mod-notes-belt4 .note-card input,
+  .mod-notes-belt4 .note-card textarea,
+  .mod-notes-belt4 .note-card .note-actions button{
+    color: var(--note-fg, inherit);
+  }
+</style>
+
+<!-- █████ STRUKTURA: 4 sloty (każdy po 1) z notatkami – każda ma własne --note-fg (na start #000) █████ -->
+<section class="mod-notes-belt4" data-module="mod-notes-belt4" aria-label="Belka notatek (4 sloty)">
+  <div class="mod-belt">
+
+    <!-- ░ SLOT 1 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
+    <div class="mod-belt-item" style="--span:1">
+      <div style="margin-top:14px">
+        <div class="note-card" style="--note-fg:#000000;">
+          <div class="note-header">
+            <input type="text" placeholder="Note title...">
+            <div class="note-actions">
+              <button class="note-zoom" title="Open">🔍</button>
+              <button class="note-copy" title="Copy">📋</button>
+              <button class="note-clear" title="Clear">🗑️</button>
+            </div>
+          </div>
+          <textarea class="note-text" placeholder="Write your note..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ░ SLOT 2 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
+    <div class="mod-belt-item" style="--span:1">
+      <div style="margin-top:14px">
+        <div class="note-card" style="--note-fg:#000000;">
+          <div class="note-header">
+            <input type="text" placeholder="Note title...">
+            <div class="note-actions">
+              <button class="note-zoom" title="Open">🔍</button>
+              <button class="note-copy" title="Copy">📋</button>
+              <button class="note-clear" title="Clear">🗑️</button>
+            </div>
+          </div>
+          <textarea class="note-text" placeholder="Write your note..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ░ SLOT 3 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
+    <div class="mod-belt-item" style="--span:1">
+      <div style="margin-top:14px">
+        <div class="note-card" style="--note-fg:#000000;">
+          <div class="note-header">
+            <input type="text" placeholder="Note title...">
+            <div class="note-actions">
+              <button class="note-zoom" title="Open">🔍</button>
+              <button class="note-copy" title="Copy">📋</button>
+              <button class="note-clear" title="Clear">🗑️</button>
+            </div>
+          </div>
+          <textarea class="note-text" placeholder="Write your note..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ░ SLOT 4 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
+    <div class="mod-belt-item" style="--span:1">
+      <div style="margin-top:14px">
+        <div class="note-card" style="--note-fg:#000000;">
+          <div class="note-header">
+            <input type="text" placeholder="Note title...">
+            <div class="note-actions">
+              <button class="note-zoom" title="Open">🔍</button>
+              <button class="note-copy" title="Copy">📋</button>
+              <button class="note-clear" title="Clear">🗑️</button>
+            </div>
+          </div>
+          <textarea class="note-text" placeholder="Write your note..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ░░░ KONIEC MODUŁU: BELKA 4 SLOTY – UKŁAD + KOLORY PER NOTATKA (mod-notes-belt4) ░░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -624,7 +745,7 @@
 
 
           <!-- (oryginalna treść zostaje pod belką) -->
-          <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">Twoja treść</h1>
+          <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">TESTOWE</h1>
           <p style="margin:0 0 10px 0;opacity:.9">Ściągawka checkboxów (D/W/24/X) + przykładowa notatka jako element budulcowy.</p>
           <div>
             <input type="checkbox" class="cb daily">
@@ -659,7 +780,7 @@
 
 
 
-        
+
         <div class="mod-app-footer">
           <footer class="mod-footer" role="contentinfo" aria-label="Stopka">
             <small>© 2025 Katgo&DW — All rights reserved.</small>
