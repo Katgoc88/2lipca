@@ -242,7 +242,7 @@
           <div class="mod-hud-card">
             <div class="note-card">
               <div class="note-header">
-                <input type="text" placeholder="Note title...">
+                <input type="text" placeholder="SHORT DEADLINE">
                 <div class="note-actions">
                   <button class="note-zoom"  title="Open">🔍</button>
                   <button class="note-copy"  title="Copy">📋</button>
@@ -257,7 +257,7 @@
           <div class="mod-hud-card">
             <div class="note-card">
               <div class="note-header">
-                <input type="text" placeholder="Note title...">
+                <input type="text" placeholder="IMPORTANT NOTES">
                 <div class="note-actions">
                   <button class="note-zoom"  title="Open">🔍</button>
                   <button class="note-copy"  title="Copy">📋</button>
@@ -272,7 +272,7 @@
           <div class="mod-hud-card">
             <div class="note-card">
               <div class="note-header">
-                <input type="text" placeholder="Note title...">
+                <input type="text" placeholder="GENERAL NOTES">
                 <div class="note-actions">
                   <button class="note-zoom"  title="Open">🔍</button>
                   <button class="note-copy"  title="Copy">📋</button>
@@ -371,6 +371,21 @@
     font-size:15px; /* domyślnie 13px w td, tu +2 */
 }
 
+/* ░░ NAGŁÓWEK (pierwszy wiersz thead): centrowanie + +2px ░░ */
+.mod-tables .mod-tbl thead tr:first-child th{
+  text-align:center;
+  font-size:calc(var(--fs-head) + 2px);
+}
+
+/* ░░ NAGŁÓWEK z sortowaniem: wycentrowanie przycisku i strzałki ░░ */
+.mod-tables .mod-tbl thead tr:first-child .mod-sort-btn{
+  justify-content:center; /* label i strzałka pośrodku */
+}
+.mod-tables .mod-tbl thead tr:first-child .mod-sort-btn .mod-sort-ind{
+  margin-left:8px; /* zamiast auto, żeby strzałka nie uciekała na prawo */
+}
+
+
 <!-- ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ -->
 <style>
   /* Grupa pigułek w komórce */
@@ -439,12 +454,11 @@
   <td colspan="2"> </td>
   <td colspan="1">MICRO 3</td>
   <td colspan="1" class="muted">
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://micro3.io/">Micro 3</a>
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily"> <a href="https://micro3.io/">Micro 3</a></label>
         <a href="https://micro3.io/" target="_blank" rel="noopener">🔗</a>
-      </label>
+      </span>
     </div>
   </td>
   <td colspan="6"> </td>
@@ -455,160 +469,17 @@
   <td colspan="2"> </td>
   <td colspan="1">INTRACT</td>
   <td colspan="1" class="muted">
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://quest.intract.io/achievements">Intract</a>
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily"> <a href="https://quest.intract.io/achievements">Intract</a></label>
         <a href="https://quest.intract.io/achievements" target="_blank" rel="noopener">🔗</a>
-      </label>
+      </span>
     </div>
   </td>
   <td colspan="6"> </td>
 </tr>
 
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
-  <td colspan="1">OPEN SEA</td>
-  <td colspan="1" class="muted">
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://opensea.io/rewards">Open Sea</a>
-        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
-      </label>
-    </div>
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://opensea.io/">Home</a>
-        <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a>
-      </label>
-    </div>
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://opensea.io/rewards">Rewards</a>
-        <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
-      </label>
-    </div>
-    <div>
-      <label>
-        <input type="checkbox" class="cb daily">
-        <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a>
-        <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a>
-      </label>
-    </div>
-  </td>
-  <td colspan="6"> </td>
-</tr>
 
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
-  <td colspan="1">OPEN SEA</td>
-  <td colspan="1" class="muted">
-    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-    <span> | </span>
-    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
-    <span> | </span>
-    <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-    <span> | </span>
-    <span><label><input type="checkbox" class="cb daily"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
-  </td>
-  <td colspan="6"> </td>
-</tr>
-
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
-  <td colspan="1">OPEN SEA</td>
-<td colspan="1" class="muted">
-  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-  <span> ║ </span>
-  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
-  <span> ║ </span>
-  <span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-  <span> ║║ </span>
-  <span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
-</td>
-<td colspan="6"> </td>
-
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
-<td colspan="1">OPEN SEA</td>
-<td colspan="1" class="muted">
-  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">║&nbsp;</span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label><span aria-hidden="true">&nbsp;║</span></span>
-</td>
-<td colspan="6"> </td>
-
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
-  <td colspan="1">OPEN SEA</td>
-<td colspan="1" class="muted">
-  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a> <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a></label></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a> <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a></label></span>
-  <span style="white-space:nowrap;"><span aria-hidden="true">➤&nbsp;</span><label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a> <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a></label></span>
-</td>
-<td colspan="6"> </td>
-
-<!-- ---------------------OPEN SEA------------------------------------- -->
-<tr>
-  <td colspan="2">
-    <span class="mod-tip-a" data-variant="info" data-width="280">
-      <button type="button" class="mod-tip-a__btn" aria-expanded="false">✭</button>
-      <span class="mod-tip-a__bubble" role="tooltip" hidden>
-        👉daily misje<br>
-        👉śledźcie wpisy i nie róbcie na własną rękę
-      </span>
-    </span>
-  </td>
   <!-- ---------------------OPEN SEA------------------------------------- -->
 <tr>
   <td colspan="2">
@@ -643,10 +514,6 @@
   </td>
   <td colspan="6"> </td>
 </tr>
-
-
-
-
 
 
 
@@ -699,26 +566,26 @@
                     <thead>
                       <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA -->
                       <tr>
-                        <th colspan="2">ID</th>
+                        <th colspan="2"> </th>
                         <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
                           <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
                         </th>
-                        <th colspan="2">IP</th>
+                        <th colspan="2"> </th>
                       </tr>
                     </thead>
 
                     <tbody>
                       <!-- DRUGI WIERSZ TESTOWY -->
                       <tr>
-                        <td colspan="2">19<br>9</td>
-                        <td colspan="1">Gocka <span class="muted">checkbox</span> <input type="checkbox" class="cb h24"></td>
-                        <td colspan="2">88<br>8</td>
+                        <td colspan="2"> </td>
+                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb h24"></td>
+                        <td colspan="2"> </td>
                       </tr>
                       <!-- TRZECI WIERSZ TESTOWY -->
                       <tr>
-                        <td colspan="2">19<br>9</td>
-                        <td colspan="1">Stasik <span class="muted">checkbox</span> <input type="checkbox" class="cb once"></td>
-                        <td colspan="2">88<br>8</td>
+                        <td colspan="2"> </td>
+                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb once"></td>
+                        <td colspan="2"> </td>
                       </tr>
                     </tbody>
                   </table>
@@ -728,6 +595,33 @@
             </div>
           </section>
           <!-- ░░░ KONIEC MODUŁU: BELKA + TABEL(E) (mod-tables-belt24) ░░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           <!-- (oryginalna treść zostaje pod belką) -->
           <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">Twoja treść</h1>
@@ -753,6 +647,19 @@
           </div>
         </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+        
         <div class="mod-app-footer">
           <footer class="mod-footer" role="contentinfo" aria-label="Stopka">
             <small>© 2025 Katgo&DW — All rights reserved.</small>
