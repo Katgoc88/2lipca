@@ -136,51 +136,206 @@
     .mod-calc-btn.span-2{ grid-column:span 2; }
   </style>
 
-<!-- ░░░░░░░░░░░░ STYLE: TOOLTIPY (mod-tip-a • wariant ✭) – v2 (fixed) ░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░ STYLE: TOOLTIP ✭ (mod-tip-a) – v3 centered/overlay [FINAL CSS] ░░░░░░░░░░░░ -->
 <style>
-  .mod-tip-a{ --mod-tip-a-fs:15px; --mod-tip-a-bg:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
-              --mod-tip-a-color:#2b1e0c; --mod-tip-a-border:1px solid rgba(0,0,0,.14); --mod-tip-a-radius:12px;
-              --mod-tip-a-shadow:0 8px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45);
-              --mod-tip-a-pad:10px; --mod-tip-a-gap:8px; --mod-tip-a-z:1000; position:relative; display:inline-block; }
-  .mod-tip-a__btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 2px;
-                   font-size:var(--mod-tip-a-fs); line-height:1; background:none; border:0; cursor:pointer; color:inherit; }
+  /* ░░ ROOT + ZMIENNE DOMYŚLNE ░░ */
+  .mod-tip-a{
+    --mod-tip-a-fs:15px;
+    --mod-tip-a-bg:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
+    --mod-tip-a-color:#2b1e0c;
+    --mod-tip-a-border:1px solid rgba(0,0,0,.14);
+    --mod-tip-a-radius:12px;
+    --mod-tip-a-shadow:0 8px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45);
+    --mod-tip-a-pad:10px;
+    --mod-tip-a-gap:8px;
+    --mod-tip-a-z:1000;
+    --mod-tip-a-overlay:rgba(0,0,0,.35);
+    position:relative; display:inline-block;
+  }
+
+  /* ░░ PRZYCISK ✭ ░░ */
+  .mod-tip-a__btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 2px;
+    font-size:var(--mod-tip-a-fs); line-height:1; background:none; border:0; cursor:pointer; color:inherit;
+  }
   .mod-tip-a__btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.28); border-radius:8px; }
 
-  /* Dymek teraz jest przyklejany do okna (nie podlega przycinaniu rodziców) */
+  /* ░░ OVERLAY (globalny, doklejany do <body>) ░░ */
+  .mod-tip-a__overlay{
+    position:fixed; inset:0; background:var(--mod-tip-a-overlay, rgba(0,0,0,.35));
+    z-index:calc(var(--mod-tip-a-z, 1000) - 1); display:none;
+  }
+
+  /* ░░ DYMek: WYŚRODKOWANY + WŁASNY SCROLL ░░
+     Uwaga: używamy fallbacków, bo po „portalowaniu” do <body> dymek nie dziedziczy zmiennych z .mod-tip-a */
   .mod-tip-a__bubble{
-    position:fixed; left:50%; top:0; transform:translateX(-50%);
-    z-index:var(--mod-tip-a-z); color:var(--mod-tip-a-color);
-    background:var(--mod-tip-a-bg); border:var(--mod-tip-a-border); border-radius:var(--mod-tip-a-radius);
-    box-shadow:var(--mod-tip-a-shadow); padding:var(--mod-tip-a-pad); font:400 13px/1.35 system-ui;
-    min-width:180px; max-width:min(420px, 72vw); white-space:normal; word-break:break-word;
+    position:fixed; left:50%; top:50%; transform:translate(-50%, -50%);
+    z-index:var(--mod-tip-a-z, 1000);
+    color:var(--mod-tip-a-color, #2b1e0c);
+    background:var(--mod-tip-a-bg, linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94)));
+    border:var(--mod-tip-a-border, 1px solid rgba(0,0,0,.14));
+    border-radius:var(--mod-tip-a-radius, 12px);
+    box-shadow:var(--mod-tip-a-shadow, 0 8px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45));
+    padding:var(--mod-tip-a-pad, 10px);
+    font:400 13px/1.35 system-ui;
+    min-width:220px; max-width:min(420px, 86vw);
+    max-height:70vh; overflow:auto;
+    white-space:normal; word-break:break-word;
   }
   .mod-tip-a__bubble[hidden]{ display:none; }
 
-  /* Strzałka – domyślnie dymek NAD ikonką (strzałka w dół) */
-  .mod-tip-a__bubble::after{
-    content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%) rotate(45deg);
-    width:10px; height:10px; background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94));
-    border-left:var(--mod-tip-a-border); border-bottom:var(--mod-tip-a-border);
-  }
-  /* Gdy brakuje miejsca u góry – dymek pod ikonką (strzałka w górę) */
-  .mod-tip-a__bubble[data-pos="below"]::after{
-    top:-10px; transform:translateX(-50%) rotate(225deg);
-  }
+  /* ░░ Brak strzałki – dymek nie jest przypięty do gwiazdki ░░ */
+  .mod-tip-a__bubble::after{ content:none; }
 
-  /* Wariant ostrzegawczy (na przyszłość) */
-  .mod-tip-a[data-variant="warn"] .mod-tip-a__bubble{ border-color:rgba(184,134,11,.45); }
+  /* ░░ WARIANT ostrzegawczy – stosowany bezpośrednio na dymku (działa po „portalowaniu”) ░░ */
+  .mod-tip-a__bubble[data-variant="warn"]{ border-color:rgba(184,134,11,.45); }
 </style>
 
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ v2: INFO LISTA + PODGLĄD (mod-info-deep) – lista z samymi nazwami, podgląd ze scrollami ░░░░░░░░░░░░░░░░ -->
+<!-- ░░ MODUŁ v4: INFO LISTA + PODGLĄD (mod-info-deep) – poprawiony overflow i wysokości ░░ -->
+<style>
+  .mod-info-deep{
+    --mod-z:1100; --mod-overlay:rgba(0,0,0,.35);
+    --mod-bg:#fff; --mod-fg:#222; --mod-accent:#2b1e0c; --mod-muted:#6b6b6b;
+    --mod-r:16px; --mod-shadow:0 12px 32px rgba(0,0,0,.18); --mod-shadow-hi:0 18px 44px rgba(0,0,0,.22);
+    --mod-gap:12px; --mod-pad:14px;
+  }
+  .mod-info-deep__overlay{ position:fixed; inset:0; background:var(--mod-overlay); z-index:var(--mod-z); display:none; }
+  .mod-info-deep__dlg{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(520px,90vw); max-height:92vh;
+    z-index:calc(var(--mod-z) + 1); background:var(--mod-bg); color:var(--mod-fg);
+    border-radius:var(--mod-r); box-shadow:var(--mod-shadow);
+    box-sizing:border-box; display:none; display:flex; flex-direction:column;
+    overflow:hidden; /* klucz: nic nie wychodzi poza ramę dialogu */
+  }
+  .mod-info-deep__header{ display:flex; align-items:center; justify-content:space-between; padding:10px var(--mod-pad); border-bottom:1px solid rgba(0,0,0,.06); }
+  .mod-info-deep__title{ font-weight:600; font-size:15px; margin:0; }
+  .mod-info-deep__actions{ display:flex; gap:8px; }
+  .mod-info-deep__btn{ display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; border:1px solid rgba(0,0,0,.1); background:#fff; border-radius:10px; cursor:pointer; user-select:none; }
+  .mod-info-deep__btn:focus{ outline:2px solid rgba(184,134,11,.45); outline-offset:2px; }
+
+  .mod-info-deep__wrap{ display:flex; flex-direction:column; gap:var(--mod-gap); padding:var(--mod-pad); box-sizing:border-box; }
+
+  /* Lista: nazwa + ikony obok siebie */
+  .mod-info-deep__list{ overflow:auto; }
+  .mod-info-deep__row{ display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid rgba(0,0,0,.08); border-radius:12px; margin-bottom:8px; background:#fff; }
+  .mod-info-deep__name{ font-size:14px; text-decoration:none; color:var(--mod-accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+  .mod-info-deep__act{ display:inline-flex; gap:6px; }
+  .mod-info-deep__icon{ display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; border:1px solid rgba(0,0,0,.1); border-radius:10px; cursor:pointer; user-select:none; background:#fff; }
+  .mod-info-deep__icon:hover{ background:#f7f7f7; }
+
+  /* Podgląd: własny scroll zamknięty w ramie */
+  .mod-info-deep__preview{ border:1px solid rgba(0,0,0,.08); border-radius:12px; box-shadow:var(--mod-shadow-hi); overflow:hidden; display:none; }
+  .mod-info-deep__previewHead{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:1px solid rgba(0,0,0,.06); }
+  .mod-info-deep__previewTitle{ font-weight:600; font-size:14px; margin:0; }
+  .mod-info-deep__previewBody{ overflow:auto; padding:10px; font-size:13px; line-height:1.45; white-space:pre-wrap; box-sizing:border-box; max-height:60vh; }
+
+  .mod-info-deep__overlay[aria-hidden="false"]{ display:block; animation:modInfoFade .14s ease-out; }
+  .mod-info-deep__dlg[aria-hidden="false"]{ display:block; animation:modInfoPop .14s ease-out; }
+  @keyframes modInfoFade{ from{opacity:0} to{opacity:1} }
+  @keyframes modInfoPop{ from{opacity:0; transform:translate(-50%,-52%) scale(.96)} to{opacity:1; transform:translate(-50%,-50%) scale(1)} }
+
+  .mod-info-open{ display:inline-flex; align-items:center; justify-content:center; min-width:32px; min-height:32px; border:1px solid rgba(0,0,0,.12); background:#fff; border-radius:12px; cursor:pointer; user-select:none; font-size:20px; line-height:1; }
+  .mod-info-open:hover{ background:#f8f8f8; }
+  .mod-info-open:focus{ outline:2px solid rgba(184,134,11,.45); outline-offset:2px; }
+
+  @media (max-width:800px){
+    .mod-info-deep__dlg{ width:min(480px,92vw); }
+  }
+</style>
+
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – STYLES (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+<style>
+  /* ░░ SCOPE I ZMIENNE ░░ */
+  .mod-exporter{
+    --mod-w:98%; --mod-gutter:16px; --mod-radius:14px;
+    --mod-bg1:#fdf1d5; --mod-bg2:#e6c98b; --mod-border:rgba(255,255,255,.38); --mod-shadow:0 6px 18px rgba(0,0,0,.08);
+    --mod-fg:#2b1e0c; --mod-btn-bg:linear-gradient(180deg,#fae8b9,#ecd596); --mod-btn-fg:#3d2f12;
+    --mod-btn-bd:1px solid rgba(0,0,0,.08); --mod-btn-radius:12px; --mod-cell-h:82px;
+    width:var(--mod-w); margin:18px auto; color:var(--mod-fg);
+  }
+
+  /* ░░ KARTA PANELU ░░ */
+  .mod-exporter .card{
+    border-radius:var(--mod-radius); border:1px solid var(--mod-border);
+    background:linear-gradient(180deg, var(--mod-bg1), var(--mod-bg2)); box-shadow:var(--mod-shadow);
+    padding:12px;
+  }
+
+  /* ░░ WSPÓLNE DLA BELEK ░░ */
+  .mod-exporter .belt{
+    display:grid;
+    gap:var(--mod-gutter);
+    margin:6px 0;
+  }
+  /* ░░ EXPORT: 10 kolumn technicznych (dla układu 2–3–3–2) ░░ */
+  .mod-exporter .belt--export{ grid-template-columns:repeat(10, 1fr); }
+  /* ░░ IMPORT: klasyczne 5 kolumn ░░ */
+  .mod-exporter .belt--import{ grid-template-columns:repeat(5, 1fr); }
+
+  /* ░░ KOMÓRKI ░░ */
+  .mod-exporter .cell{
+    min-height:var(--mod-cell-h); display:flex; align-items:center; justify-content:center;
+    padding:8px; background:rgba(255,255,255,.35); border:1px solid rgba(0,0,0,.08); border-radius:12px;
+  }
+  .mod-exporter .cell.is-empty{ background:transparent; border-color:transparent; }
+
+  /* ░░ DELIKATNE RAMKI WOKÓŁ BELEK ░░ */
+  .mod-exporter .belt--export,
+  .mod-exporter .belt--import{
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:16px;
+    padding:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.32));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+  }
+  .mod-exporter .belt--export{ margin-bottom:12px; }
+  .mod-exporter .belt--import{ margin-top:12px; }
+
+  /* ░░ LABEL/Etykiety ░░ */
+  .mod-exporter .label{ display:flex; align-items:center; gap:10px; font:700 14px/1.2 system-ui; }
+  .mod-exporter .label svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* ░░ FILE PICKER ░░ */
+  .mod-exporter .filewrap{ display:flex; flex-direction:column; gap:8px; width:100%; }
+  .mod-exporter .filebtn{
+    appearance:none; border:var(--mod-btn-bd); border-radius:var(--mod-btn-radius);
+    background:var(--mod-btn-bg); color:var(--mod-btn-fg); font:700 13px/1 system-ui; padding:10px 12px; cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 5px rgba(0,0,0,.08); text-align:center;
+  }
+  .mod-exporter .filebtn:active{ transform:translateY(1px); }
+  .mod-exporter input[type="file"]{ display:none; }
+  .mod-exporter .filename{ font:600 12px/1.25 system-ui; opacity:.85; word-break:break-word; }
+
+  /* ░░ PRZYCISKI AKCJI ░░ */
+  .mod-exporter .btn{
+    appearance:none; border:var(--mod-btn-bd); border-radius:var(--mod-btn-radius);
+    background:var(--mod-btn-bg); color:var(--mod-btn-fg); font:700 13px/1 system-ui; padding:10px 12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 5px rgba(0,0,0,.08);
+  }
+  .mod-exporter .btn:active{ transform:translateY(1px); }
+  .mod-exporter .btn[disabled]{ opacity:.55; cursor:not-allowed; }
+  .mod-exporter .btn svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* ░░ STATUS / TOAST ░░ */
+  .mod-exporter .status{ margin-top:8px; min-height:18px; font:600 12px/1.2 system-ui; }
+  .mod-exporter .toast{
+    position:fixed; right:16px; bottom:16px; background:rgba(33,33,33,.92); color:#fff; padding:8px 12px; border-radius:8px;
+    font:600 13px/1.2 system-ui; opacity:0; transform:translateY(8px); transition:opacity .2s ease, transform .2s ease; z-index:1200;
+  }
+  .mod-exporter .toast--show{ opacity:1; transform:translateY(0); }
+</style>
+<!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – STYLES (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+
+
+
 </head>
-
-
-
-
-
-
-
-
-
 
 <body>
   <div class="mod-app-root">
@@ -240,7 +395,8 @@
 
           <!-- SLOT 5 -->
           <div class="mod-hud-card">
-            <div class="note-card">
+            <div class="note-card" data-note-id="note-hud-short-deadline">
+
               <div class="note-header">
                 <input type="text" placeholder="SHORT DEADLINE">
                 <div class="note-actions">
@@ -255,7 +411,8 @@
 
           <!-- SLOT 6 -->
           <div class="mod-hud-card">
-            <div class="note-card">
+            <div class="note-card" data-note-id="note-hud-important">
+
               <div class="note-header">
                 <input type="text" placeholder="IMPORTANT NOTES">
                 <div class="note-actions">
@@ -270,7 +427,8 @@
 
           <!-- SLOT 7 -->
           <div class="mod-hud-card">
-            <div class="note-card">
+            <div class="note-card" data-note-id="note-hud-general">
+
               <div class="note-header">
                 <input type="text" placeholder="GENERAL NOTES">
                 <div class="note-actions">
@@ -340,7 +498,7 @@
             .mod-tables .mod-tbl caption{ text-align:left; font:italic 700 var(--fs-cap)/1.2 system-ui; margin:6px 0 10px; color:#2b1e0c; }
             .mod-tables .mod-tbl thead th{ position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui; padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none; }
             .mod-tables .mod-tbl td{ font:400 13px/1.35 system-ui; padding:8px 10px; vertical-align:top; }
-            .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:1px solid var(--c-grid); }
+            .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:2px solid var(--c-grid); }
 
             /* ░░ Wiersze ░░ */
             .mod-tables .mod-tbl tbody tr:hover td{ background:rgba(255,255,255,.4); }
@@ -386,8 +544,7 @@
 }
 
 
-<!-- ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ -->
-<style>
+/* ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ */
   /* Grupa pigułek w komórce */
   .mod-tables .mod-pairs{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
   /* Pojedyncza pigułka: checkbox + nazwa + 🔗, wszystko razem */
@@ -396,32 +553,11 @@
     padding:3px 8px; border-radius:999px; white-space:nowrap;
     background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.10);
   }
-</style>
-
           </style>
 
           <!-- █████ STRUKTURA: BELKA 24 SLOTY (układ 18 + 6), tabele jako „pasażerowie” █████ -->
           <section class="mod-tables" data-module="mod-tables-belt24" aria-label="Zestaw tabel (belka 24)">
             <div class="mod-belt">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
               <!-- ░░░ TABELA 1 – 18 SLOTÓW ░░░ -->
               <div class="mod-belt-item" style="--span:18">
@@ -449,6 +585,37 @@
 
                     <tbody>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- ---------------------MICRO 3------------------------------------- -->
 <tr>
   <td colspan="2"> </td>
@@ -456,7 +623,8 @@
   <td colspan="1" class="muted">
     <div class="mod-pairs">
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb daily"> <a href="https://micro3.io/">Micro 3</a></label>
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-micro3-daily">
+ <a href="https://micro3.io/">Micro 3</a></label>
         <a href="https://micro3.io/" target="_blank" rel="noopener">🔗</a>
       </span>
     </div>
@@ -471,7 +639,8 @@
   <td colspan="1" class="muted">
     <div class="mod-pairs">
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb daily"> <a href="https://quest.intract.io/achievements">Intract</a></label>
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-intract-achievements">
+ <a href="https://quest.intract.io/achievements">Intract</a></label>
         <a href="https://quest.intract.io/achievements" target="_blank" rel="noopener">🔗</a>
       </span>
     </div>
@@ -495,19 +664,23 @@
   <td colspan="1" class="muted">
     <div class="mod-pairs">
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Open Sea</a></label>
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-opensea-rewards-a">
+ <a href="https://opensea.io/rewards">Open Sea</a></label>
         <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
       </span>
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/">Home</a></label>
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-opensea-home">
+ <a href="https://opensea.io/">Home</a></label>
         <a href="https://opensea.io/" target="_blank" rel="noopener">🔗</a>
       </span>
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb daily"> <a href="https://opensea.io/rewards">Rewards</a></label>
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-opensea-rewards-b">
+ <a href="https://opensea.io/rewards">Rewards</a></label>
         <a href="https://opensea.io/rewards" target="_blank" rel="noopener">🔗</a>
       </span>
       <span class="mod-pair">
-        <label><input type="checkbox" class="cb once"> <a href="https://discord.com/channels/758584467484442695/1380417265681436825">Dw discord</a></label>
+        <label><input type="checkbox" class="cb once" data-cb-key="cb-opensea-dw-discord">
+ <a href="https://discord.com/channels/758584467484442695/1380417265681436825">DW discord</a></label>
         <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a>
       </span>
     </div>
@@ -515,23 +688,436 @@
   <td colspan="6"> </td>
 </tr>
 
+<!-- -----------------------LAYER 3------------------------------ -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- ░ TIP (colspan=2) ░ -->
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉Daily check-in<br>
+          👉Kampanie miesięczne wykonuj bieżące misje Nasz target to Platyna & Diamond<br>
+          👉Otwórz Weekly Lootbox w guildii
+        </p>
+      </div>
+    </div>
+  </td>
+
+  <!-- ░ NAZWA (colspan=1) ░ -->
+  <td colspan="1">LAYER 3</td>
+
+  <!-- ░ SZCZEGÓŁY (colspan=1) ░ -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      
+      <!-- 1. Projekt główny: daily check-in -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-1" />
+          <a href="https://app.layer3.xyz/">Layer 3 — daily check-in</a>
+        </label>
+        <a href="https://app.layer3.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 2. Streak -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-2" />
+          <a href="https://app.layer3.xyz/discover?tab=streaks">Streak</a>
+        </label>
+        <a href="https://app.layer3.xyz/discover?tab=streaks" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 3. Sezonowe -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-3" />
+          <a href="https://app.layer3.xyz/search?types=current_season">Sezonowe</a>
+        </label>
+        <a href="https://app.layer3.xyz/search?types=current_season" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- NOWA LINIA -->
+      <div style="flex-basis:100%; height:0;"></div>
+
+      <!-- 4. Guild box (zmiana: cb h24) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-layer3-h24-1" />
+          <a href="https://app.layer3.xyz/pl/guilds/f6f97494-1bbb-43f5-bf92-44e828559355">Guild box</a>
+        </label>
+        <a href="https://app.layer3.xyz/pl/guilds/f6f97494-1bbb-43f5-bf92-44e828559355" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 5. Dw discord (zmiana: cb once) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-layer3-once-1" />
+          <a href="https://discord.com/channels/758584467484442695/1179836877667315824">Dw discord</a>
+        </label>
+        <a href="https://discord.com/channels/758584467484442695/1179836877667315824" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- NOWA LINIA -->
+      <div style="flex-basis:100%; height:0;"></div>
+
+      <!-- 6. Good dapp -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-4" />
+          <a href="https://gooddapp.org/#/">Good dapp do streaka</a>
+        </label>
+        <a href="https://gooddapp.org/#/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 7. Hume daily spin -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-5" />
+          <a href="https://humeworld.xyz/daily-spin">Hume daily spin</a>
+        </label>
+        <a href="https://humeworld.xyz/daily-spin" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 8. Linea daily spin -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-layer3-daily-6" />
+          <a href="https://linea.build/hub/rewards">Linea daily spin</a>
+        </label>
+        <a href="https://linea.build/hub/rewards" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+    </div>
+  </td>
+
+  <!-- ░ PUSTE (colspan=6) ░ -->
+  <td colspan="6"></td>
+</tr>
+
+<!-- --------------------------BINANCE----------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉ALPHA</p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">BINANCE</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-binance-daily-1" />
+          <a href="https://www.binance.com/pl/my/dashboard">Binance</a>
+        </label>
+        <a href="https://www.binance.com/pl/my/dashboard" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-binance-daily-2" />
+          <a href="https://web3.binance.com/pl/portfolio/bsc/0x64A4C84eD0F93579853d3e05dFFd9E03C6c0c7a5">Wallet</a>
+        </label>
+        <a href="https://web3.binance.com/pl/portfolio/bsc/0x64A4C84eD0F93579853d3e05dFFd9E03C6c0c7a5" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-binance-daily-3" />
+          <a href="https://discord.com/channels/758584467484442695/930054287550218260/1402279893466742865">Wpis1 dc</a>
+        </label>
+        <a href="https://discord.com/channels/758584467484442695/930054287550218260/1402279893466742865" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- --------------------------SUPRA----------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉ALPHA</p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">SUPRA</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-supra-daily-1" />
+          <a href="https://supra.com/blastoff">Blast Off</a>
+        </label>
+        <a href="https://supra.com/blastoff" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-supra-daily-2" />
+          <a href="https://supra.com/blastoff/starcade/breakroom/bobble-heads?communication-device=true&tab=polls">Ankieta daily</a>
+        </label>
+        <a href="https://supra.com/blastoff/starcade/breakroom/bobble-heads?communication-device=true&tab=polls" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-supra-daily-3" />
+          <a href="https://supra.com/blastoff/starcade/breakroom/bobblehead-equip">Bobblenaut daily</a>
+        </label>
+        <a href="https://supra.com/blastoff/starcade/breakroom/bobblehead-equip" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-supra-daily-4" />
+          <a href="https://discord.com/channels/758584467484442695/1154771868847448094/1402406003445862441">DC DW</a>
+        </label>
+        <a href="https://discord.com/channels/758584467484442695/1154771868847448094/1402406003445862441" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- ----------------------ABSTRACT------------------------------------ -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉Gigaverse 1 dziennie wykorzystać energię<br>
+          👉Roachracingclub 1 dziennie wykorzystać energię<br>
+          👉Śledź aktualne odznaki na do zrobienia są limitowane czasowo
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">ABSTRACT</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-abstract-once-1" />
+          <a href="https://portal.abs.xyz/rewards">Abstract</a>
+        </label>
+        <a href="https://portal.abs.xyz/rewards" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-abstract-once-2" />
+          <a href="https://gigaverse.io/">Gigaverse</a>
+        </label>
+        <a href="https://gigaverse.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------HUMANITY PROTOCOL--------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉Daily check-in<br>
+          👉discord<br>
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">HUMANITY PROTOCOL</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+            <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-humanity-daily-2" />
+          <a href="https://testnet.humanity.org/dashboard">Daily check-in</a>
+        </label>
+        <a href="https://testnet.humanity.org/dashboard" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb weekly" data-cb-key="cb-humanity-weekly-1" />
+          <a href="https://bridge.arbitrum.io/?amount=0&destinationChain=humanity-testnet&sourceChain=sepolia&tab=bridge">Bridge</a>
+        </label>
+        <a href="https://bridge.arbitrum.io/?amount=0&destinationChain=humanity-testnet&sourceChain=sepolia&tab=bridge" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- ---------------------------SAHARA--------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉wyślij tokeny testowe $SAHARA na swój adres Rabby<br/>
+          👉odwiedź stronki visit linkami na galxe<br/>
+          👉w Gobby Desert odbierz punkty za 3 misje<br/>
+          👉wykonuj misje socialowe na discordzie<br/>
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">SAHARA</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-sahara-daily-1" />
+          <a href="https://legends.saharalabs.ai/">Sahara</a>
+        </label>
+        <a href="https://legends.saharalabs.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-sahara-daily-2" />
+          <a href="https://app.galxe.com/quest/SaharaAI/GCNLYtpFM5">Galxe</a>
+        </label>
+        <a href="https://app.galxe.com/quest/SaharaAI/GCNLYtpFM5" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-sahara-daily-3" />
+          <a href="https://legends.saharalabs.ai/">Sahara Legends</a>
+        </label>
+        <a href="https://legends.saharalabs.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-sahara-once-1" />
+          <a href="https://app.saharalabs.ai/developer-platform/main/explore">Siwa testnet</a>
+        </label>
+        <a href="https://app.saharalabs.ai/developer-platform/main/explore" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-sahara-once-2" />
+          <a href="https://app.saharalabs.ai/#/">Data services</a>
+        </label>
+        <a href="https://app.saharalabs.ai/#/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------KITE AI-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – GWIAZDKA ✭ -->
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false" >
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉Codzienny Quiz<br>👉Odbiór tokenów i dodanie ich do stakingu<br>👉Rozmowa z Botami</p>
+      </div>
+    </div>
+  </td>
+
+
+  
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">KITE AI</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-1" />
+          <a href="https://testnet.gokite.ai/">Kite AI</a></label>
+        <a href="https://testnet.gokite.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-2" />
+          <span>Faucet</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-3" />
+          <span>Stake</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-4" />
+          <span>Claim staking</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-5" />
+          <span>Quiz</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-6" />
+          <span>Agents x 20</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-7" />
+          <a href="https://bridge.prod.gokite.ai/">Bridge</a></label>
+        <a href="https://bridge.prod.gokite.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-8" />
+          <a href="https://tesseract.finance/swap">Swap</a></label>
+        <a href="https://tesseract.finance/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-kiteai-daily-9" />
+          <a href="https://wallet.ash.center/home?safe=kiteaitestnet:0x71642F1F3d5bF64e0D0E573274C5a45EB44e3a91">Ash wallet Kite</a></label>
+        <a href="https://wallet.ash.center/home?safe=kiteaitestnet:0x71642F1F3d5bF64e0D0E573274C5a45EB44e3a91" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (6) + LISTA 📑 przeniesiona tutaj -->
+  <td colspan="6">
+    <button type="button" class="mod-info-open" aria-label="Pokaż listę" data-project="Kite AI">📑</button>
+    <script type="application/json" class="mod-info-data" data-project="Kite AI">[
+      {
+        "text": "Kite AI nowa sieć Testnet Ozone!",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1379859228721942528",
+        "detail": "🔗 Kite.Ai Testnet Ozone\n\nKolejna faza testów nowej sieci Kite.Ai! Sprawdź ich kanał #aktualizacje oraz linki techniczne.\nPamiętaj, aby przed dołączeniem sprawdzić najnowsze zmiany w systemie naliczania XP i stakingu!"
+      },
+      {
+        "text": "Kite AI misja Galxe",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1378991257770000494",
+        "detail": "@everyone\n\n🔥 Kite.Ai Galxe\n\n– Kite.Ai przeszło do kolejnej fazy testnetu, ale nie wrzucamy jeszcze wpisu – są problemy z naliczaniem poleceń 😬\n– Misje w Galxe wrzucam dziś, żeby były odhaczone ✅\n\n🛑 Uwaga: jedna z misji to odwiedzenie strony testnetu. NIE ŁĄCZ portfela – spalony ref!\n\n🔗 Link do misji Galxe:\nhttps://app.galxe.com/quest/KiteAI/GCwcstmCQV?referral_code=GRFr2J0m6ym5H3qmptrEqCev1ZR4AbUFSzjWxBrk5ajZTgh\n\n🧩 Misje:\n– 2x follow\n– Odwiedziny strony (bez walleta!)\n– Rola na DC\n– Like + RT"
+      },
+      {
+        "text": "Kite AI Ozone update",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1381255281475977226",
+        "detail": "📢 Update Ozone\n\nZespół KiteAI wprowadził nowy interfejs użytkownika do sieci testowej Ozone.\n🧪 Zmiany obejmują UX walleta, staking, interakcję z botem.\n✅ Sprawdź, czy nie pojawiły się nowe źródła XP lub możliwości testowe."
+      },
+      {
+        "text": "Strategia pod KiteAI",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1381989266720030770",
+        "detail": "🧠 Wstęp do projektu:\n→ 🎖 ruchy-pod-airdropy\n→ 🔗 spis-linków\n\n📊 Obecnie 525 XP dziennie:\n+75 XP – staking (3x po 25)\n+50 – quiz\n+50 – staking 1 KITE\n+50 – kranik\n+300 – rozmowy z botem\n→ Nalicza się z opóźnieniem (~12:00 PL)\n\n🧪 Praktyka:\n→ Kranik → staking do każdego validatora\n→ Odbiór nagród (u wszystkich 3)\n→ Quiz (bot Professor)\n→ Rozmowy z botem (15–20 wiadomości max)"
+      }
+    ]</script>
+  </td>
+</tr>
+
+
+
+
 
 
                     </tbody>
                   </table>
                 </div>
               </div>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -578,13 +1164,15 @@
                       <!-- DRUGI WIERSZ TESTOWY -->
                       <tr>
                         <td colspan="2"> </td>
-                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb h24"></td>
+                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb h24" data-cb-key="cb-faucets-test-h24">
+</td>
                         <td colspan="2"> </td>
                       </tr>
                       <!-- TRZECI WIERSZ TESTOWY -->
                       <tr>
                         <td colspan="2"> </td>
-                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb once"></td>
+                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb once" data-cb-key="cb-faucets-test-once">
+</td>
                         <td colspan="2"> </td>
                       </tr>
                     </tbody>
@@ -595,6 +1183,29 @@
             </div>
           </section>
           <!-- ░░░ KONIEC MODUŁU: BELKA + TABEL(E) (mod-tables-belt24) ░░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -643,7 +1254,8 @@
     <!-- ░ SLOT 1 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
     <div class="mod-belt-item" style="--span:1">
       <div style="margin-top:14px">
-        <div class="note-card" style="--note-fg:#000000;">
+        <div class="note-card" style="--note-fg:#000000;" data-note-id="note-belt1">
+
           <div class="note-header">
             <input type="text" placeholder="Note title...">
             <div class="note-actions">
@@ -660,7 +1272,8 @@
     <!-- ░ SLOT 2 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
     <div class="mod-belt-item" style="--span:1">
       <div style="margin-top:14px">
-        <div class="note-card" style="--note-fg:#000000;">
+        <div class="note-card" style="--note-fg:#000000;" data-note-id="note-belt2">
+
           <div class="note-header">
             <input type="text" placeholder="Note title...">
             <div class="note-actions">
@@ -677,7 +1290,8 @@
     <!-- ░ SLOT 3 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
     <div class="mod-belt-item" style="--span:1">
       <div style="margin-top:14px">
-        <div class="note-card" style="--note-fg:#000000;">
+        <div class="note-card" style="--note-fg:#000000;" data-note-id="note-belt3">
+
           <div class="note-header">
             <input type="text" placeholder="Note title...">
             <div class="note-actions">
@@ -694,7 +1308,8 @@
     <!-- ░ SLOT 4 – kolor czcionki ustawiaj tutaj (obecnie #000) ░ -->
     <div class="mod-belt-item" style="--span:1">
       <div style="margin-top:14px">
-        <div class="note-card" style="--note-fg:#000000;">
+        <div class="note-card" style="--note-fg:#000000;" data-note-id="note-belt4">
+
           <div class="note-header">
             <input type="text" placeholder="Note title...">
             <div class="note-actions">
@@ -712,49 +1327,22 @@
 </section>
 <!-- ░░░ KONIEC MODUŁU: BELKA 4 SLOTY – UKŁAD + KOLORY PER NOTATKA (mod-notes-belt4) ░░░ -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <!-- (oryginalna treść zostaje pod belką) -->
           <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">TESTOWE</h1>
           <p style="margin:0 0 10px 0;opacity:.9">Ściągawka checkboxów (D/W/24/X) + przykładowa notatka jako element budulcowy.</p>
           <div>
-            <input type="checkbox" class="cb daily">
-            <input type="checkbox" class="cb weekly">
-            <input type="checkbox" class="cb h24">
-            <input type="checkbox" class="cb once">
+            <input type="checkbox" class="cb daily" data-cb-key="cb-demo-daily">
+
+            <input type="checkbox" class="cb weekly" data-cb-key="cb-demo-weekly">
+
+            <input type="checkbox" class="cb h24" data-cb-key="cb-demo-24h">
+
+            <input type="checkbox" class="cb once" data-cb-key="cb-demo-once">
+
           </div>
           <div style="margin-top:14px">
-            <div class="note-card">
+            <div class="note-card" data-note-id="note-test">
+
               <div class="note-header">
                 <input type="text" placeholder="Note title...">
                 <div class="note-actions">
@@ -767,6 +1355,97 @@
             </div>
           </div>
         </div>
+
+
+
+
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – HTML (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+<section class="mod-exporter" data-module="mod-exporter" aria-label="Export / Import">
+  <div class="card">
+    <!-- ░ BELKA GÓRNA: EXPORT (układ 2–3–3–2 na 10 kolumnach) ░ -->
+    <div class="belt belt--export" role="group" aria-label="Export">
+      <!-- slot 1: etykieta (span 2) -->
+      <div class="cell" style="grid-column:span 2">
+        <div class="label" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10M7 8l5-5 5 5M5 13v5a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-5"/></svg>
+          <span>EXPORT</span>
+        </div>
+      </div>
+      <!-- slot 2-4: export checkboxes (span 3) -->
+      <div class="cell" style="grid-column:span 3">
+        <button type="button" class="btn" data-act="export-cb" aria-label="Export checkboxes">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+          <span>checkboxes</span>
+        </button>
+      </div>
+      <!-- slot 5-7: export notes (span 3) -->
+      <div class="cell" style="grid-column:span 3">
+        <button type="button" class="btn" data-act="export-notes" aria-label="Export notes">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h6"/></svg>
+          <span>notes</span>
+        </button>
+      </div>
+      <!-- slot 8-10: export all (span 2) -->
+      <div class="cell" style="grid-column:span 2">
+        <button type="button" class="btn" data-act="export-all" aria-label="Export all data">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10M7 8l5-5 5 5M4 20h16"/></svg>
+          <span>all</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ░ BELKA DOLNA: IMPORT (5 slotów klasycznych) ░ -->
+    <div class="belt belt--import" role="group" aria-label="Import">
+      <!-- slot 1: etykieta -->
+      <div class="cell">
+        <div class="label" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21V11M17 16l-5 5-5-5M5 11V6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5"/></svg>
+          <span>IMPORT</span>
+        </div>
+      </div>
+      <!-- slot 2: wybór pliku (przycisk + podgląd nazwy) -->
+      <div class="cell">
+        <div class="filewrap" style="width:100%">
+          <label class="filebtn" for="mod-exporter-file" aria-label="Choose JSON file">Choose file (.json)</label>
+          <input id="mod-exporter-file" type="file" accept=".json,application/json" />
+          <div class="filename" data-filename>No file selected.</div>
+        </div>
+      </div>
+      <!-- slot 3: import checkboxes -->
+      <div class="cell">
+        <button type="button" class="btn" data-act="import-cb" aria-label="Import checkboxes">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7M12 21V11M17 16l-5 5-5-5"/></svg>
+          <span>checkboxes</span>
+        </button>
+      </div>
+      <!-- slot 4: import notes -->
+      <div class="cell">
+        <button type="button" class="btn" data-act="import-notes" aria-label="Import notes">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h6M12 21V11M17 16l-5 5-5-5"/></svg>
+          <span>notes</span>
+        </button>
+      </div>
+      <!-- slot 5: import all -->
+      <div class="cell">
+        <button type="button" class="btn" data-act="import-all" aria-label="Import all data">
+          <svg viewBox="0 0 24 24"><path d="M12 21V11M17 16l-5 5-5-5M4 20h16"/></svg>
+          <span>all</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- status/toast -->
+    <div class="status" data-status role="status" aria-live="polite"></div>
+    <div class="toast" data-toast></div>
+  </div>
+</section>
+<!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – HTML (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+
+
+
+
 
 
 
@@ -864,9 +1543,6 @@
     </style>
   </div>
 
-
-
-
   <!-- SKRYPTY APLIKACJI (HUD + skala) -->
   <script>
   (function(){
@@ -878,18 +1554,59 @@
     const grid=hud.querySelector('[data-hud-grid]');
     const auth=document.querySelector('.mod-auth-login');
     const BASE=1340;
+
+    /* ░░ PAMIĘĆ STANU HUD ░░ */
+    const LS_KEY='app:hud:open'; // '1' = otwarty, '0' = zamknięty
+
     function computeScale(){ return Math.min(1, window.innerWidth/BASE); }
-    function applyScale(){ const s=computeScale(); root.style.setProperty('--app-scale', String(s)); const hudH=hud.getBoundingClientRect().height; const gap=parseFloat(getComputedStyle(root).getPropertyValue('--app-gap'))||16; main.style.marginTop=(hudH+gap)+'px'; }
-    function toggleHud(){ const hidden=grid.hasAttribute('hidden'); if(hidden){ grid.removeAttribute('hidden'); toggle.setAttribute('aria-expanded','true'); } else { grid.setAttribute('hidden',''); toggle.setAttribute('aria-expanded','false'); } requestAnimationFrame(applyScale); }
-    function onPower(){ if(!auth || !auth.modAuth) return; if(auth.modAuth.isAuthed()){ auth.modAuth.logout('manual'); } else { auth.hidden=false; auth.classList.remove('is-hidden'); const inp=auth.querySelector('.mod-auth-input'); inp && inp.focus({preventScroll:true}); } }
+    function applyScale(){
+      const s=computeScale();
+      root.style.setProperty('--app-scale', String(s));
+      const hudH=hud.getBoundingClientRect().height;
+      const gap=parseFloat(getComputedStyle(root).getPropertyValue('--app-gap'))||16;
+      main.style.marginTop=(hudH+gap)+'px';
+    }
+
+    function setHud(open){
+      if(open){ grid.removeAttribute('hidden'); toggle.setAttribute('aria-expanded','true'); }
+      else    { grid.setAttribute('hidden','');   toggle.setAttribute('aria-expanded','false'); }
+      requestAnimationFrame(applyScale);
+    }
+
+    function saveHud(open){
+      try{ localStorage.setItem(LS_KEY, open ? '1' : '0'); }catch(e){}
+    }
+
+    function restoreHud(){
+      let open=true;
+      try{
+        const v=localStorage.getItem(LS_KEY);
+        if(v==='0') open=false;
+        else if(v==='1') open=true;
+      }catch(e){}
+      setHud(open);
+    }
+
+    function toggleHud(){
+      const willOpen = grid.hasAttribute('hidden'); // jeśli ukryty → otworzymy
+      setHud(willOpen);
+      saveHud(willOpen);
+    }
+
+    function onPower(){
+      if(!auth || !auth.modAuth) return;
+      if(auth.modAuth.isAuthed()){ auth.modAuth.logout('manual'); }
+      else { auth.hidden=false; auth.classList.remove('is-hidden'); const inp=auth.querySelector('.mod-auth-input'); inp && inp.focus({preventScroll:true}); }
+    }
+
     window.addEventListener('resize', applyScale, {passive:true});
     toggle.addEventListener('click', toggleHud);
     power.addEventListener('click', onPower);
-    document.addEventListener('DOMContentLoaded', applyScale, {once:true});
+    document.addEventListener('DOMContentLoaded', ()=>{ restoreHud(); }, {once:true});
   })();
   </script>
 
-  <!-- LOGIKA NOTATEK -->
+  <!-- LOGIKA NOTATEK (z autosave lokalnym) -->
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const popup=document.getElementById("note-popup");
@@ -907,21 +1624,56 @@
     const optCancel=confirmBar.querySelector(".np-cancel");
     const toast=document.getElementById("np-toast");
 
+    /* ░░ PERSIST: identyfikacja i autosave notatek ░░ */
+    const NOTE_PREFIX='app:note:';
+    let noteSeq=0;
+    const keyNote=(id,field)=>`${NOTE_PREFIX}${id}:${field}`;
+    const getNoteId=(card)=>{ if(!card.dataset.noteId){ card.dataset.noteId=String(noteSeq++); } return card.dataset.noteId; };
+
     let activeNote=null, original="", dirty=false, toastTimer=null;
 
     const showToast=(msg)=>{ toast.textContent=msg; toast.classList.add("np-toast--show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove("np-toast--show"),1200); };
-    const linkify=(s)=>{ const esc=(t)=>t.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); return esc(s).replace(/https?:\/\/\S+/g,m=>`<a href="${m}" target="_blank" rel="noopener noreferrer">${m}</a>`); };
+    const esc=(t)=>t.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const linkify=(s)=> esc(s).replace(/https?:\/\/\S+/g,m=>`<a href="${m}" target="_blank" rel="noopener noreferrer">${m}</a>`);
     const openPopup=(noteTextarea)=>{ activeNote=noteTextarea; original=noteTextarea.value; txt.value=original; preview.innerHTML=linkify(original); dirty=false; chkPreview.checked=false; preview.style.display="none"; txt.style.display="block"; confirmBar.style.display="none"; popup.style.display="flex"; };
     const hardClose=()=>{ popup.style.display="none"; confirmBar.style.display="none"; };
-    const doSave=()=>{ if(activeNote){ activeNote.value=txt.value; original=txt.value; dirty=false; preview.innerHTML=linkify(original); showToast("Saved"); } };
+    const doSave=()=>{ if(activeNote){
+        activeNote.value=txt.value; original=txt.value; dirty=false; preview.innerHTML=linkify(original);
+        /* zapis do localStorage tej samej notatki */
+        const card=activeNote.closest('.note-card');
+        if(card){ const id=getNoteId(card); try{ localStorage.setItem(keyNote(id,'text'), activeNote.value); }catch(e){} }
+        showToast("Saved");
+      } };
 
+    /* Inicjalizacja wszystkich notatek: restore + autosave */
     document.querySelectorAll(".note-card").forEach(card=>{
-      const textarea=card.querySelector(".note-text"); const input=card.querySelector("input");
+      const textarea=card.querySelector(".note-text");
+      const input=card.querySelector("input");
+      const id=getNoteId(card);
+
+      /* restore */
+      try{
+        const savedTitle=localStorage.getItem(keyNote(id,'title'));
+        const savedText =localStorage.getItem(keyNote(id,'text'));
+        if(savedTitle!==null) input.value=savedTitle;
+        if(savedText !==null) textarea.value=savedText;
+      }catch(e){}
+
+      /* autosave */
+      input.addEventListener("input",()=>{ try{ localStorage.setItem(keyNote(id,'title'), input.value); }catch(e){} });
+      textarea.addEventListener("input",()=>{ try{ localStorage.setItem(keyNote(id,'text'), textarea.value); }catch(e){} });
+
+      /* przyciski karty */
       card.querySelector(".note-zoom").addEventListener("click",()=>openPopup(textarea));
       card.querySelector(".note-copy").addEventListener("click",()=>{ navigator.clipboard.writeText(textarea.value).then(()=>showToast("Copied!")); });
-      card.querySelector(".note-clear").addEventListener("click",()=>{ if(confirm("Clear this note? This cannot be undone.")){ textarea.value=""; input.value=""; showToast("Cleared"); } });
+      card.querySelector(".note-clear").addEventListener("click",()=>{ if(confirm("Clear this note? This cannot be undone.")){
+        textarea.value=""; input.value="";
+        try{ localStorage.removeItem(keyNote(id,'title')); localStorage.removeItem(keyNote(id,'text')); }catch(e){}
+        showToast("Cleared");
+      }});
     });
 
+    /* popup zachowanie */
     txt.addEventListener("input",()=>{ dirty=(txt.value!==original); if(chkPreview.checked) preview.innerHTML=linkify(txt.value); });
     btnCopy.addEventListener("click",()=>{ navigator.clipboard.writeText(txt.value).then(()=>showToast("Copied!")); });
     btnClear.addEventListener("click",()=>{ if(confirm("Clear popup content? This cannot be undone.")){ txt.value=""; preview.innerHTML=""; dirty=(txt.value!==original); showToast("Cleared"); } });
@@ -938,13 +1690,62 @@
   });
   </script>
 
-  <!-- LOGIKA: RESETY (Daily/Once/All + 24H + WEEKLY) -->
+  <!-- LOGIKA: RESETY + TIMERY + PERSIST CHECKBOXÓW -->
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-    window.resetDaily=()=>{ if(!confirm("Reset DAILY?\nThis will clear all DAILY checkboxes.")) return; document.querySelectorAll('.cb.daily').forEach(cb=>cb.checked=false); };
-    window.resetOnce =()=>{ if(!confirm("Reset ONE TIME?\nThis will clear all ONE-TIME checkboxes.")) return; document.querySelectorAll('.cb.once').forEach(cb=>cb.checked=false); };
+    /* ░░ PERSIST: checkboxy ░░ */
+    const CB_PREFIX='app:cb:';
+    const computeCbKey=(cb)=>{
+      if(cb.dataset.cbKey) return cb.dataset.cbKey;
+      try{
+        const tr=cb.closest('tr');
+        const rowIndex = tr && tr.parentElement ? Array.from(tr.parentElement.children).indexOf(tr) : -1;
+        const type = cb.classList.contains('daily')?'daily': cb.classList.contains('weekly')?'weekly': cb.classList.contains('h24')?'h24': cb.classList.contains('once')?'once':'';
+        const pair = cb.closest('.mod-pair') || cb.closest('label') || cb.parentElement;
+        const a = pair ? pair.querySelector('a[href]') : null;
+        const href = a ? a.getAttribute('href') : '';
+        const idxInRow = tr ? Array.from(tr.querySelectorAll('input.cb')).indexOf(cb) : -1;
+        const labelText = pair ? (pair.textContent||'').trim().slice(0,80) : '';
+        const key = `${CB_PREFIX}${rowIndex}|${type}|${href}|${idxInRow}|${labelText}`;
+        cb.dataset.cbKey=key;
+        return key;
+      }catch(e){
+        const key = `${CB_PREFIX}tmp|${Math.random().toString(36).slice(2)}`;
+        cb.dataset.cbKey=key;
+        return key;
+      }
+    };
+    const restoreCb=(cb)=>{ try{ const v=localStorage.getItem(computeCbKey(cb)); if(v==='1') cb.checked=true; else if(v==='0') cb.checked=false; }catch(e){} };
+    const saveCb   =(cb)=>{ try{ localStorage.setItem(computeCbKey(cb), cb.checked?'1':'0'); }catch(e){} };
+
+    document.querySelectorAll('.cb').forEach(cb=>{
+      restoreCb(cb);
+      cb.addEventListener('change', ()=>saveCb(cb));
+    });
+
+    const clearCbByFilter=(fn)=>{
+      try{
+        for(let i=localStorage.length-1;i>=0;i--){
+          const k=localStorage.key(i);
+          if(k && k.startsWith(CB_PREFIX) && fn(k)){ localStorage.removeItem(k); }
+        }
+      }catch(e){}
+    };
+    const clearCbClass=(cls)=> clearCbByFilter(k=>k.includes(`|${cls}|`));
+    const clearCbAll =()=> clearCbByFilter(()=>true);
+
+    /* ░░ Reset przyciski (rozszerzone o czyszczenie persist) ░░ */
+    window.resetDaily=()=>{ if(!confirm("Reset DAILY?\nThis will clear all DAILY checkboxes.")) return;
+      document.querySelectorAll('.cb.daily').forEach(cb=>{ cb.checked=false; saveCb(cb); });
+      clearCbClass('daily');
+    };
+    window.resetOnce =()=>{ if(!confirm("Reset ONE TIME?\nThis will clear all ONE-TIME checkboxes.")) return;
+      document.querySelectorAll('.cb.once').forEach(cb=>{ cb.checked=false; saveCb(cb); });
+      clearCbClass('once');
+    };
     window.resetAll  =()=>{ if(!confirm("RESET ALL?\nThis will clear ALL checkboxes and remove saved 24h/weekly timers.")) return;
-      document.querySelectorAll('.cb').forEach(cb=>cb.checked=false);
+      document.querySelectorAll('.cb').forEach(cb=>{ cb.checked=false; saveCb(cb); });
+      clearCbAll();
       localStorage.removeItem("timer24h"); localStorage.removeItem("timerWeekly");
       const info24=document.getElementById("info24h"); if(info24) info24.textContent="No data yet.";
       const infoW=document.getElementById("infoWeekly"); if(infoW) infoW.textContent="No data yet.";
@@ -952,29 +1753,33 @@
       try{ if(typeof updateInfoWeekly==='function') updateInfoWeekly(); }catch(e){}
     };
 
+    /* ░░ 24h timer ░░ */
     const info24h=document.getElementById("info24h");
     window.reset24h=()=>{ if(!confirm("Reset 24h?\nThis will clear all 24h checkboxes and restart the 24h timer.")) return;
-      document.querySelectorAll('.cb.h24').forEach(cb=>cb.checked=false);
+      document.querySelectorAll('.cb.h24').forEach(cb=>{ cb.checked=false; saveCb(cb); });
+      clearCbClass('h24');
       localStorage.setItem("timer24h", new Date().toISOString()); updateInfo24h();
     };
-    function updateInfo24h(){ if(!info24h) return; const saved=localStorage.getItem("timer24h"); if(!saved){ info24h.textContent="No data yet."; return; }
+    window.updateInfo24h=function updateInfo24h(){ if(!info24h) return; const saved=localStorage.getItem("timer24h"); if(!saved){ info24h.textContent="No data yet."; return; }
       const last=new Date(saved); const next=new Date(last.getTime()+24*60*60*1000); const now=new Date();
       const diffMs=now-last; const diffH=Math.floor(diffMs/3600000); const diffM=Math.floor((diffMs%3600000)/60000);
       info24h.innerHTML=[`Last time: <b>${last.toLocaleString()}</b>`,`Next: ${next.toLocaleString()}`,`Passed: <b>${diffH}h ${diffM}m</b>`].join('<br>');
-    }
-    updateInfo24h(); window.updateInfo24h=updateInfo24h;
+    };
+    updateInfo24h();
 
+    /* ░░ weekly timer ░░ */
     const infoWeekly=document.getElementById("infoWeekly");
     window.resetWeekly=()=>{ if(!confirm("Reset weekly?\nThis will clear all weekly checkboxes and restart the weekly timer.")) return;
-      document.querySelectorAll('.cb.weekly').forEach(cb=>cb.checked=false);
+      document.querySelectorAll('.cb.weekly').forEach(cb=>{ cb.checked=false; saveCb(cb); });
+      clearCbClass('weekly');
       localStorage.setItem("timerWeekly", new Date().toISOString()); updateInfoWeekly();
     };
-    function updateInfoWeekly(){ if(!infoWeekly) return; const saved=localStorage.getItem("timerWeekly"); if(!saved){ infoWeekly.textContent="No data yet."; return; }
+    window.updateInfoWeekly=function updateInfoWeekly(){ if(!infoWeekly) return; const saved=localStorage.getItem("timerWeekly"); if(!saved){ infoWeekly.textContent="No data yet."; return; }
       const last=new Date(saved); const next=new Date(last.getTime()+7*24*60*60*1000); const now=new Date();
       const diffMs=now-last; const diffH=Math.floor(diffMs/3600000); const diffM=Math.floor((diffMs%3600000)/60000);
       infoWeekly.innerHTML=`Last start: <b>${last.toLocaleString()}</b><br>Next: ${next.toLocaleString()}<br>Passed: <b>${diffH}h ${diffM}m</b>`;
-    }
-    updateInfoWeekly(); window.updateInfoWeekly=updateInfoWeekly;
+    };
+    updateInfoWeekly();
   });
   </script>
 
@@ -1150,91 +1955,164 @@
   })();
   </script>
 
-<!-- ░░░░░░░░░░░░ SKRYPT: TOOLTIPY (mod-tip-a • wariant ✭) – v2 (fixed) ░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░ SKRYPT: TOOLTIP ✭ (mod-tip-a) – v4.2 centered/overlay + portal do <body> + solidne zamykanie ░░░░░░░░░░░░ -->
 <script>
 (()=>{'use strict';
-  const ROOT='.mod-tip-a', BTN='.mod-tip-a__btn', BUB='.mod-tip-a__bubble';
-  const uid=()=> 'mod-tip-a-'+Math.random().toString(36).slice(2);
+  /* ────────────────────────────── KONFIG / SELECTORY ────────────────────────────── */
+  const ROOT = '.mod-tip-a';
+  const BTN  = '.mod-tip-a__btn';
+  const BUB  = '.mod-tip-a__bubble';
+  let overlayEl = null;
 
-  const closeAll=(except=null)=>{
+  /* ────────────────────────────── OVERLAY + BLOKADA BODY ────────────────────────────── */
+  const ensureOverlay = ()=>{
+    if (overlayEl) return overlayEl;
+    overlayEl = document.createElement('div');
+    overlayEl.className = 'mod-tip-a__overlay';
+    overlayEl.setAttribute('aria-hidden','true');
+    overlayEl.addEventListener('click', ()=>closeAll());
+    document.body.appendChild(overlayEl);
+    return overlayEl;
+  };
+  const lockBody = (lock)=>{ document.documentElement.style.overflow = lock ? 'hidden' : ''; };
+
+  /* ────────────────────────────── PORTAL: dymek → <body> (zapis referencji) ────────────────────────────── */
+  function mountToBody(tip, bub){
+    if (bub.__ph) return;                        // już przeniesiony
+    const ph = document.createElement('span');   // placeholder
+    ph.className = 'mod-tip-a__ph'; ph.hidden = true;
+    bub.after(ph); bub.__ph = ph;
+
+    // zapisz referencję do bąbla na kontenerze (ważne przy zamykaniu)
+    tip.__bub = bub;
+
+    // skopiuj zmienne CSS (po portalowaniu bąbel nie dziedziczy ich z .mod-tip-a)
+    const vars = [
+      '--mod-tip-a-bg','--mod-tip-a-color','--mod-tip-a-border','--mod-tip-a-radius',
+      '--mod-tip-a-shadow','--mod-tip-a-pad','--mod-tip-a-z','--mod-tip-a-overlay'
+    ];
+    const cs = getComputedStyle(tip);
+    vars.forEach(v=>{
+      const val = cs.getPropertyValue(v);
+      if (val && val.trim()) bub.style.setProperty(v, val.trim());
+    });
+
+    // przenieś wariant (warn/info) na sam bąbel
+    const variant = tip.getAttribute('data-variant');
+    if (variant) bub.setAttribute('data-variant', variant); else bub.removeAttribute('data-variant');
+
+    document.body.appendChild(bub);
+  }
+  function restoreToOwner(tip, bub){
+    if (!bub.__ph) return;
+    bub.__ph.replaceWith(bub);
+    bub.__ph = null;
+    if (tip && tip.__bub === bub) tip.__bub = null;
+  }
+
+  /* ────────────────────────────── ZAMYKANIE WSZYSTKICH ────────────────────────────── */
+  const closeAll = (except=null)=>{
     document.querySelectorAll(ROOT+'.is-open').forEach(t=>{
-      if(except && t===except) return;
-      const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
-      if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+      if (except && t===except) return;
+      const btn = t.querySelector(BTN);
+      // klucz: jeśli bąbel był zportalowany, bierzemy zapisaną referencję
+      const bub = t.__bub || t.querySelector(BUB);
+      if (btn && bub){
+        btn.setAttribute('aria-expanded','false');
+        bub.setAttribute('hidden','');     // ukryj
+        restoreToOwner(t, bub);            // odportalo­wanie (jeśli dotyczy)
+      }
       t.classList.remove('is-open');
     });
+    const ov = ensureOverlay();
+    ov.style.display = 'none';
+    ov.setAttribute('aria-hidden','true');
+    lockBody(false);
   };
 
-  // Pozycjonowanie względem okna (bubble ma position:fixed)
-  const position=(tip)=>{
-    const btn=tip.querySelector(BTN), bub=tip.querySelector(BUB);
-    if(!btn || !bub) return;
-    const gap=parseInt(getComputedStyle(tip).getPropertyValue('--mod-tip-a-gap'))||8;
-    // najpierw pokaż, żeby znać rozmiar
-    bub.hidden=false;
-    // środek przycisku
-    const r=btn.getBoundingClientRect();
-    const cx=r.left + (r.width/2);
-    // domyślnie nad przyciskiem
-    let top=r.top - gap - bub.offsetHeight;
-    let below=false;
-    if(top < 8){ top = r.bottom + gap; below=true; } // jeśli kolizja z górną krawędzią, pokaż pod
-    // ustaw pozycję
-    bub.style.left = cx+'px';
-    bub.style.top  = top+'px';
-    // korekty boczne przy krawędziach
-    const brect=bub.getBoundingClientRect();
-    const pad=8;
-    if(brect.left < pad)   bub.style.left = (cx + (pad - brect.left))+'px';
-    if(brect.right > (window.innerWidth - pad)) bub.style.left = (cx - (brect.right - (window.innerWidth - pad)))+'px';
-    // strzałka: góra/dół
-    if(below) bub.setAttribute('data-pos','below'); else bub.removeAttribute('data-pos');
-  };
+  /* ────────────────────────────── PRZEŁĄCZANIE ✭ ────────────────────────────── */
+  const toggle = (tip)=>{
+    const btn = tip.querySelector(BTN);
+    // bąbel może być już zportalowany → spróbuj z pamięci, a dopiero potem w DOM
+    const bub = tip.__bub || tip.querySelector(BUB);
+    if (!btn || !bub) return;
 
-  const toggle=(tip)=>{
-    const btn=tip.querySelector(BTN), bub=tip.querySelector(BUB);
-    if(!btn || !bub) return;
-    const willOpen = tip.classList.toggle('is-open');
-    if(willOpen){
-      if(!bub.id) bub.id=uid();
-      btn.setAttribute('aria-controls',bub.id);
+    const willOpen = !tip.classList.contains('is-open');
+
+    if (willOpen){
+      // zamknij listę 📑 jeśli była otwarta
+      const infoOv = document.querySelector('.mod-info-deep__overlay[aria-hidden="false"]');
+      if (infoOv) infoOv.click();
+
+      // zamknij inne ✭ zanim otworzysz tę
+      closeAll();
+
+      tip.classList.add('is-open');
+      mountToBody(tip, bub);                                  // portal do <body>
+      btn.setAttribute('aria-controls', bub.id || (bub.id = 'mod-tip-a-'+Math.random().toString(36).slice(2)));
       btn.setAttribute('aria-expanded','true');
-      position(tip);
+      bub.hidden = false; bub.removeAttribute('hidden');
+
+      const ov = ensureOverlay();
+      ov.style.display = 'block';
+      ov.setAttribute('aria-hidden','false');
+      lockBody(true);
+
       document.dispatchEvent(new CustomEvent('app:mod-tip-a:opened',{detail:{tip}}));
     }else{
       btn.setAttribute('aria-expanded','false');
-      bub.hidden=true;
+      bub.setAttribute('hidden','');
+      restoreToOwner(tip, bub);
+      tip.classList.remove('is-open');
+
+      const ov = ensureOverlay();
+      ov.style.display = 'none';
+      ov.setAttribute('aria-hidden','true');
+      lockBody(false);
+
       document.dispatchEvent(new CustomEvent('app:mod-tip-a:closed',{detail:{tip}}));
     }
   };
 
-  const onClick=(e)=>{
-    const btn=e.target.closest(BTN);
-    if(btn){ const tip=btn.closest(ROOT); if(tip){ e.stopPropagation(); closeAll(tip); toggle(tip); } return; }
-    if(!e.target.closest(ROOT)) closeAll();
-  };
-  const onKey=(e)=>{ if(e.key==='Escape') closeAll(); };
-  const onScroll=()=> closeAll();
+  /* ────────────────────────────── LISTENERY GLOBALNE ────────────────────────────── */
+  const onClick = (e)=>{
+    // klik przycisku ✭
+    const btn = e.target.closest(BTN);
+    if (btn){ const tip = btn.closest(ROOT); if (tip){ e.stopPropagation(); toggle(tip); } return; }
 
-  const initExisting=()=>{
+    // klik wewnątrz przeniesionego bąbla – nie zamykaj
+    if (e.target.closest('.mod-tip-a__bubble')) return;
+
+    // klik poza – zamknij wszystkie
+    if (!e.target.closest(ROOT)) closeAll();
+  };
+  const onKey   = (e)=>{ if (e.key==='Escape') closeAll(); };
+  const onScroll= ()=> closeAll();
+
+  /* ────────────────────────────── INICJALIZACJA ────────────────────────────── */
+  const initExisting = ()=>{
     document.querySelectorAll(ROOT).forEach(t=>{
       const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
-      if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+      if (btn && bub){
+        btn.setAttribute('aria-expanded','false');
+        bub.setAttribute('hidden','');
+        t.classList.remove('is-open');
+        t.__bub = null; // na starcie nic nie jest zportalowane
+      }
     });
   };
-
-  const observeNew=()=>{
-    const mo=new MutationObserver((muts)=>{
+  const observeNew = ()=>{
+    const mo = new MutationObserver((muts)=>{
       muts.forEach(m=>{
         m.addedNodes && m.addedNodes.forEach(node=>{
-          if(!(node instanceof Element)) return;
-          if(node.matches && node.matches(ROOT)){
-            const btn=node.querySelector(BTN), bub=node.querySelector(BUB);
-            if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+          if (!(node instanceof Element)) return;
+          if (node.matches && node.matches(ROOT)){
+            const b=node.querySelector(BTN), u=node.querySelector(BUB);
+            if (b&&u){ b.setAttribute('aria-expanded','false'); u.setAttribute('hidden',''); node.__bub=null; }
           }
           node.querySelectorAll && node.querySelectorAll(ROOT).forEach(t=>{
-            const btn=t.querySelector(BTN), bub=t.querySelector(BUB);
-            if(btn && bub){ btn.setAttribute('aria-expanded','false'); bub.hidden=true; }
+            const b=t.querySelector(BTN), u=t.querySelector(BUB);
+            if (b&&u){ b.setAttribute('aria-expanded','false'); u.setAttribute('hidden',''); t.__bub=null; }
           });
         });
       });
@@ -1245,6 +2123,7 @@
       document.removeEventListener('keydown', onKey, true);
       window.removeEventListener('scroll', onScroll, true);
       mo.disconnect();
+      if (overlayEl){ overlayEl.remove(); overlayEl=null; }
     }, {once:true});
   };
 
@@ -1252,11 +2131,351 @@
   document.addEventListener('keydown', onKey, true);
   window.addEventListener('scroll', onScroll, true);
 
-  if(document.readyState==='loading'){
+  if (document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded', ()=>{ initExisting(); observeNew(); });
-  }else{ initExisting(); observeNew(); }
+  }else{
+    initExisting(); observeNew();
+  }
 })();
 </script>
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ v2: INFO LISTA + PODGLĄD (mod-info-deep) – lista z samymi nazwami, podgląd ze scrollami ░░░░░░░░░░░░░░░░ -->
+<script>
+(function(){
+  const FLAG='data-mod-info-deep-ready'; if(document.body.hasAttribute(FLAG)) return; document.body.setAttribute(FLAG,'1');
+
+  let overlay, dialog, header, titleEl, wrap, listWrap, preview, previewHead, previewTitle, previewBody;
+
+  function ensureUI(){
+    if(dialog) return;
+
+    overlay = el('div','mod-info-deep__overlay',{'aria-hidden':'true'});
+    dialog  = el('div','mod-info-deep mod-info-deep__dlg',{role:'dialog','aria-hidden':'true','aria-modal':'true','aria-label':'Information list'});
+
+    header  = el('div','mod-info-deep__header');
+    titleEl = el('h3','mod-info-deep__title'); header.appendChild(titleEl);
+    const actTop = el('div','mod-info-deep__actions'); actTop.appendChild(btn('×','Zamknij', closeAll)); header.appendChild(actTop);
+
+    wrap    = el('div','mod-info-deep__wrap');
+    listWrap= el('div','mod-info-deep__list');
+
+    preview      = el('div','mod-info-deep__preview');
+    previewHead  = el('div','mod-info-deep__previewHead');
+    previewTitle = el('h4','mod-info-deep__previewTitle');
+    const actB   = el('div','mod-info-deep__actions');
+    actB.appendChild(btn('↗','Otwórz w nowej karcie', ()=>{ const u=previewBody?.getAttribute('data-src'); if(u) window.open(u,'_blank','noopener'); }));
+    actB.appendChild(btn('×','Zamknij podgląd', hidePreview));
+    previewHead.appendChild(previewTitle); previewHead.appendChild(actB);
+    previewBody  = el('div','mod-info-deep__previewBody');
+
+    preview.appendChild(previewHead); preview.appendChild(previewBody);
+    wrap.appendChild(listWrap); wrap.appendChild(preview);
+    dialog.appendChild(header); dialog.appendChild(wrap);
+    document.body.appendChild(overlay); document.body.appendChild(dialog);
+
+    overlay.addEventListener('click', closeAll, {passive:true});
+    document.addEventListener('keydown', onKey, {passive:true});
+    window.addEventListener('resize', recalcHeights, {passive:true});
+  }
+
+  function el(tag, cls, attrs){ const e=document.createElement(tag); if(cls) e.className=cls; if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function btn(txt,label,onClick){ const b=el('button','mod-info-deep__btn',{'type':'button','aria-label':label}); b.textContent=txt; b.addEventListener('click',onClick); return b; }
+
+  function onKey(e){ if(e.key==='Escape'){ if(preview && preview.style.display!=='none'){ hidePreview(); return; } closeAll(); } }
+  function bodyLock(lock){ document.documentElement.style.overflow = lock ? 'hidden' : ''; }
+
+  <!-- ░░ AKTUALIZACJA: openList — kolejność w Popup 1 = 🔍 → 🔗 → [klikalna nazwa] ░░ -->
+
+function openList(project, entries){
+  ensureUI();
+  titleEl.textContent = project || 'Info';
+  listWrap.innerHTML = '';
+
+  entries.forEach(e=>{
+    const row  = el('div','mod-info-deep__row');
+
+    // ── 1) Ikony po LEWEJ: najpierw lupka (jeśli jest detail), potem łańcuch ──
+    const act  = el('div','mod-info-deep__act');
+
+    if (e.detail && String(e.detail).trim()) {
+      const search = el('button','mod-info-deep__icon',{ type:'button', 'aria-label':'Pokaż podgląd' });
+      search.textContent = '🔍';
+      search.addEventListener('click', ()=>showPreview(e.text || 'Podgląd', e.detail, e.url || ''));
+      act.appendChild(search);
+    }
+
+    const aNew = el('a','mod-info-deep__icon',{
+      href: e.url || '#', target:'_blank', rel:'noopener', 'aria-label':'Otwórz w nowej karcie'
+    });
+    aNew.textContent = '🔗';
+    act.appendChild(aNew);
+
+    // ── 2) Po ikonach klikalna nazwa, która zajmuje resztę szerokości ──
+    const name = el('a','mod-info-deep__name',{ href: e.url || '#' });
+    name.textContent = e.text || '—';
+
+    row.appendChild(act);   // ikony po lewej
+    row.appendChild(name);  // nazwa po prawej (ma flex:1 w CSS)
+    listWrap.appendChild(row);
+  });
+
+  overlay.setAttribute('aria-hidden','false'); dialog.setAttribute('aria-hidden','false');
+  overlay.style.display = ''; dialog.style.display = '';
+  bodyLock(true);
+
+  hidePreview();
+  recalcHeights();
+}
+
+
+
+  function showPreview(title, content, src){
+    previewTitle.textContent = title || 'Podgląd';
+    previewBody.textContent = ''; previewBody.setAttribute('data-src', src||'');
+    previewBody.textContent = content;
+    preview.style.display = 'block';
+    recalcHeights(); previewBody.scrollTop = 0;
+  }
+  function hidePreview(){
+    if(!preview) return;
+    preview.style.display = 'none';
+    previewBody.textContent=''; previewBody.removeAttribute('data-src');
+    recalcHeights();
+  }
+  function closeAll(){
+    hidePreview();
+    overlay.setAttribute('aria-hidden','true'); overlay.style.display='none';
+    dialog.setAttribute('aria-hidden','true');  dialog.style.display='none';
+    bodyLock(false);
+  }
+
+  function recalcHeights(){
+    if(!dialog) return;
+
+    const vh = Math.min(window.innerHeight||0, document.documentElement.clientHeight||0);
+    const maxDlg = Math.floor(vh * 0.92);                 /* limit dla całego dialogu */
+    const headerH = header.offsetHeight;
+
+    /* padding wrapa + odstęp między listą a podglądem */
+    const wrapStyles = getComputedStyle(wrap);
+    const pad = parseFloat(wrapStyles.paddingTop) + parseFloat(wrapStyles.paddingBottom);
+    const gap = parseFloat(wrapStyles.rowGap || wrapStyles.gap || 12);
+
+    /* miejsce na zawartość (bez nagłówka i paddingów) */
+    const contentAvail = maxDlg - headerH - pad - (preview.style.display!=='none' ? gap : 0);
+
+    /* lista dostaje ok. 40% */
+    const listMax = Math.max(120, Math.floor(contentAvail * 0.40));
+    listWrap.style.maxHeight = listMax + 'px';
+
+    if(preview.style.display!=='none'){
+      /* odejmujemy realną wysokość listy i WYSOKOŚĆ NAGŁÓWKA PODGLĄDU */
+      const listH = Math.min(listWrap.scrollHeight, listMax);
+      const pHeadH = previewHead.offsetHeight; /* <<< kluczowa poprawka */
+      const previewAvail = contentAvail - listH - pHeadH;
+
+      const previewMax = Math.max(160, Math.min(previewAvail, Math.floor(maxDlg*0.70)));
+      previewBody.style.maxHeight = previewMax + 'px';
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.mod-info-open'); if(!btn) return;
+    /* zamknij ✭ jeśli otwarta */
+    document.querySelectorAll('.mod-tip-a[aria-expanded="true"]').forEach(el=>el.setAttribute('aria-expanded','false'));
+
+    const rootRow = btn.closest('tr');
+    const dataEl  = rootRow ? rootRow.querySelector('.mod-info-data[type="application/json"]') : null;
+
+    let project = btn.getAttribute('data-project') || 'Info';
+    let entries = [];
+    if(dataEl){ project = dataEl.getAttribute('data-project') || project; try{ entries = JSON.parse(dataEl.textContent||'[]'); }catch(_){} }
+    openList(project, entries);
+  }, {passive:true});
+
+})();
+</script>
+<!-- ░░ KONIEC MODUŁU v4 ░░ -->
+
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT ░░░░░░░░░░░░░░░░ -->
+<script>
+(function(){
+  const SCOPE='[data-module="mod-exporter"]';
+  const APP_ID='mod-exporter'; const VERSION=1; const MAX_SIZE=2*1024*1024; // 2 MB
+
+  const qs = (r,s)=>r.querySelector(s);
+  const qsa= (r,s)=>Array.from(r.querySelectorAll(s));
+
+  function toast(root, msg){
+    const el=qs(root,'[data-toast]'); if(!el) return;
+    el.textContent=msg; el.classList.add('toast--show');
+    clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('toast--show'), 1300);
+  }
+  function setStatus(root, msg){ const el=qs(root,'[data-status]'); if(el) el.textContent=msg||''; }
+
+  function collectCheckboxes(){
+    const map={}; const missing=[];
+    document.querySelectorAll('input.cb').forEach(cb=>{
+      const key=cb.dataset.cbKey;
+      if(!key){ missing.push(cb); return; }
+      map[key]= !!cb.checked;
+    });
+    return {map, missing};
+  }
+  function collectNotes(){
+    const map={}; const missing=[];
+    document.querySelectorAll('.note-card').forEach(card=>{
+      const id=card.dataset.noteId;
+      if(!id){ missing.push(card); return; }
+      const ta=card.querySelector('.note-text');
+      map[id]= ta ? ta.value : '';
+    });
+    return {map, missing};
+  }
+
+  function buildPayload({wantCb, wantNotes}){
+    const out={ app:APP_ID, version:VERSION };
+    if(wantCb){
+      const {map,missing}=collectCheckboxes();
+      out.checkboxes=map; out._cbMissing=(missing.length||0);
+    }
+    if(wantNotes){
+      const {map,missing}=collectNotes();
+      out.notes=map; out._notesMissing=(missing.length||0);
+    }
+    return out;
+  }
+
+  function downloadJson(obj, baseName='rutyna-export'){
+    const ts=new Date();
+    const pad=n=>String(n).padStart(2,'0');
+    const fname=`${baseName}-${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}.json`;
+    const blob=new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 50);
+    return fname;
+  }
+
+  function readJsonFile(file){
+    return new Promise((resolve,reject)=>{
+      const fr=new FileReader();
+      fr.onerror=()=>reject(new Error('File read error'));
+      fr.onload=()=>{ try{ resolve(JSON.parse(String(fr.result||''))); }catch(e){ reject(new Error('Invalid JSON')); } };
+      fr.readAsText(file);
+    });
+  }
+
+  function isObject(x){ return x && typeof x==='object' && !Array.isArray(x); }
+  function validatePayload(obj){
+    if(!isObject(obj)) throw new Error('Payload is not an object');
+    if(obj.app!==APP_ID) throw new Error('Unexpected app id');
+    if(typeof obj.version!=='number') throw new Error('Missing version');
+    if(obj.checkboxes && !isObject(obj.checkboxes)) throw new Error('Bad "checkboxes" section');
+    if(obj.notes && !isObject(obj.notes)) throw new Error('Bad "notes" section');
+    return true;
+  }
+
+  function applyCheckboxes(map){
+    let applied=0, skipped=0;
+    Object.entries(map).forEach(([key,val])=>{
+      const cb=document.querySelector(`input.cb[data-cb-key="${CSS.escape(key)}"]`);
+      if(!cb){ skipped++; return; }
+      cb.checked = !!val;
+      // wyzwól 'change', żeby obecny autosave zapisał stan
+      cb.dispatchEvent(new Event('change', {bubbles:true}));
+      applied++;
+    });
+    return {applied, skipped};
+  }
+  function applyNotes(map){
+    let applied=0, skipped=0;
+    Object.entries(map).forEach(([id,text])=>{
+      const card=document.querySelector(`.note-card[data-note-id="${CSS.escape(id)}"]`);
+      if(!card){ skipped++; return; }
+      const ta=card.querySelector('.note-text'); if(!ta){ skipped++; return; }
+      ta.value = String(text||'');
+      // wyzwól 'input', żeby obecny autosave zapisał stan
+      ta.dispatchEvent(new Event('input', {bubbles:true}));
+      applied++;
+    });
+    return {applied, skipped};
+  }
+
+  function setBusy(root, busy){
+    qsa(root, '.btn, .filebtn').forEach(b=>b.disabled=!!busy);
+  }
+
+  function onInit(root){
+    const file=qs(root,'#mod-exporter-file');
+    const fileName=qs(root,'[data-filename]');
+    file.addEventListener('change', ()=>{ fileName.textContent = file.files?.[0]?.name || 'No file selected.'; });
+
+    const act = async(kind)=>{
+      try{
+        setBusy(root,true);
+        // EXPORTS
+        if(kind==='export-cb' || kind==='export-notes' || kind==='export-all'){
+          const wantCb=(kind!=='export-notes'), wantNotes=(kind!=='export-cb');
+          const payload=buildPayload({wantCb, wantNotes});
+          const fname=downloadJson(payload);
+          const miss = (payload._cbMissing||0) + (payload._notesMissing||0);
+          setStatus(root, `Exported to "${fname}"` + (miss?` • Missing keys: ${miss}`:''));
+          toast(root, 'Export complete');
+          root.dispatchEvent(new CustomEvent('app:mod-exporter:exported',{detail:{kind,payload}}));
+        }
+
+        // IMPORTS
+        if(kind==='import-cb' || kind==='import-notes' || kind==='import-all'){
+          const f=file.files?.[0];
+          if(!f) throw new Error('Choose a JSON file first');
+          if(f.size>MAX_SIZE) throw new Error('File too large');
+          if(!(f.type?.includes('json') || f.name.endsWith('.json'))) {
+            // dopuszczamy błędne MIME, jeśli rozszerzenie jest .json – tylko ostrzeż status
+          }
+          const data=await readJsonFile(f);
+          validatePayload(data);
+
+          const doCb=(kind!=='import-notes') && data.checkboxes;
+          const doNotes=(kind!=='import-cb') && data.notes;
+          let msg=[];
+          if(doCb){ const r=applyCheckboxes(data.checkboxes); msg.push(`checkboxes: ${r.applied} applied, ${r.skipped} skipped`); }
+          if(doNotes){ const r=applyNotes(data.notes); msg.push(`notes: ${r.applied} applied, ${r.skipped} skipped`); }
+          if(!doCb && !doNotes) msg.push('nothing to apply');
+          setStatus(root, `Import OK — ${msg.join(' • ')}`);
+          toast(root, 'Import complete');
+          root.dispatchEvent(new CustomEvent('app:mod-exporter:applied',{detail:{kind,data}}));
+        }
+      }catch(err){
+        console.error(err);
+        setStatus(root, `Error: ${err.message||err}`);
+        toast(root, 'Error');
+      }finally{
+        setBusy(root,false);
+      }
+    };
+
+    root.addEventListener('click', (e)=>{
+      const b=e.target.closest('.btn'); if(!b) return;
+      const k=b.getAttribute('data-act'); if(!k) return;
+      e.preventDefault(); act(k);
+    });
+  }
+
+  function initAll(){
+    document.querySelectorAll(SCOPE).forEach(onInit);
+  }
+
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', initAll); }
+  else { initAll(); }
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT ░░░░░░░░░░░░░░░░ -->
+
+
+
 
 
 </body>
