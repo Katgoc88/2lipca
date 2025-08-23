@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RUTYNA — nowy start (1340 + HUD + Login)</title>
+  <title>RUTYNA KATGO</title>
 
   <!-- ░░░ FUNDAMENT STRONY (mod-app) ░░░ -->
   <style>
@@ -246,6 +246,50 @@
     .mod-info-deep__dlg{ width:min(480px,92vw); }
   }
 </style>
+
+<!-- ░░░░░░░░░░░░ STYLE: LINKI W PIGUŁKACH (mod-pairs) – neutralne linki + hover/focus ░░░░░░░░░░░░ -->
+<style>
+  /* ── USTAWIENIA LOKALNE DLA MODUŁU ───────────────────────────────────────────────────────── */
+  .mod-pairs{
+    /* Kolor linków w pigułkach (akcent strony). Zmień w razie potrzeby */
+    --mod-pairs-link: #2b1e0c;
+    --mod-pairs-focus: rgba(212,175,55,.5); /* złotawy focus jak w tooltipach */
+  }
+
+  /* ── LINK TEKSTOWY W ŚRODKU ETYKIETY (ta sama karta) ───────────────────────────────────── */
+  .mod-pairs .mod-pair label a{
+    color: var(--mod-pairs-link);
+    text-decoration: none;           /* bez podkreślenia w spoczynku */
+  }
+  .mod-pairs .mod-pair label a:visited{
+    color: var(--mod-pairs-link);    /* bez fioletu „visited” */
+  }
+  .mod-pairs .mod-pair label a:hover{
+    text-decoration: underline;      /* podkreślenie tylko na hover */
+  }
+  .mod-pairs .mod-pair label a:focus-visible{
+    outline: 2px solid var(--mod-pairs-focus);
+    outline-offset: 2px;
+    text-decoration: underline;      /* czytelny focus dla klawiatury */
+  }
+
+  /* ── IKONA ZEW. LINKU (🔗, nowa karta) ──────────────────────────────────────────────────── */
+  .mod-pairs .mod-pair > a{
+    color: inherit;                   /* bez domyślnego niebieskiego */
+    text-decoration: none;
+  }
+  .mod-pairs .mod-pair > a:hover{
+    text-decoration: underline;       /* delikatny sygnał na hover */
+  }
+  .mod-pairs .mod-pair > a:focus-visible{
+    outline: 2px solid var(--mod-pairs-focus);
+    outline-offset: 2px;
+    text-decoration: underline;
+  }
+</style>
+<!-- ░░░░░░░░░░░░ KONIEC: LINKI W PIGUŁKACH (mod-pairs) ░░░░░░░░░░░░ -->
+
+
 
 
 
@@ -680,7 +724,7 @@
       </span>
       <span class="mod-pair">
         <label><input type="checkbox" class="cb once" data-cb-key="cb-opensea-dw-discord">
- <a href="https://discord.com/channels/758584467484442695/1380417265681436825">DW discord</a></label>
+ <a href="https://discord.com/channels/758584467484442695/1380417265681436825">DC DW</a></label>
         <a href="https://discord.com/channels/758584467484442695/1380417265681436825" target="_blank" rel="noopener">🔗</a>
       </span>
     </div>
@@ -754,7 +798,7 @@
       <span class="mod-pair">
         <label>
           <input type="checkbox" class="cb once" data-cb-key="cb-layer3-once-1" />
-          <a href="https://discord.com/channels/758584467484442695/1179836877667315824">Dw discord</a>
+          <a href="https://discord.com/channels/758584467484442695/1179836877667315824">DC DW</a>
         </label>
         <a href="https://discord.com/channels/758584467484442695/1179836877667315824" target="_blank" rel="noopener">🔗</a>
       </span>
@@ -826,7 +870,7 @@
       <span class="mod-pair">
         <label>
           <input type="checkbox" class="cb daily" data-cb-key="cb-binance-daily-3" />
-          <a href="https://discord.com/channels/758584467484442695/930054287550218260/1402279893466742865">Wpis1 dc</a>
+          <a href="https://discord.com/channels/758584467484442695/930054287550218260/1402279893466742865">DC DW</a>
         </label>
         <a href="https://discord.com/channels/758584467484442695/930054287550218260/1402279893466742865" target="_blank" rel="noopener">🔗</a>
       </span>
@@ -1109,6 +1153,1115 @@
   </td>
 </tr>
 
+<!-- -----------------------SOMNIA QUEST GM-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – GWIAZDKA ✭ -->
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉pobranie tokenów $STT z faucetu<br>
+          👉wysyłanie 0.001 $STT na dowolny inny wallet<br>
+          👉2-3 swapy oraz stworzenie tokena<br>
+          👉wejdź w profil i w Login Streak kliknij gSomnia<br>
+          👉odbiór daily komendą /claim daily DC<br>
+          👉misje socialowe DC
+        </p>
+      </div>
+    </div>
+  </td>
+
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">SOMNIA</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <!-- 1) pigułka projektowa (daily) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-somniaquestgm-daily-1" />
+          <a href="https://quest.somnia.network/">GM i quest</a>
+        </label>
+        <a href="https://quest.somnia.network/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 2) Somnia testnet (daily) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-somniaquestgm-daily-2" />
+          <a href="https://testnet.somnia.network/">Somnia testnet</a>
+        </label>
+        <a href="https://testnet.somnia.network/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- pozostałe once -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-1" />
+          <a href="https://somniawheel.fun/">Wheel fortune</a>
+        </label>
+        <a href="https://somniawheel.fun/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-2" />
+          <a href="https://somniamine.fun/">Mine gra</a>
+        </label>
+        <a href="https://somniamine.fun/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-3" />
+          <a href="https://somniaroad.fun/">Road gra</a>
+        </label>
+        <a href="https://somniaroad.fun/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-4" />
+          <a href="https://discord.com/channels/1267553406411608136/1382144916448215060">Variance DC engage</a>
+        </label>
+        <a href="https://discord.com/channels/1267553406411608136/1382144916448215060" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-5" />
+          <a href="https://somnia.arenas.fi/">Arenas fi</a>
+        </label>
+        <a href="https://somnia.arenas.fi/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-6" />
+          <a href="https://testnet.standardweb3.com/somnia-testnet/trade">Standard protocol</a>
+        </label>
+        <a href="https://testnet.standardweb3.com/somnia-testnet/trade" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-7" />
+          <a href="https://testnet.somnex.xyz/#/quest">Somnex</a>
+        </label>
+        <a href="https://testnet.somnex.xyz/#/quest" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-somniaquestgm-once-8" />
+          <a href="https://somnia.exchange/#/">Exchange</a>
+        </label>
+        <a href="https://somnia.exchange/#/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (6) -->
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------LENS-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉odbiór tekenów z faucetu<br>👉bridge z Sepila do Lens następnego dnia odwrotny</p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">LENS</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-lens-once-1" />
+          <a href="https://lensreputation.xyz/">Reputation</a>
+        </label>
+        <a href="https://lensreputation.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-lens-daily-1" />
+          <a href="https://firefly.social/profile/lens/katgo88/media">Firefly</a>
+        </label>
+        <a href="https://firefly.social/profile/lens/katgo88/media" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-lens-once-2" />
+          <a href="https://hey.xyz/">Profile Hey</a>
+        </label>
+        <a href="https://hey.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-lens-once-3" />
+          <a href="https://portal.testnet.lens.dev/bridge/">Lens Bridge</a>
+        </label>
+        <a href="https://portal.testnet.lens.dev/bridge/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-lens-once-4" />
+          <a href="https://jumper.exchange/">Jumper</a>
+        </label>
+        <a href="https://jumper.exchange/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------CYPHER-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – GWIAZDKA ✭ -->
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉pobierz tokeny $DEAI oraz $eDEAI<br>
+          👉stwórz własny token<br>
+          👉wykonaj 10 txów
+        </p>
+      </div>
+    </div>
+  </td>
+
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">CYPHER</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+
+      <!-- pigułka projektowa (daily) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-cypher-daily-1" />
+          <a href="https://cypher.z1labs.ai/testnet/">Cypher</a>
+        </label>
+        <a href="https://cypher.z1labs.ai/testnet/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- pozostałe checkboxy (domyślnie daily, bez linków) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-cypher-daily-2" />
+          <span>Deai</span>
+        </label>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-cypher-daily-3" />
+          <span>Edeai</span>
+        </label>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-cypher-daily-4" />
+          <span>Create</span>
+        </label>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-cypher-daily-5" />
+          <span>Send x10</span>
+        </label>
+      </span>
+
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (6) -->
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------CAMP-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉wykonuj daily misje oraz misje socialowe<br>
+          👉pobierz tokeny z faucetu<br>
+          👉SWAP wykonaj 5 różnych swapów dziennie – zmieniaj tokeny oraz ich ilości<br>
+          👉LIQUIDITY wykonaj 2 interakcje dziennie (utworzenie puli / częściowe wyjęcie / odbiór nagród)<br>
+          👉DEPLOY wykonaj 1 deploy dziennie – wybierz logo Camp Network, opcję (Timer / Token / NFT), uzupełnij pola i kliknij Deploy
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">CAMP</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-1" />
+          <a href="https://loyalty.campnetwork.xyz/loyalty">Camp</a></label>
+        <a href="https://loyalty.campnetwork.xyz/loyalty" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-2" />
+          <a href="https://scoreplay.xyz/">Scoreplay</a></label>
+        <a href="https://scoreplay.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-3" />
+          <a href="https://tokentails.com/game">Tokentails</a></label>
+        <a href="https://tokentails.com/game" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-4" />
+          <a href="https://panenkafc.gg/sign-up?ref=PK39J3">Panenka</a></label>
+        <a href="https://panenkafc.gg/sign-up?ref=PK39J3" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-5" />
+          <a href="https://tiles.arcoin.net/?refCode=ZNxU0-Ld">Arcoin</a></label>
+        <a href="https://tiles.arcoin.net/?refCode=ZNxU0-Ld" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-6" />
+          <a href="https://tech.awana.world/login?code=NSNPSI">Avana</a></label>
+        <a href="https://tech.awana.world/login?code=NSNPSI" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-7" />
+          <a href="https://copass.app/wallet">Checker</a></label>
+        <a href="https://copass.app/wallet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-8" />
+          <a href="https://summitx.finance/swap?chain=basecamp">Summit swap x5 mix</a></label>
+        <a href="https://summitx.finance/swap?chain=basecamp" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-9" />
+          <a href="https://summitx.finance/liquidity?chain=basecamp">Liquidity x2 mix</a></label>
+        <a href="https://summitx.finance/liquidity?chain=basecamp" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-camp-daily-10" />
+          <a href="https://contracts.mintair.xyz/">Deploy</a></label>
+        <a href="https://contracts.mintair.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------IRYS-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉pobierz faucet<br>
+          👉zagraj raz w snake'a<br>
+          👉dodaj plik
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">IRYS</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-irys-daily-1" />
+          <a href="https://app.galxe.com/quest/Irys?sort=Trending">Irys</a></label>
+        <a href="https://app.galxe.com/quest/Irys?sort=Trending" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-irys-daily-2" />
+          <span>Quest all</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-irys-daily-3" />
+          <a href="https://spritetype.irys.xyz/">Spritex5</a></label>
+        <a href="https://spritetype.irys.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-irys-daily-4" />
+          <a href="https://app.galxe.com/quest/Irys/GCLjLtf7zj">Spritex5 quest</a></label>
+        <a href="https://app.galxe.com/quest/Irys/GCLjLtf7zj" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------PHAROS CHECK-IN-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉wykonuj daily ruchy z powyższego wpisu</p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">PHAROS</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-pharoscheckin-daily-1" />
+          <a href="https://testnet.pharosnetwork.xyz/experience">Daily check-in</a></label>
+        <a href="https://testnet.pharosnetwork.xyz/experience" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-pharoscheckin-daily-3" />
+          <span>Send</span></label>
+      </span>
+
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-pharoscheckin-daily-4" />
+          <a href="https://testnet.zenithfinance.xyz/swap">Pharos zenith</a></label>
+        <a href="https://testnet.zenithfinance.xyz/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------LIVEART-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip"></td>
+  <td colspan="1">LIVEART</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-liveart-daily-1" />
+          <a href="https://liveart.io/quests/predict-art-price">Liveart</a></label>
+        <a href="https://liveart.io/quests/predict-art-price" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- „CHECK” ze starej tabeli pomijamy zgodnie z zasadami -->
+      <span class="mod-pair">
+        <label><input type="checkbox" class="cb daily" data-cb-key="cb-liveart-daily-2" />
+          <span>Zealy</span></label>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------TEA APP-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉Odbiór tokenów z faucetu<br>
+          👉Tia Dice Game rzut kostką 2-3 razy dziennie
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">TEA APP</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-teaapp-daily-1" />
+          <a href="https://base.app.tea.xyz/">Base app</a>
+        </label>
+        <a href="https://base.app.tea.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-teaapp-daily-2" />
+          <a href="https://teatools.vercel.app/">Tools / faucet</a>
+        </label>
+        <a href="https://teatools.vercel.app/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-teaapp-daily-3" />
+          <a href="https://tea-dice-game-web.vercel.app/">Dice game (kostka)</a>
+        </label>
+        <a href="https://tea-dice-game-web.vercel.app/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-teaapp-daily-4" />
+          <a href="https://tea-verse.vercel.app/">Tea verse NFT</a>
+        </label>
+        <a href="https://tea-verse.vercel.app/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-teaapp-daily-5" />
+          <a href="https://assam-tea.vercel.app/nft-mint">Assam tea verse NFT</a>
+        </label>
+        <a href="https://assam-tea.vercel.app/nft-mint" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------FARQUEST SCHOOL-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>
+          👉Farschool czyli daily quest<br>
+          👉oraz 5 spinów
+        </p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">FARQUEST SCHOOL</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-farquestschool-daily-1" />
+          <a href="https://far.quest/?school=true">Farquest school</a>
+        </label>
+        <a href="https://far.quest/?school=true" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------TOWNS A`LA DISCORD-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉.....brak w rutynie....</p>
+      </div>
+    </div>
+  </td>
+
+  <td colspan="1">TOWNS A`LA DISCORD</td>
+
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <!-- pigułka projektowa -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-townsaladiscord-daily-1" />
+          <a href="https://app.towns.com/">Towns a`la discord</a>
+        </label>
+        <a href="https://app.towns.com/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Napiwek (bez linku) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-townsaladiscord-daily-2" />
+          <span>Napiwek</span>
+        </label>
+      </span>
+
+      <!-- Daily bóbr (placeholder URL zachowany 1:1) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-townsaladiscord-daily-3" />
+          <a href="........">Daily bóbr</a>
+        </label>
+        <a href="........" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- LISTA 📑 przeniesiona do ostatniej kolumny -->
+  <td colspan="6">
+    <button type="button" class="mod-info-open" aria-label="Pokaż listę" data-project="Towns">📑</button>
+    <script type="application/json" class="mod-info-data" data-project="Towns">[
+      {
+        "text": "Town",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1376183595047190630",
+        "detail": "Towns\n\nTowns to projekt który przypomina Discord, tyle że w świecie Web3. Każdy server lub nawet wiadomość to tx na sieci Towns. Mają duże finansowanie więc zrobimy tutaj troche ruchów\nWejdź na strone 🔗 https://app.towns.com/\nPo prawej w rogu Log In i zaloguj sie Googlem\nKliknij na swój avatar > Linked Wallets i połącz swój wallet Rabby(zdj1)\nNastępnie Linked Accounts i połącz swój Twitter\nUstaw też jakiś nowy Avatar\nObok avatara kliknij na ikonke portfela > Deposit > Add funds i wpłać kilka $ na sieci Base\nNastępnie po lewej stronie kliknij na + i stwórz swój własny server dodając zdjęcie oraz nazwe > Free > Create Server\nLink do swojego servera wrzuć do wątku pod postem i dołączajmy do wszystkich naszych serverów, po dołączeniu zostawmy jakąś wiadomość na każdym z nich.\nLink do servera znajdziesz na (zdj1). Nie wrzucaj linku z przeglądarki\nDołączcie również do serverów dodanych poniżej\nPatryk : https://app.towns.com/t/0xf56869d1302aa9ef0a3340d92a71dcb8e80ea256/\nBartosz : https://app.towns.com/t/0x30cd1bdbceb72f0bcc464aa958b79631bf632126/\nMaciej : https://app.towns.com/t/0xef90e41ac26459dc28819339960165b4d56a8b21/\nKrzysztof : https://app.towns.com/t/0xa80b95ce46248e6846368f2e2e0c0adaee36f8de/\nFabian : https://app.towns.com/t/0x24ac0a6718e6956682883f66cf5260523eb05e71/\nPaweł G : https://app.towns.com/t/0xf692c2d1d59faee77442b598e3ea02811c266fa6/\n\nOdwiedzając te towny zostaw jakąś wiadomość oraz po lewej nad nazwami kanałów masz Review this Town - Daj 5* i zostaw kilka słów\nDaj tipa osobie z która współpracujesz, gdy najedziesz na wiadomość pokaże ci sie ikonka $, kliknij na to i wyślij 1$ tipa (zdj2)\nNa górze po prawej jest ikonka bobra, kliknij na to i pogłaszcz go po brzuszku, dostaniemy za to 1 pkt dziennie, róbmy to daily\nWróć do swojego Town i wejdź w opcje. Uzupełnij Town Motto oraz dodaj opis.\nPo lewej widać twoje kanały na serverze. Przy Channels kliknij + , teraz po prawej Create New Role. Dodaj nazwe oraz wybierz jakie przywileje ktoś z tą rolą może mieć.\nTeraz znowu wejdź w tworzenie kanału i dodaj kanał oraz wybierz że osoby z tą rolą mogą mieć do tego dostęp.\nNa Czacie wpisz komendę $WETH , kliknij na to co wyskoczy a następnie kup za 0.0001 ETH (zdj3)\nDodaj do rutyny codzienny Check - In oraz wysyłanie kilku wiadomości, możesz też dopracować swój server i próbować rozbudować go na jakiś tematyczny sposób"
+      }
+    ]</script>
+  </td>
+</tr>
+
+<!-- -----------------------DE.FI-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉odbiór Daily Reward w dashboard</p>
+      </div>
+    </div>
+  </td>
+  <td colspan="1">DE.FI</td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-defi-daily-1" />
+          <a href="https://de.fi/dashboard/progress">De.fi</a>
+        </label>
+        <a href="https://de.fi/dashboard/progress" target="_blank" rel="noopener">🔗</a>
+      </span>
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-defi-daily-2" />
+          <span>Daily check-in</span>
+        </label>
+      </span>
+    </div>
+  </td>
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------PLUME-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉.....brak w rutynie....</p>
+      </div>
+    </div>
+  </td>
+
+  <td colspan="1">PLUME</td>
+
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-1" />
+          <a href="https://portal.plume.org/daily-spin">Daily spin</a>
+        </label>
+        <a href="https://portal.plume.org/daily-spin" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-2" />
+          <a href="https://plume.ambient.finance/">Daily trade x5</a>
+        </label>
+        <a href="https://plume.ambient.finance/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-3" />
+          <a href="https://discord.com/channels/1177250613344612443/1342499019548659714">Plume DC</a>
+        </label>
+        <a href="https://discord.com/channels/1177250613344612443/1342499019548659714" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-4" />
+          <span>Ruchy na Discordzie</span>
+        </label>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-5" />
+          <a href="https://v2.harvestflow.io/en/account">Harvest</a>
+        </label>
+        <a href="https://v2.harvestflow.io/en/account" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-6" />
+          <a href="https://market.polytrade.app/my-assets">Market Polytrade</a>
+        </label>
+        <a href="https://market.polytrade.app/my-assets" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-7" />
+          <a href="https://staking.plume.org/">Stake 1plume</a>
+        </label>
+        <a href="https://staking.plume.org/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-8" />
+          <a href="https://portal.plume.org/swap">Swap 1plume</a>
+        </label>
+        <a href="https://portal.plume.org/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-9" />
+          <a href="https://plume.ambient.finance/">Swap ambient</a>
+        </label>
+        <a href="https://plume.ambient.finance/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-10" />
+          <a href="https://app.camelot.exchange/?chainId=98866">Swap camelot</a>
+        </label>
+        <a href="https://app.camelot.exchange/?chainId=98866" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-11" />
+          <a href="https://izumi.finance/trade/swap">Swap izumi</a>
+        </label>
+        <a href="https://izumi.finance/trade/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-12" />
+          <a href="https://www.rooster-protocol.com/swap?chain=98866&tokenA=PLUME">Swap rooster</a>
+        </label>
+        <a href="https://www.rooster-protocol.com/swap?chain=98866&tokenA=PLUME" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-13" />
+          <a href="https://app.stratus.exchange/swap">Swap stratus</a>
+        </label>
+        <a href="https://app.stratus.exchange/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-14" />
+          <a href="https://www.curve.finance/dex/plume/pools/factory-stable-ng-17/deposit/">Depo 0,1pUSD Curve</a>
+        </label>
+        <a href="https://www.curve.finance/dex/plume/pools/factory-stable-ng-17/deposit/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-15" />
+          <a href="https://app.mysticfinance.xyz/">Depo 0,1pUSD Mystic</a>
+        </label>
+        <a href="https://app.mysticfinance.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-plume-daily-16" />
+          <a href="https://yield.fi/vault">Yield</a>
+        </label>
+        <a href="https://yield.fi/vault" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <td colspan="6">
+    <button type="button" class="mod-info-open" aria-label="Pokaż listę" data-project="Plume">📑</button>
+    <script type="application/json" class="mod-info-data" data-project="Plume">[
+      {
+        "text": "Odbiór dropa i badge",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1381883383742857318",
+        "detail": "Plume - Genesis Mainnet\nWystartował Mainnet, a wraz z nim następna kampania. Możemy odebrać już część tokenów za Airdrop, niestety będzie on na vestingu 90 dniowym. Za wykonywanie kampanii będziemy mogli odebrać to wcześniej. Jeżeli nie zakwalifikowałeś się na Airdrop ale miałeś mile, zamienią się one na PlumePoints na ten sezon.\nNa początek wejdź na stronę przez link osoby, z którą współpracujesz:\nPatryk: https://portal.plume.org/?referrer=GoldenrodColorfulZone658\nBartosz: https://portal.plume.org/?referrer=FlaxExtensiveWhistle201\nMaciej: https://portal.plume.org/?referrer=BlackSpaciousCar221\nKrzysztof: https://portal.plume.org/?referrer=PeriwinkleAttractiveVase367\nFabian: https://portal.plume.org/?referrer=MyrtlePersonableLeaf566\nPaweł: https://portal.plume.org/?referrer=ChocolateCreativeHook520\n\nNa stronie mamy pola RWA, Bridge, Swap oraz Staking.\nClaim: https://claim.plume.org/ (20% dropa; reszta do 90 dni lub szybciej za punkty)\nGet essentials: https://portal.plume.org/level-up/get_essentials\nBridge: https://portal.plume.org/bridge\nSwap: https://www.rooster-protocol.xyz/swap\nMint pUSD: https://pusd.plume.org/\nSwap: https://plume.ambient.finance/swap\nNest staking/swapping: https://portal.plume.org/level-up/nest_staking_swapping\nStake: https://app.nest.credit/nest-alpha-vault\nRooster swap przykładowy: https://www.rooster-protocol.xyz/swap?chain=98866&tokenA=0x593cCcA4c4bf58b7526a4C164cEEf4003C6388db&tokenB=0xdddD73F5Df1F0DC31373357beAC77545dC5A6f3F\nVaulty: https://app.nest.credit/nest-credit-vault oraz https://app.nest.credit/nest-treasury-vault\nLP: https://portal.plume.org/level-up/dex_lp oraz https://www.rooster-protocol.xyz/pool/0x2fb3f735f685a9d8c0ffc35912e4acb1796752ad?chain=98866&tokenA=0x593cCcA4c4bf58b7526a4C164cEEf4003C6388db&tokenB=0xdddD73F5Df1F0DC31373357beAC77545dC5A6f3F&f=true\nLending: https://portal.plume.org/level-up/supply_borrow_lending_markets oraz https://app.solera.market/\nStake Plume: https://staking.plume.org/\nDaily Spin: https://portal.plume.org/daily-spin"
+      },
+      {
+        "text": "Tiery i staking",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1386090273964163155",
+        "detail": "Plume Genesis — Jak działać cz. 1\nCel: zbierać Plume Points i piąć się w rankingu.\nProfil: https://portal.plume.org/profile/me\nPodłącz Twitter i Discord, odbieraj Badges.\nSky Society — wymagania dla tierów (Sparrow, Pigeon, Raven, Hawk, Falcon itd.).\nStaking: wrzuć min. 101 PLUME — https://staking.plume.org/\nBridge: https://portal.plume.org/bridge\nTrade: https://plume.ambient.finance/\nDalsze instrukcje w kolejnych wpisach."
+      },
+      {
+        "text": "Daily Plume i Ruchy na discord",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1386339950743519252",
+        "detail": "Strategia daily pod tiery.\nLvl na Discord: wiadomości dają ~11–18 XP co minutę; cel 10 i 20 lvl.\nRole z bounty board (punkty): kupuj po kolei.\nDaily Spin (obowiązkowe): https://portal.plume.org/daily-spin\nTrade: po 5 swapów dziennie — https://plume.ambient.finance/ (zakładka Trade)\nKolejne wpisy: interakcje na dappsach i TVL."
+      }
+    ]</script>
+  </td>
+</tr>
+
+<!-- ---------------------SOSOVALUE + SOSODEX------------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – ✭ z treścią ze starego ⚠️ -->
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉odbiór punktów za 5 daily misji</p>
+      </div>
+    </div>
+  </td>
+
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">SOSOVALUE + SOSODEX</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <!-- Zasada anty-duplikacyjna: NIE dodajemy pigułki „projektowej” z linkiem https://sosovalue.com/exp,
+           bo istnieje pigułka z tym samym URL i etykietą „Daily check-in”. -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-sosovalue-daily-1" />
+          <a href="https://sosovalue.com/exp">Daily check-in</a>
+        </label>
+        <a href="https://sosovalue.com/exp" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-sosovalue-daily-2" />
+          <a href="https://testnet.sodex.com/spot/trade/BTC_USDC">Sosodex</a>
+        </label>
+        <a href="https://testnet.sodex.com/spot/trade/BTC_USDC" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (6) – tu wstawiamy 📑 (lista) -->
+  <td colspan="6">
+    <button type="button" class="mod-info-open" aria-label="Pokaż listę" data-project="SOSOVALUE">📑</button>
+    <script type="application/json" class="mod-info-data" data-project="SOSOVALUE">[
+      {
+        "text": "Pierwszy wpis",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1334465336736485377",
+        "detail": "SoSoValue\\nJest to projekt, gdzie można badać różne aspekty rynku krypto: kryptowaluty, ETF-y, finansowanie projektów, płynność na DEX-ach. Zebrali 20M finansowania, wycena 200M.\\n\\nUżyj referala osoby, z którą współpracujesz, żeby odebrać dodatkowy EXP.\\nPatryk: https://sosovalue.com/join/S1989T8R\\nBartosz: https://sosovalue.com/join/C184Q591\\nMaciek: https://sosovalue.com/join/434AAON7\\nKrzysiek: https://sosovalue.com/join/47A0X652\\nFabian: https://sosovalue.com/join/4FL03I21\\nPaweł: https://sosovalue.com/join/733MYBAB\\n\\nPo zalogowaniu przejdź do profilu: https://sosovalue.com/center\\n– Ustaw username\\n– Uzupełnij bio\\n– Połącz Email, Telegram, Twitter i Wallet\\n\\nZbieranie EXP: https://sosovalue.com/exp\\n– Zrób misje social (Like, Quote, obejrzyj film)\\n– Zainstaluj apkę (Android/iOS)\\nAndroid: https://play.google.com/store/apps/details?id=com.sosovalue.app\\nApple: https://apps.apple.com/us/app/sosovalue-crypto-tracker/id6739542818\\n– Kup token $MAG7.ssi na Base (mała kwota): https://ssi.sosovalue.com/buy\\n– 2x Follow\\n– Sub na YouTube\\n\\nCel: zebrać jak najwięcej EXP i wbić wysoki level. Dodaj do rutyny i codziennie loguj się po Daily EXP."
+      }
+    ]</script>
+  </td>
+</tr>
+
+<!-- -----------------------------MOMENTUM SUI----------------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – brak ⚭ w starym wierszu, zostaje puste -->
+  <td colspan="2"></td>
+
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">MOMENTUM SUI</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <!-- 1) Pigułka „projektowa” z linkiem z 1. kolumny -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-1" />
+          <a href="https://app.mmt.finance/leaderboard">Momentum sui</a>
+        </label>
+        <a href="https://app.mmt.finance/leaderboard" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 2) Trade/Swapy (bez linku) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-2" />
+          <span>Trade/Swapy</span>
+        </label>
+      </span>
+
+      <!-- 3) Liquidity (bez linku) -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-3" />
+          <span>Liquidity</span>
+        </label>
+      </span>
+
+      <!-- 4) Momentum Galxe -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-4" />
+          <a href="https://app.galxe.com/quest/Momentum?sort=Trending">Momentum Galxe</a>
+        </label>
+        <a href="https://app.galxe.com/quest/Momentum?sort=Trending" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 5) Monthly -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-5" />
+          <a href="https://app.galxe.com/quest/Momentum/GCX5utpYFJ">Monthly</a>
+        </label>
+        <a href="https://app.galxe.com/quest/Momentum/GCX5utpYFJ" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 6) Weekly -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-6" />
+          <a href="https://app.galxe.com/quest/Momentum/GCN4utp8ej">Weekly</a>
+        </label>
+        <a href="https://app.galxe.com/quest/Momentum/GCN4utp8ej" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 7) Daily -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-7" />
+          <a href="https://app.galxe.com/quest/Momentum/GCX1utpZNz">Daily</a>
+        </label>
+        <a href="https://app.galxe.com/quest/Momentum/GCX1utpZNz" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 8) Discord -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-momentumsui-daily-8" />
+          <a href="https://discord.com/channels/948033443483254845/1027161980970205225">Discord</a>
+        </label>
+        <a href="https://discord.com/channels/948033443483254845/1027161980970205225" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 9) Przycisk kopiowania tekstu (bez checkboxa) -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>Momentum…</strong>
+        <button type="button"
+                aria-label="Kopiuj: Momentum Where Money Flows"
+                data-text="Momentum Where Money Flows"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (6) -->
+  <td colspan="6"></td>
+</tr>
+
+<!-- -----------------------------MIRA NETWORK KLOK APP-------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <td colspan="2" class="cell-tip">
+    <div class="mod-tip-a" aria-expanded="false">
+      <button type="button" class="mod-tip-a__btn" aria-label="Show tip"><span>✭</span></button>
+      <div class="mod-tip-a__bubble" role="tooltip">
+        <p>👉nowe, nie ma jeszcze na kanele z rutyną</p>
+      </div>
+    </div>
+  </td>
+
+  <td colspan="1">MIRA NETWORK KLOK APP</td>
+
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-miranetworkklokapp-daily-1" />
+          <a href="https://klokapp.ai/app?c=3c1932f5-a61c-4416-adb7-1d9a8666a772">Klok app-interakcje x10</a>
+        </label>
+        <a href="https://klokapp.ai/app?c=3c1932f5-a61c-4416-adb7-1d9a8666a772" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <td colspan="6">
+    <button type="button" class="mod-info-open" aria-label="Pokaż listę" data-project="Mira Network Klok App">📑</button>
+    <script type="application/json" class="mod-info-data" data-project="Mira Network Klok App">[
+      {
+        "text": "Mira Network",
+        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1387489005540741272",
+        "detail": "@everyone\n\nMIRA Network to projekt łączący blockchain z AI do weryfikacji treści generowanych przez AI. System dzieli wynik na mniejsze części, a niezależni użytkownicy weryfikują sensowność; wszystko zapisywane on-chain. MIRA umożliwia też inwestowanie w startupy i zdobywanie tokenów przez aplikację.\n\nSociale:\nX: https://x.com/Mira_Network\nDC: https://discord.gg/Xfcy5nQ8UH\nGuild: https://guild.xyz/mira-network\nWWW: https://mira.network/\nWhitepaper: https://mira.network/research/mira-whitepaper.pdf\n\nRole: zdobywane za aktywność na czacie (jest też rola Mira Knights z delegacji do ich node).\n\nKlokApp (produkt MIRA):\n– Wejdź z linku osoby, z którą współpracujesz (np. Patryk: https://klokapp.ai/?referral_code=RPABSA5W).\n– Wybierz More Options i zaloguj się walletem EVM (np. Rabby).\n– Po zalogowaniu połącz konto Google i odbierz 500 pkt.\n– Zrób jedyny task na stronie (follow na X): https://x.com/klok_app\n– Wróć na stronę i w czacie wykonaj 10 promptów dziennie (1 prompt = 10 pkt). Dodaj do rutyny premium.\n\nTo wszystko."
+      }
+    ]</script>
+  </td>
+</tr>
+
+<!-- -----------------------------TAIKO----------------------------------------- -->
+<tr class="mod-row1" data-module="mod-row1">
+  <!-- kol. TIP (2) – brak ⚠️, puste -->
+  <td colspan="2"></td>
+
+  <!-- kol. NAZWA (1) -->
+  <td colspan="1">TAIKO</td>
+
+  <!-- kol. SZCZEGÓŁY (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <!-- 1) Trailblazers -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-taiko-once-1" />
+          <a href="https://trailblazers.taiko.xyz/profile/">Trailblazers</a>
+        </label>
+        <a href="https://trailblazers.taiko.xyz/profile/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+          
+
+      <!-- 4) Rubyscore -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-taiko-once-4" />
+          <a href="https://rubyscore.io/dashboard?net=taiko">Rubyscore</a>
+        </label>
+        <a href="https://rubyscore.io/dashboard?net=taiko" target="_blank" rel="noopener">🔗</a>
+      </span>
+      
+
+      <!-- 6) Tako tako -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-taiko-once-6" />
+          <a href="https://www.takotako.xyz/">Tako tako</a>
+        </label>
+        <a href="https://www.takotako.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      
+
+      <!-- 8) Ritsu -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb daily" data-cb-key="cb-taiko-once-8" />
+          <a href="https://ritsu.xyz/">Ritsu</a>
+        </label>
+        <a href="https://ritsu.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+      
+<div style="flex-basis:100%; height:0;"></div>
+
+      <!-- 10) Izumi -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-taiko-once-10" />
+          <a href="https://izumi.finance/trade/swap">Izumi</a>
+        </label>
+        <a href="https://izumi.finance/trade/swap" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 2) Robots farm -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-taiko-once-2" />
+          <a href="https://robots.farm/daily">Robots farm</a>
+        </label>
+        <a href="https://robots.farm/daily" target="_blank" rel="noopener">🔗</a>
+      </span>
+      
+      <!-- 14) Taiko status -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-taiko-once-14" />
+          <a href="https://takeoff.taiko.xyz/status">Taiko status</a>
+        </label>
+        <a href="https://takeoff.taiko.xyz/status" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+<!-- 17) Guild Taiko -->
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb once" data-cb-key="cb-taiko-once-17" />
+          <a href="https://guild.xyz/taiko#role-28586">Guild</a>
+        </label>
+        <a href="https://guild.xyz/taiko#role-28586" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+<div style="flex-basis:100%; height:0;"></div>
+
+      <!-- Okidori — jedna kapsułka z checkboxem na początku -->
+<span class="mod-pair">
+  <label>
+    <input type="checkbox" class="cb once" data-cb-key="cb-taiko-once-12" />
+    <a href="https://okidori.xyz/">Okidori NFT Taiko</a>
+    <a href="https://okidori.xyz/" target="_blank" rel="noopener">🔗</a>
+
+    <span style="display:inline-block;width:1px;height:1em;background:currentColor;opacity:.35;margin:0 10px;vertical-align:-2px;"></span>
+
+    <a href="https://okidori.xyz/collections/0xb66a56126fad14563e62ba2cda658cb97f7a90de">Brigade decoration</a>
+    <a href="https://okidori.xyz/collections/0xb66a56126fad14563e62ba2cda658cb97f7a90de" target="_blank" rel="noopener">🔗</a>
+  </label>
+</span>
+
+      <!-- 16) Wpis DC / Patryk -->
+      <span class="mod-pair">
+        <label>
+          
+          <a href="https://discord.com/channels/758584467484442695/1131963199667843162/1370077992985952396">Wpis DC / Patryk</a>
+        </label>
+        <a href="https://discord.com/channels/758584467484442695/1131963199667843162/1370077992985952396" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+    
+
+<div style="flex-basis:100%; height:0;"></div>
+
+       
+  <!-- OKX badges — jedna kapsułka, bez checkboxa, z łańcuchami przy każdej nazwie -->
+<span class="mod-pair">
+  <label>
+    <a href="https://web3.okx.com/pl/nft/collection/taiko/trailblazers-badges">Okx badges — devs</a>
+    <a href="https://web3.okx.com/pl/nft/collection/taiko/trailblazers-badges" target="_blank" rel="noopener">🔗</a>
+
+    <span style="display:inline-block;width:1px;height:1em;background:currentColor;opacity:.35;margin:0 10px;vertical-align:-2px;"></span>
+
+    <a href="https://web3.okx.com/pl/nft/collection/taiko/trailblazers-s2-badges">whales, minnows</a>
+    <a href="https://web3.okx.com/pl/nft/collection/taiko/trailblazers-s2-badges" target="_blank" rel="noopener">🔗</a>
+  </label>
+</span>
+
+<!-- 15) Intraverse free mint -->
+      <span class="mod-pair">
+        <label>
+          
+          <a href="https://play.intraverse.io/drop/NBTFQFkHjfYKDsuYKrDE">Intraverse free mint</a>
+        </label>
+        <a href="https://play.intraverse.io/drop/NBTFQFkHjfYKDsuYKrDE" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+
+</div>
+  </td>
+
+  <!-- kol. PUSTE (6) -->
+  <td colspan="6"></td>
+</tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1161,20 +2314,877 @@
                     </thead>
 
                     <tbody>
-                      <!-- DRUGI WIERSZ TESTOWY -->
-                      <tr>
-                        <td colspan="2"> </td>
-                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb h24" data-cb-key="cb-faucets-test-h24">
-</td>
-                        <td colspan="2"> </td>
-                      </tr>
-                      <!-- TRZECI WIERSZ TESTOWY -->
-                      <tr>
-                        <td colspan="2"> </td>
-                        <td colspan="1">TEST <span class="muted">checkbox</span> <input type="checkbox" class="cb once" data-cb-key="cb-faucets-test-once">
-</td>
-                        <td colspan="2"> </td>
-                      </tr>
+                      
+<!-- -----------------------SEPOLIA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – checkbox h24 + nazwa klikalna + łańcuch 🔗 -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sepolia-h24-1" />
+          <a href="https://sepolia-faucet.pk910.de/">Sepolia</a>
+        </label>
+        <a href="https://sepolia-faucet.pk910.de/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------KITE AI-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-kiteai-h24-1" />
+          <a href="https://faucet.gokite.ai/">Kite AI</a>
+        </label>
+        <a href="https://faucet.gokite.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SAHARA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sahara-h24-1" />
+          <a href="https://faucet.saharalabs.ai/">Sahara</a>
+        </label>
+        <a href="https://faucet.saharalabs.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------HUMANITY-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-humanity-h24-1" />
+          <a href="https://faucets.alchemy.com/faucets/humanity-testnet">Humanity</a>
+        </label>
+        <a href="https://faucets.alchemy.com/faucets/humanity-testnet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SOMNIA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – NAZWA (bez linku) w 1. linii, potem wszystko JEDNO POD DRUGIM -->
+  <td colspan="1" class="muted">
+    <!-- wymuszenie układu pionowego tylko w tym wierszu -->
+    <div class="mod-pairs mod-pairs--stack" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku) -->
+      <!-- ░░░ NAGŁÓWEK (pogrubiony + wyśrodkowany) ░░░ -->
+<div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">SOMNIA</div>
+
+
+      <!-- 1 -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-somnia-h24-1" />
+          <a href="https://testnet.somnia.network/">Testnet</a>
+        </label>
+        <a href="https://testnet.somnia.network/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 2 -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-somnia-h24-2" />
+          <a href="https://discord.com/channels/1209923224620761088/1306988055135256738">Faucet DC</a>
+        </label>
+        <a href="https://discord.com/channels/1209923224620761088/1306988055135256738" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 3 -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-somnia-h24-3" />
+          <a href="https://somnia.exchange/#/faucet">Exchange</a>
+        </label>
+        <a href="https://somnia.exchange/#/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- 4 -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-somnia-h24-4" />
+          <a href="https://faucet.trade/somnia-shannon-stt-faucet">Shannon</a>
+        </label>
+        <a href="https://faucet.trade/somnia-shannon-stt-faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- przycisk kopiowania (osobna linia) -->
+      
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px; position:relative;">
+        <strong>Tweet…</strong>
+        <button type="button"
+                aria-label="Kopiuj link do tweeta"
+                data-text="https://x.com/Katgo88/status/1935771805920251950"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+
+  <!-- -----------------------MEGA ETH-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – nagłówek + 2 pigułki h24, każda w nowej linii -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">MEGA ETH</div>
+
+      <!-- Testnet -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-megaeth-h24-1" />
+          <a href="https://testnet.megaeth.com/">Testnet</a>
+        </label>
+        <a href="https://testnet.megaeth.com/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- C-USD (Cap) -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-megaeth-h24-2" />
+          <a href="https://cap.app/testnet">C-USD</a>
+        </label>
+        <a href="https://cap.app/testnet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------CAMP-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-camp-h24-1" />
+          <a href="https://faucet.campnetwork.xyz/">Camp</a>
+        </label>
+        <a href="https://faucet.campnetwork.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------IRYS-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">IRYS</div>
+
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-irys-h24-1" />
+          <a href="https://irys.xyz/faucet">Faucet</a>
+        </label>
+        <a href="https://irys.xyz/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-irys-h24-2" />
+          <a href="https://app.galxe.com/quest/Irys/GCxxCtmLMP">Galxe faucet</a>
+        </label>
+        <a href="https://app.galxe.com/quest/Irys/GCxxCtmLMP" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------TEA SEPOLIA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-teasepolia-h24-1" />
+          <a href="https://faucet-sepolia.tea.xyz/#/">Tea Sepolia</a>
+        </label>
+        <a href="https://faucet-sepolia.tea.xyz/#/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------PHAROS-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – nagłówek + 2 pigułki h24 w nowych liniach -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+
+      <!-- NAZWA (bez linku) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">PHAROS</div>
+
+      <!-- Pharos Testnet -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-pharos-h24-1" />
+          <a href="https://testnet.pharosnetwork.xyz/">Testnet</a>
+        </label>
+        <a href="https://testnet.pharosnetwork.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Pharos Zenith faucet -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-pharos-h24-2" />
+          <a href="https://testnet.zenithfinance.xyz/faucet">Zenith</a>
+        </label>
+        <a href="https://testnet.zenithfinance.xyz/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------MONAD-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – nagłówek + pigułki h24, każda w nowej linii -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku, wycentrowana i pogrubiona) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">MONAD</div>
+
+      <!-- Testnet (URL z monad.xyz) -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-monad-h24-1" />
+          <a href="https://faucet.monad.xyz/">Testnet</a>
+        </label>
+        <a href="https://faucet.monad.xyz/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Nerzo -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-monad-h24-2" />
+          <a href="https://faucet.nerzo.xyz/monad">Nerzo</a>
+        </label>
+        <a href="https://faucet.nerzo.xyz/monad" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Morkie -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-monad-h24-3" />
+          <a href="https://faucet.morkie.xyz/monad">Morkie</a>
+        </label>
+        <a href="https://faucet.morkie.xyz/monad" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Mozi (brak linku w źródle → sama etykieta) -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-monad-h24-4" />
+          <span>Mozi</span>
+        </label>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------MOONVEIL MORE-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-moonveilmore-h24-1" />
+          <a href="https://faucet.testnet.moonveil.gg/">Moonveil More</a>
+        </label>
+        <a href="https://faucet.testnet.moonveil.gg/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------BLACKNODE AVAX/FUJI-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-blacknodeavaxfuji-h24-1" />
+          <a href="https://faucet.quicknode.com/avalanche/fuji">Faucet QuickNode</a>
+        </label>
+        <a href="https://faucet.quicknode.com/avalanche/fuji" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- przycisk kopiowania Tweeta (osobna linia, jak w źródle) -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>Tweet…</strong>
+        <button type="button"
+                aria-label="Kopiuj link do tweeta"
+                data-text="https://x.com/Katgo88/status/1934555826963845233"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------CITREA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-citrea-h24-1" />
+          <a href="https://citrea.xyz/faucet">Citrea</a>
+        </label>
+        <a href="https://citrea.xyz/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SUI TESTNET-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- Nagłówek, bo są >= 2 checkboxy -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">SUI TESTNET</div>
+
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-suitestnet-h24-1" />
+          <a href="https://faucet.sui.io/">Sui testnet</a>
+        </label>
+        <a href="https://faucet.sui.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-suitestnet-h24-2" />
+          <a href="https://discord.com/channels/916379725201563759/1037811694564560966">Faucet DC</a>
+        </label>
+        <a href="https://discord.com/channels/916379725201563759/1037811694564560966" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------LENS-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-lens-h24-1" />
+          <a href="https://testnet.lenscan.io/faucet">Lens</a>
+        </label>
+        <a href="https://testnet.lenscan.io/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------OG-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) – nagłówek + 3 pigułki h24 w osobnych liniach -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku, wyśrodkowana i pogrubiona) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">OG</div>
+
+      <!-- OG.ai -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-og-h24-1" />
+          <a href="https://faucet.0g.ai/">Og.ai</a>
+        </label>
+        <a href="https://faucet.0g.ai/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Test Zero -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-og-h24-2" />
+          <a href="https://test.zer0.exchange/faucet">Test Zero</a>
+        </label>
+        <a href="https://test.zer0.exchange/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- OG hub -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-og-h24-3" />
+          <a href="https://hub.0g.ai/faucet">Og hub</a>
+        </label>
+        <a href="https://hub.0g.ai/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------ZENCHAIN-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- pigułka: checkbox h24 + nazwa (bez słowa "Faucet") + 🔗 -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-zenchain-h24-1" />
+          <a href="https://faucet.zenchain.io/">Zen</a>
+        </label>
+        <a href="https://faucet.zenchain.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- przycisk kopiowania Tweeta (osobna linia) -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>Tweet…</strong>
+        <button type="button"
+                aria-label="Kopiuj link do tweeta"
+                data-text="https://x.com/Katgo88/status/1940477230314082485"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------CYTONIC-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1): nagłówek + 2 pigułki h24 w osobnych liniach -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku, wyśrodkowana i pogrubiona) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">CYTONIC</div>
+
+      <!-- Cytonic CCC -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-cytonic-h24-1" />
+          <a href="https://www.cytonic.com/evm">Cytonic Ccc</a>
+        </label>
+        <a href="https://www.cytonic.com/evm" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Cytonic USDC -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-cytonic-h24-2" />
+          <a href="https://testnet.deri.io/#/faucet">Cytonic Usdc</a>
+        </label>
+        <a href="https://testnet.deri.io/#/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SOSODEX-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sosodex-h24-1" />
+          <a href="https://testnet.sodex.com/faucet">Sosodex</a>
+        </label>
+        <a href="https://testnet.sodex.com/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------RUBY SCORE SEPOLIA-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- 1 pigułka (nazwa bez słowa Faucet) -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-rubyscore-h24-1" />
+          <a href="https://rubyscore.io/faucet">Ruby Score Sepolia</a>
+        </label>
+        <a href="https://rubyscore.io/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- przycisk kopiowania Tweet… (osobna linia) -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>Tweet…</strong>
+        <button type="button"
+                aria-label="Kopiuj link do tweeta"
+                data-text="https://x.com/Katgo88/status/1941167345931829378"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------CORN-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-corn-h24-1" />
+          <a href="https://faucet.conduit.xyz/corn-testnet-l8rm17uloq">Corn</a>
+        </label>
+        <a href="https://faucet.conduit.xyz/corn-testnet-l8rm17uloq" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SEPOLIA ETH-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sepoliaeth-h24-1" />
+          <a href="https://www.alchemy.com/faucets/ethereum-sepolia">Sepolia eth</a>
+        </label>
+        <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------HOLESKY ETH-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-holeskyeth-h24-1" />
+          <a href="https://www.alchemy.com/faucets/ethereum-holesky">Holesky eth</a>
+        </label>
+        <a href="https://www.alchemy.com/faucets/ethereum-holesky" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------BABYLON-KEPLRWALLET/SEPOLIA/HOLESKY----------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1): nagłówek + pigułka h24 + 3 przyciski kopiuj (każdy w nowej linii) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku, wyśrodkowana i pogrubiona) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">
+        BABYLON-KEPLRWALLET/SEPOLIA/HOLESKY
+      </div>
+
+      <!-- Hoodscan faucet -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-babylonkeplrwalletsepoliaholesky-h24-1" />
+          <a href="https://faucet.hoodscan.io/">Hoodscan</a>
+        </label>
+        <a href="https://faucet.hoodscan.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Copy: A/Keplr Xion -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Xion</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Xion"
+                data-text="xion192nlvaufe3z47lff0m07zdal9tpd6d6hj5vkmn"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+
+      <!-- Copy: A/Keplr Babylon Testnet -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Babylon Testnet</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Babylon Testnet"
+                data-text="bbn192nlvaufe3z47lff0m07zdal9tpd6d6h8r89jp"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+
+      <!-- Copy: A/Keplr Osmosis -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Osmosis</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Osmosis"
+                data-text="osmo192nlvaufe3z47lff0m07zdal9tpd6d6hcx9ym2"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SEPOLIA / HOLESKY (Google Cloud)----------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sepoliaholesky-h24-1" />
+          <a href="https://cloud.google.com/application/web3/faucet">Sepolia / Holesky</a>
+        </label>
+        <a href="https://cloud.google.com/application/web3/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------USDC SEPOLIA / HOLESKY (Circle)----------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-usdcsepoliaholesky-h24-1" />
+          <a href="https://faucet.circle.com/">USDC Sepolia / Holesky</a>
+        </label>
+        <a href="https://faucet.circle.com/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------XION-KEPLRWALLET-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+
+  <!-- kol. ŚRODEK (1): nagłówek + pigułka h24 + 3 przyciski kopiuj (każdy w nowej linii) -->
+  <td colspan="1" class="muted">
+    <div class="mod-pairs" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+      <!-- NAZWA (bez linku, wyśrodkowana i pogrubiona) -->
+      <div class="mod-pairs-head" style="font-weight:700; width:100%; text-align:center;">XION-KEPLRWALLET</div>
+
+      <!-- Faucet Xion -->
+      <span class="mod-pair" style="display:flex; align-items:center; gap:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="cb h24" data-cb-key="cb-xionkeplrwallet-h24-1" />
+          <a href="https://faucet.xion.burnt.com/">Xion</a>
+        </label>
+        <a href="https://faucet.xion.burnt.com/" target="_blank" rel="noopener">🔗</a>
+      </span>
+
+      <!-- Copy: A/Keplr Xion -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Xion</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Xion"
+                data-text="xion192nlvaufe3z47lff0m07zdal9tpd6d6hj5vkmn"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+
+      <!-- Copy: A/Keplr Babylon Testnet -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Babylon Testnet</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Babylon Testnet"
+                data-text="bbn192nlvaufe3z47lff0m07zdal9tpd6d6h8r89jp"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+
+      <!-- Copy: A/Keplr Osmosis -->
+      <span class="mod-pair" style="display:inline-flex; align-items:center; gap:8px; position:relative;">
+        <strong>A/Keplr Osmosis</strong>
+        <button type="button"
+                aria-label="Kopiuj A/Keplr Osmosis"
+                data-text="osmo192nlvaufe3z47lff0m07zdal9tpd6d6hcx9ym2"
+                onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.text).then(()=>{const t=this.nextElementSibling; t.style.visibility='visible'; setTimeout(()=>t.style.visibility='hidden',1200);});"
+                onmouseleave="this.nextElementSibling.style.visibility='hidden';"
+                style="cursor:pointer; background:none; border:0; font-size:16px; line-height:1;">📋</button>
+        <span style="visibility:hidden; position:absolute; top:-25px; left:0; background:#333; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; white-space:nowrap; z-index:10;">
+          Skopiowano!
+        </span>
+      </span>
+    </div>
+  </td>
+
+  <!-- kol. PUSTE (2) -->
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------SEI-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-sei-h24-1" />
+          <a href="https://www.docs.sei.io/learn/faucet">Sei</a>
+        </label>
+        <a href="https://www.docs.sei.io/learn/faucet" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+<!-- -----------------------FIDE AI-------------------------------- -->
+<tr class="mod-row2" data-module="mod-row2">
+  <td colspan="2"></td>
+  <td colspan="1" class="muted">
+    <div class="mod-pairs">
+      <span class="mod-pair">
+        <label>
+          <input type="checkbox" class="cb h24" data-cb-key="cb-fideai-h24-1" />
+          <a href="https://faucet.metafide.io/">Fide Ai</a>
+        </label>
+        <a href="https://faucet.metafide.io/" target="_blank" rel="noopener">🔗</a>
+      </span>
+    </div>
+  </td>
+  <td colspan="2"></td>
+</tr>
+
+
+
                     </tbody>
                   </table>
                 </div>
@@ -1327,34 +3337,7 @@
 </section>
 <!-- ░░░ KONIEC MODUŁU: BELKA 4 SLOTY – UKŁAD + KOLORY PER NOTATKA (mod-notes-belt4) ░░░ -->
 
-          <!-- (oryginalna treść zostaje pod belką) -->
-          <h1 style="margin:0 0 12px 0;font:600 20px/1.2 system-ui;">TESTOWE</h1>
-          <p style="margin:0 0 10px 0;opacity:.9">Ściągawka checkboxów (D/W/24/X) + przykładowa notatka jako element budulcowy.</p>
-          <div>
-            <input type="checkbox" class="cb daily" data-cb-key="cb-demo-daily">
-
-            <input type="checkbox" class="cb weekly" data-cb-key="cb-demo-weekly">
-
-            <input type="checkbox" class="cb h24" data-cb-key="cb-demo-24h">
-
-            <input type="checkbox" class="cb once" data-cb-key="cb-demo-once">
-
-          </div>
-          <div style="margin-top:14px">
-            <div class="note-card" data-note-id="note-test">
-
-              <div class="note-header">
-                <input type="text" placeholder="Note title...">
-                <div class="note-actions">
-                  <button class="note-zoom" title="Open">🔍</button>
-                  <button class="note-copy" title="Copy">📋</button>
-                  <button class="note-clear" title="Clear">🗑️</button>
-                </div>
-              </div>
-              <textarea class="note-text" placeholder="Write your note..."></textarea>
-            </div>
-          </div>
-        </div>
+   
 
 
 
