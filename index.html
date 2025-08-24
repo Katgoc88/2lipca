@@ -5534,7 +5534,7 @@ function openList(project, entries){
   • Tu zostawiamy tylko logikę frontową (UX + autopoprawki).
 -->
 <section class="mod-link-guard-root" data-module="mod-link-guard"
-         data-allow="https,mailto" data-scope="document" data-debug="true" aria-hidden="true"></section>
+         data-allow="https,mailto" data-scope="document" data-debug="false" aria-hidden="true"></section>
 
 <style>
   /* ░░ STYLE MODUŁU (lokalne; moduł nie styluje globalnie <a>) ░░ */
@@ -5723,6 +5723,172 @@ function openList(project, entries){
 
 
 
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: DYMek LINKU – DOMENA + „…” (DESKTOP-PRIM, WYMUSZONY START) (mod-link-tip) ░░░░░░░░░░░░░░░░ -->
+<!--
+  ZAŁOŻENIA:
+  • Desktop: dymek na hover/focus → pokazuje DOMENĘ; w dymku „…” rozwija PEŁNY link.
+  • Mobile: normalnie wyłączone, ale tu start wymuszony (desktop-only="false"), żeby łatwo sprawdzić działanie.
+  • Automat: działa dla wszystkich <a href="..."> (można wykluczyć class="mod-link-tip-skip").
+  • Bezpieczeństwo: brak innerHTML/eval; URL parsowany bezpiecznie; „złe” schematy tylko subtelnie oznaczamy.
+  • Izolacja: prefiks .mod-link-tip-*, zero globali, namespacowane zdarzenia.
+
+  JAK UŻYĆ:
+  • Wklej całość NAD </body>.
+  • Po teście możesz przełączyć:
+      data-desktop-only="true"
+      data-debug="false"
+-->
+<section class="mod-link-tip-root" data-module="mod-link-tip"
+         data-scope="document" data-allow="https,mailto"
+         data-desktop-only="false" data-debug="true" aria-hidden="true"></section>
+
+<style>
+  /* ░░ STYLE – izolowane ░░ */
+  .mod-link-tip-root{
+    --tip-bg:#0f1320; --tip-fg:#e9eef6; --tip-sub:#a7b1c2; --tip-bad:#ffb3b3;
+    --tip-shadow:0 8px 22px rgba(0,0,0,.22); --tip-radius:10px; --tip-pad:10px; --tip-gap:8px;
+    --tip-maxw:520px; --tip-minw:220px;
+  }
+  .mod-link-tip-root .mod-link-tip-pop{
+    position:fixed; z-index:9999; /* PODBITY, żeby nic nie przykryło */
+    min-width:var(--tip-minw); max-width:var(--tip-maxw);
+    background:var(--tip-bg); color:var(--tip-fg);
+    border-radius:var(--tip-radius); box-shadow:var(--tip-shadow);
+    padding:var(--tip-pad); font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    display:none; opacity:0; transform:translateY(6px);
+    transition:opacity .12s ease, transform .12s ease;
+    pointer-events:none;
+  }
+  .mod-link-tip-root .mod-link-tip-pop[data-show="1"]{ display:block; opacity:1; transform:translateY(0); }
+  .mod-link-tip-root .mod-link-tip-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .mod-link-tip-root .mod-link-tip-domain{ font-weight:700; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:380px; }
+  .mod-link-tip-root .mod-link-tip-actions{ display:flex; align-items:center; gap:6px; }
+  .mod-link-tip-root .mod-link-tip-btn{
+    pointer-events:auto; border:0; background:transparent; color:var(--tip-fg);
+    cursor:pointer; padding:2px 6px; border-radius:8px; opacity:.8; font-size:12px;
+  }
+  .mod-link-tip-root .mod-link-tip-btn:hover{ opacity:1; background:rgba(255,255,255,.06); }
+  .mod-link-tip-root .mod-link-tip-ellipsis{ font-weight:700; letter-spacing:2px; }
+  .mod-link-tip-root .mod-link-tip-full{ color:var(--tip-sub); word-break:break-all; display:none; margin-top:6px; }
+  .mod-link-tip-root .mod-link-tip-full.is-open{ display:block; }
+  .mod-link-tip-root .mod-link-tip-pop.bad .mod-link-tip-domain{ color: var(--tip-bad); }
+</style>
+
+<script type="module">
+/* ░░ SKRYPT: Dymek linku – domena + „…” ░░ */
+(() => {
+  const root = document.querySelector('.mod-link-tip-root[data-module="mod-link-tip"]');
+  if (!root) return;
+
+  // ░ konfiguracja
+  const cfg = {
+    scope: (root.dataset.scope||'document').toLowerCase(),
+    allow: new Set(String(root.dataset.allow||'https,mailto').split(',').map(s=>s.trim().toLowerCase()+':')),
+    desktopOnly: String(root.dataset.desktopOnly||'false').toLowerCase()==='true',
+    debug: String(root.dataset.debug||'false').toLowerCase()==='true',
+  };
+
+  // ░ auto-wyłączenie na urządzeniach bez hover (jeśli desktopOnly=true)
+  const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (cfg.desktopOnly && !supportsHover) {
+    if (cfg.debug) console.log('[app:mod-link-tip] skipped (no hover)');
+    return;
+  }
+
+  const NS = 'app:mod-link-tip';
+
+  // ░ bezpieczne parsowanie URL
+  const parseHref = (href) => {
+    try{
+      if (!href) return null;
+      const low = href.trim().toLowerCase();
+      if (low.startsWith('mailto:')) {
+        const email = href.slice(7);
+        const domain = (email.split('@')[1]||'').trim();
+        return { protocol:'mailto:', domain, full:`mailto:${email}` };
+      }
+      const u = new URL(href, window.location.href);
+      return { protocol:u.protocol, domain:u.hostname, full:u.href };
+    }catch{ return null; }
+  };
+
+  // ░ pojedynczy tooltip
+  const pop = document.createElement('div');
+  pop.className = 'mod-link-tip-pop';
+  pop.innerHTML = `
+    <!-- domena + „…” -->
+    <div class="mod-link-tip-row">
+      <div class="mod-link-tip-domain" data-role="domain"></div>
+      <div class="mod-link-tip-actions">
+        <button type="button" class="mod-link-tip-btn mod-link-tip-ellipsis" data-role="toggle" aria-expanded="false" aria-label="Pokaż pełny link">…</button>
+      </div>
+    </div>
+    <!-- pełny link (ukryty do rozwinięcia) -->
+    <div class="mod-link-tip-full" data-role="full"></div>
+  `;
+  document.body.appendChild(pop);
+
+  const el = {
+    domain: pop.querySelector('[data-role="domain"]'),
+    full:   pop.querySelector('[data-role="full"]'),
+    toggle: pop.querySelector('[data-role="toggle"]'),
+  };
+
+  el.toggle.addEventListener('click', (ev) => {
+    ev.preventDefault(); ev.stopPropagation();
+    const open = !el.full.classList.contains('is-open');
+    el.full.classList.toggle('is-open', open);
+    el.toggle.setAttribute('aria-expanded', String(open));
+  });
+
+  let hideT=null;
+  const showPop = (anchor, info) => {
+    clearTimeout(hideT);
+    pop.classList.remove('bad');
+    el.domain.textContent = info.domain || '(brak domeny)';
+    el.full.textContent   = info.full || '';
+    el.full.classList.remove('is-open');
+    el.toggle.setAttribute('aria-expanded','false');
+
+    if (!cfg.allow.has((info.protocol||'').toLowerCase())) pop.classList.add('bad');
+
+    const r = anchor.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const left = Math.round(Math.max(8, Math.min(r.left, vw - 8 - 260)));
+    const top  = Math.round((r.top > 80 ? r.top - 12 : r.bottom + 12));
+    pop.style.left = left + 'px';
+    pop.style.top  = top  + 'px';
+    pop.setAttribute('data-show','1');
+  };
+  const hidePop = (delay=120) => { clearTimeout(hideT); hideT = setTimeout(()=>pop.removeAttribute('data-show'), delay); };
+
+  const scopeRoot = (cfg.scope==='within') ? root : document;
+
+  const onEnter = (ev) => {
+    const a = ev.target.closest && ev.target.closest('a');
+    if (!a || a.classList?.contains('mod-link-tip-skip')) return;
+    const info = parseHref(a.getAttribute('href')||'');
+    if (!info) return;
+    showPop(a, info);
+  };
+  const onLeave = (ev) => {
+    const a = ev.target.closest && ev.target.closest('a');
+    if (!a) return;
+    hidePop();
+  };
+
+  scopeRoot.addEventListener('mouseover', onEnter, { passive:true });
+  scopeRoot.addEventListener('focusin',  onEnter);
+  scopeRoot.addEventListener('mouseout', onLeave, { passive:true });
+  scopeRoot.addEventListener('focusout', onLeave);
+  window.addEventListener('scroll', ()=>hidePop(0), { passive:true });
+  window.addEventListener('resize', ()=>hidePop(0), { passive:true });
+  document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') hidePop(0); });
+
+  if (cfg.debug) console.log(`[${NS}] ready — scope:${cfg.scope}, allow:[${[...cfg.allow].join(', ')}], desktopOnly:${cfg.desktopOnly}`);
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░ KONIEC MODUŁU: DYMek LINKU – DOMENA + „…” (DESKTOP-PRIM, WYMUSZONY START) ░░░░░░░░░░░░░░░░ -->
 
 
 
