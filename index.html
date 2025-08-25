@@ -158,6 +158,11 @@
 
 
 
+
+
+
+
+
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer">
   <title>RUTYNA KATGO</title>
@@ -166,44 +171,127 @@
 
 
   <!-- ░░░ FUNDAMENT STRONY (mod-app) ░░░ -->
-  <style>
-    body{ margin:0; background:#e6d4a6; color:#222; font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif; min-height:100vh; }
-    .mod-app-root{ --app-base:1340; --app-scale:1; --app-gap:16px; --app-shadow:0 6px 18px rgba(0,0,0,.08); overflow-x:clip; min-height:100vh; }
-    .mod-app-stage{ width:1340px; position:relative; left:50%; transform:translateX(-50%) scale(var(--app-scale)); transform-origin:top center; }
-    .mod-app-main{ width:1340px; margin:0 auto; }
-    .mod-app-plate{ border-radius:24px; border:1px solid rgba(255,255,255,.38); box-shadow:var(--app-shadow); background:linear-gradient(to bottom,#fdf1d5,#e6c98b); padding:22px 22px 24px; }
-    .mod-app-footer{ width:1340px; margin:36px auto 28px; }
-    .mod-footer{ border-radius:16px; border:1px solid rgba(255,255,255,.38); background:linear-gradient(to bottom,#fdf1d5,#e6c98b); padding:12px 16px; box-shadow:var(--app-shadow); }
-    .mod-footer small{opacity:.9}
-  </style>
+  
+<style>
+  /* ░ BODY ░ */
+  body{
+    margin:0; background:#e6d4a6; color:#222;
+    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+    min-height:100vh;
+  }
 
-  <!-- ░░░ MODUŁ HUD (mod-hud) ░░░ -->
-  <style>
-    .mod-hud{ position:fixed; top:12px; left:50%; transform:translateX(-50%) scale(var(--app-scale)); transform-origin:top center; z-index:50; width:1340px; max-width:1340px; pointer-events:auto; }
-    .mod-hud-wrap{ border-radius:24px; border:1px solid rgba(255,255,255,.38); box-shadow:0 8px 24px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.35); background:#ffffffcc; padding:16px 18px; backdrop-filter:blur(.5px); }
-    .mod-hud-topbar{ display:flex; justify-content:center; gap:10px; margin:2px 0 12px; }
-    .mod-hud-btn{ appearance:none; border:1px solid rgba(0,0,0,.08); width:36px; height:36px; border-radius:10px; padding:0; display:grid; place-items:center; cursor:pointer; background:linear-gradient(180deg,#fae8b9,#ecd596); color:#3d2f12; box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 5px rgba(0,0,0,.08); }
-    .mod-hud-btn svg{ display:block; pointer-events:none; width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; transition:transform .18s ease; }
-    .mod-hud-btn:hover{ filter:brightness(1.03); }
-    .mod-hud-btn:active{ transform:translateY(1px); }
-    .mod-hud-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25), inset 0 1px 0 rgba(255,255,255,.7); }
-    /* ░░ HUD: animacja i stan bazowy (strzałka w dół przy zwiniętym) ░░ */
-.mod-hud-btn.toggle svg{
-  transition: transform .2s ease;
-  transform: rotate(0deg); /* ▼ gdy aria-expanded="false" */
-}
+  /* ░ ROOT APLIKACJI (stała baza 1340 + skalowanie) ░ */
+  .mod-app-root{
+    --app-base:1340; --app-scale:1; --app-gap:16px;
+    --app-shadow:0 6px 18px rgba(0,0,0,.08);
+    overflow-x:clip; min-height:100vh;
+  }
 
-/* ░░ HUD: po rozwinięciu strzałka w górę ░░ */
-.mod-hud-btn.toggle[aria-expanded="true"] svg{
-  transform: rotate(180deg); /* ▲ gdy aria-expanded="true" */
-}
+  /* ░ GŁÓWNA SCENA (centrowanie: left 50% + translateX + scale) ░ */
+  .mod-app-stage{
+    width:1340px; position:relative; left:50%;
+    transform:translateX(-50%) scale(var(--app-scale));
+    transform-origin:top center;
+  }
 
-    .mod-hud-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-    .mod-hud-grid[hidden]{ display:none; }
+  /* ░ GŁÓWNY OBSZAR (może pozostać na auto-centrowaniu, bo siedzi w stage) ░ */
+  .mod-app-main{
+    width:1340px; margin:0 auto;
+  }
 
-    /* ZEROWANIE "placeholderów" pod kafelkami */
-    .mod-hud-card{ padding:0; background:transparent; box-shadow:none; border:0; border-radius:0; height:auto; }
-  </style>
+  /* ░ KARTA/PLATE ░ */
+  .mod-app-plate{
+    border-radius:24px; border:1px solid rgba(255,255,255,.38);
+    box-shadow:var(--app-shadow);
+    background:linear-gradient(to bottom,#fdf1d5,#e6c98b);
+    padding:22px 22px 24px;
+  }
+
+  /* ░ STOPKA APLIKACJI — UJEDNOLICONA Z .mod-app-stage
+     (to rozwiązuje „ucieczkę” w prawo przy różnych metodach centrowania) ░ */
+  .mod-app-footer{
+    width:1340px; position:relative; left:50%;
+    transform:translateX(-50%) scale(var(--app-scale));
+    transform-origin:top center;
+    margin:36px 0 28px; /* tylko pion — h-centrowanie robi transform */
+  }
+
+  .mod-footer{
+    border-radius:16px; border:1px solid rgba(255,255,255,.38);
+    background:linear-gradient(to bottom,#fdf1d5,#e6c98b);
+    padding:12px 16px; box-shadow:var(--app-shadow);
+  }
+  .mod-footer small{ opacity:.9; }
+</style>
+
+
+
+
+
+  <!-- ░░░ MODUŁ HUD (CSS) — PODMIANKA v2: toggle idealnie pośrodku, logout przy prawej, BEZ wpływu na tabele ░░░ -->
+<style>
+  /* ░ RAMECZKA HUD ░ */
+  .mod-hud{
+    position:fixed; top:12px; left:50%;
+    transform:translateX(-50%) scale(var(--app-scale)); transform-origin:top center;
+    z-index:50; width:1340px; max-width:1340px; pointer-events:auto;
+  }
+  .mod-hud-wrap{
+    border-radius:24px; border:1px solid rgba(255,255,255,.38);
+    box-shadow:0 8px 24px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.35);
+    background:#ffffffcc; padding:16px 18px; backdrop-filter:blur(.5px);
+  }
+
+  /* ░ GÓRNA BELKA HUD — JEDNA LINIA (scoped!) ░
+     FLEX + absolutne centrowanie toggle TYLKO w .mod-hud-topbar */
+  .mod-hud-topbar{
+    position:relative;
+    display:flex; align-items:center; gap:10px;
+    margin:2px 0 12px; min-height:36px; /* = wysokość przycisku */
+  }
+  /* 🔸 TYLKO w topbarze HUD */
+  .mod-hud-topbar .mod-hud-btn.toggle{
+    position:absolute; left:50%; transform:translate(-50%,0);
+  }
+  .mod-hud-topbar .mod-hud-btn.toggle:active{
+    transform:translate(-50%,1px);
+  }
+  .mod-hud-topbar .mod-hud-btn.logout{
+    margin-left:auto;
+  }
+
+  /* ░ PRZYCISKI (wspólne) ░ */
+  .mod-hud-btn{
+    appearance:none; border:1px solid rgba(0,0,0,.08);
+    width:36px; height:36px; border-radius:10px; padding:0;
+    display:grid; place-items:center; cursor:pointer;
+    background:linear-gradient(180deg,#fae8b9,#ecd596); color:#3d2f12;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 5px rgba(0,0,0,.08);
+  }
+  .mod-hud-btn svg{
+    display:block; pointer-events:none; width:18px; height:18px;
+    stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    transition:transform .18s ease;
+  }
+  .mod-hud-btn:hover{ filter:brightness(1.03); }
+  .mod-hud-btn:active{ transform:translateY(1px); }
+  .mod-hud-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25), inset 0 1px 0 rgba(255,255,255,.7); }
+
+  /* ░ ROTACJA STRZAŁKI (toggle): ▼ gdy zwinięty, ▲ gdy rozwinięty ░ */
+  .mod-hud-btn.toggle svg{ transition:transform .2s ease; transform:rotate(0deg); }
+  .mod-hud-btn.toggle[aria-expanded="true"] svg{ transform:rotate(180deg); }
+
+  /* ░ SIATKA HUD ░ */
+  .mod-hud-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .mod-hud-grid[hidden]{ display:none; }
+
+  /* ░ KARTY W SIATCE: wyzerowane ░ */
+  .mod-hud-card{ padding:0; background:transparent; box-shadow:none; border:0; border-radius:0; height:auto; }
+</style>
+
+
+
+
 
   <!-- ░░░ CHECKBOXY (globalne) ░░░ -->
   <style>
@@ -611,30 +699,72 @@
 
 </head>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <body>
   <div class="mod-app-root">
 
-    <!-- HUD -->
-    <div class="mod-hud" data-module="mod-hud" aria-live="polite">
-      <div class="mod-hud-wrap" role="region" aria-label="HUD">
-        <div class="mod-hud-topbar">
-          <button type="button" class="mod-hud-btn logout" data-act="logout" title="Logout / Sign in" aria-label="Logout / Sign in">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v8M7.05 7.05a7 7 0 1 0 9.9 0"/></svg>
-          </button>
-          <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" aria-controls="mod-hud-grid" title="Zwiń/Rozwiń HUD" aria-label="Zwiń/Rozwiń HUD">
-            <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-        </div>
+    <!-- ░░░ MODUŁ HUD (HTML) — PODMIANKA: układ bez zmian w strukturze; pozycjonowanie zrobimy w CSS ░░░ -->
+<!-- HUD -->
+<div class="mod-hud" data-module="mod-hud" aria-live="polite">
+  <div class="mod-hud-wrap" role="region" aria-label="HUD">
+    <div class="mod-hud-topbar">
+      <button type="button" class="mod-hud-btn logout" data-act="logout" title="Logout / Sign in" aria-label="Logout / Sign in">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v8M7.05 7.05a7 7 0 1 0 9.9 0"/></svg>
+      </button>
+      <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" aria-controls="mod-hud-grid" title="Zwiń/Rozwiń HUD" aria-label="Zwiń/Rozwiń HUD">
+        <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
 
-        <div class="mod-hud-grid" data-hud-grid id="mod-hud-grid" aria-live="polite">
-          <!-- SLOT 1 -->
-          <div class="mod-hud-card">
-            <div class="reset-card">
-              <button class="btn-daily" onclick="resetDaily()">RESET DAILY</button>
-              <button class="btn-once"  onclick="resetOnce()">RESET ONE TIME</button>
-              <button class="btn-all"   onclick="resetAll()">RESET ALL</button>
-            </div>
-          </div>
+    <div class="mod-hud-grid" data-hud-grid id="mod-hud-grid" aria-live="polite">
+
+
+      
+      <!-- SLOT 1 -->
+      <div class="mod-hud-card">
+        <div class="reset-card">
+          <button class="btn-daily" onclick="resetDaily()">RESET DAILY</button>
+          <button class="btn-once"  onclick="resetOnce()">RESET ONE TIME</button>
+          <button class="btn-all"   onclick="resetAll()">RESET ALL</button>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           <!-- SLOT 2 -->
           <div class="mod-hud-card">
@@ -4833,6 +4963,11 @@
     </style>
   </div>
 
+
+
+
+
+
   <!-- SKRYPTY APLIKACJI (HUD + skala) -->
   <script>
   (function(){
@@ -5167,6 +5302,49 @@
   </script>
 
 
+<!-- ░░░░░░░░░░░░ MODUŁ HUD — „bramka” potwierdzenia przed wylogowaniem (drop-in) ░░░░░░░░░░░░ -->
+<script>
+/* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+   MOD-HUD: POTWIERDZENIE WYLOGOWANIA
+   - Bez zmian w logice wylogowania.
+   - Pokazuje natywne okienko confirm() przed akcją.
+   - Jeśli Anuluj → blokujemy klik (preventDefault + stopImmediatePropagation).
+   - Jeśli OK → nic nie blokujemy; działa to, co już masz (link/form/funkcja).
+   - Izolacja: tylko w obrębie .mod-hud, tylko dla przycisku [data-act="logout"].
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+(function(){
+  'use strict';
+
+  // ░ Szukamy kontenera HUD (izolacja modułu)
+  var hud = document.querySelector('.mod-hud');
+  if(!hud) return;
+
+  // ░ Delegacja w fazie CAPTURE: nasza „bramka” uruchamia się ZANIM reszta handlerów
+  hud.addEventListener('click', function(ev){
+    var btn = ev.target.closest('.mod-hud-topbar .mod-hud-btn.logout, .mod-hud-topbar [data-act="logout"]');
+    if(!btn || !hud.contains(btn)) return;
+
+    // ░ Natywne okienko potwierdzenia (spójnie po angielsku)
+    var ok = window.confirm('Are you sure you want to log out?');
+    if(!ok){
+      // ░ Rezygnujemy: blokujemy domyślne i inne handlery (Twoje wylogowanie się nie wykona)
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      // (opcjonalnie) można wysłać event o anulowaniu: hud.dispatchEvent(new CustomEvent('app:mod-hud:logout:cancel'));
+      return;
+    }
+    // ░ Potwierdzone: nic nie blokujemy — Twoja dotychczasowa logika zadziała normalnie
+    // (opcjonalnie) hud.dispatchEvent(new CustomEvent('app:mod-hud:logout:confirm'));
+  }, { capture:true, passive:false });
+
+})();
+</script>
+<!-- ░░░░░░░░░░░░ KONIEC MODUŁU — POTWIERDZENIE WYLOGOWANIA ░░░░░░░░░░░░ -->
+
+
+
+
+
 <!-- ░░░░░░░░░░░░░░░░ MODUŁ: ZWIJANIE/ROZWIJANIE TABEL (mod-table-toggle) – WKLEJ JAKO JEDEN BLOK ░░░░░░░░░░░░░░░░ -->
 <!-- █████ OPIS █████
      • Samowystarczalny moduł (CSS + JS) dla tabel zwijanych/rozwijanych.
@@ -5241,6 +5419,11 @@
 })();
 </script>
 <!-- ░░░░░░░░░░░░ KONIEC MODUŁU: mod-table-toggle ░░░░░░░░░░░░ -->
+
+
+
+
+
 
 
   <!-- ░░░ MODUŁ SORTOWANIA TABEL (mod-tables-sort) – JEDEN, REUŻYWALNY ░░░ -->
@@ -5321,6 +5504,17 @@
     document.addEventListener('keydown', onKey);
   })();
   </script>
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- ░░░░░░░░░░░░ SKRYPT: TOOLTIP ✭ (mod-tip-a) – v4.2 centered/overlay + portal do <body> + solidne zamykanie ░░░░░░░░░░░░ -->
 <script>
@@ -5507,6 +5701,9 @@
 </script>
 
 
+
+
+
 <!-- ░░░░░░░░░░░░░░░░ MODUŁ v2: INFO LISTA + PODGLĄD (mod-info-deep) – lista z samymi nazwami, podgląd ze scrollami ░░░░░░░░░░░░░░░░ -->
 <script>
 (function(){
@@ -5664,6 +5861,18 @@ function openList(project, entries){
 })();
 </script>
 <!-- ░░ KONIEC MODUŁU v4 ░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5931,6 +6140,26 @@ function openList(project, entries){
 })();
 </script>
 <!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT (WERSJA UTWARDZONA) ░░░░░░░░░░░░░░░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
