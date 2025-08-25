@@ -3230,14 +3230,13 @@
 
 
 
-
-  <div class="mod-table-card" style="margin-top:12px">
+<div class="mod-table-card" style="margin-top:12px">
 
     <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=exchanges-wallets) ░░░░░░░░░░░░ -->
-    <div class="mod-table-collapsible" data-key="exchanges-wallets">
+    <div class="mod-table-collapsible" data-key="discords-details">
       <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
       <div class="mod-table-head">
-        <span class="mod-table-title">CRYPTO EXCHANGES & WALLETS</span>
+        <span class="mod-table-title">DISCORDS DETAILS</span>
         <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
           <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </button>
@@ -3246,7 +3245,7 @@
       <!-- ░ KORPUS TABELI (zwijany) ░ -->
       <div class="mod-table-body">
         <table class="mod-tbl" data-sortable="true">
-          <caption>GIEŁDY/WALLETY</caption>
+          <caption>DISCORDS DETAILS</caption>
 
           <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
           <colgroup>
@@ -3297,6 +3296,91 @@
       </div> <!-- /.mod-table-body -->
     </div> <!-- /.mod-table-collapsible -->
   </div> <!-- /.mod-table-card -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="mod-table-card" style="margin-top:12px">
+
+    <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=exchanges-wallets) ░░░░░░░░░░░░ -->
+    <div class="mod-table-collapsible" data-key="exchanges-wallets">
+      <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+      <div class="mod-table-head">
+        <span class="mod-table-title">CRYPTO EXCHANGES & WALLETS</span>
+        <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+          <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- ░ KORPUS TABELI (zwijany) ░ -->
+      <div class="mod-table-body">
+        <table class="mod-tbl" data-sortable="true">
+          <caption>CRYPTO EXCHANGES & WALLETS</caption>
+
+          <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
+          <colgroup>
+            <col style="width:2%"><col style="width:2%"><col style="width:16%"><col style="width:74%">
+            <col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%">
+          </colgroup>
+
+          <thead>
+            <!-- (colspan) 2 + 1 + 1 + 6 • sort tylko na NAZWA -->
+            <tr>
+              <th colspan="2"></th>
+              <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+              </th>
+              <th colspan="1">SZCZEGÓŁY</th>
+              <th colspan="6"> </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- ---------------------MICRO 3 (WZÓR)------------------------------------- -->
+            <tr>
+              <td colspan="2"> </td>
+              <td colspan="1">MICRO 3</td>
+              <td colspan="1" class="muted">
+                <div class="mod-pairs">
+                  <span class="mod-pair">
+                    <label><input type="checkbox" class="cb daily" data-cb-key="cb-micro3-daily">
+                      <a href="https://micro3.io/">Micro 3</a></label>
+                    <a href="https://micro3.io/" target="_blank" rel="noopener noreferrer">🔗</a>
+                  </span>
+                </div>
+              </td>
+              <td colspan="6"> </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+        <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+          <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+            <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+      </div> <!-- /.mod-table-body -->
+    </div> <!-- /.mod-table-collapsible -->
+  </div> <!-- /.mod-table-card -->
+
 
 
 </div> <!-- /.mod-belt-item -->
