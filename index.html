@@ -885,28 +885,47 @@
         
         
         
-        
-          <!-- ░░░░░░░░░░░░░░░░░░░░ MODUŁ: BELKA + TABEL(E) (mod-tables-belt24) ░░░░░░░░░░░░░░░░░░░░ -->
-          <!-- █████ STYLE MODUŁU (lokalne, bez globali) █████ -->
-    <!-- █████ STYLE MODUŁU (lokalne, bez globali) — PODMIANA: pogrubienie tylko dla TABELI „PROJECTS” █████ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░ MODUŁ: BELKA + TABEL(E) (mod-tables-belt24) ░░░░░░░░░░░░░░░░░░░░ -->
+<!-- █████ STYLE MODUŁU (lokalne, bez globali) — PODMIANKA (kolumny = kolumny; równe starty; odstępy między kartami) █████ -->
 <style>
   /* ░░ STRUKTURA BELKI 24 SLOTÓW ░░ */
-  .mod-tables{ --slots:24; --gutter:16px; --half:calc(var(--gutter)/2);
+  .mod-tables{
+    --slots:24; --gutter:16px; --half:calc(var(--gutter)/2);
     --c-head-border:rgba(0,0,0,.14); --c-grid:rgba(0,0,0,.16);
     --radius:14px; --fs-head:14px; --fs-cap:calc(var(--fs-head) * 2);
-    width:98%; margin:0 auto 18px; /* 98% szer. miejsca na zawartość, wycentrowana */
+    width:98%; margin:0 auto 18px;
   }
-  .mod-tables .mod-belt{ display:flex; flex-wrap:wrap; margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half)); }
-  .mod-tables .mod-belt-item{ padding-left:var(--half); padding-right:var(--half); flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots))); box-sizing:border-box; }
+  .mod-tables .mod-belt{
+    display:flex; flex-wrap:wrap;
+    margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half));
+    align-items:flex-start;                 /* 🔹 starty równo od góry w danym rzędzie */
+  }
+  .mod-tables .mod-belt-item{
+    padding-left:var(--half); padding-right:var(--half);
+    flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots)));
+    box-sizing:border-box;
+
+    /* 🔹 zamieniamy każdą „kolumnę” w prawdziwą kolumnę */
+    display:flex; flex-direction:column;
+  }
 
   /* ░░ KARTA TABELI (ramka, przezroczyste tło tabeli) ░░ */
-  .mod-tables .mod-table-card{ border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.08); border:1px solid rgba(255,255,255,.38);
-    background:transparent; padding:10px; overflow:hidden; }
+  .mod-tables .mod-table-card{
+    border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.08);
+    border:1px solid rgba(255,255,255,.38);
+    background:transparent; padding:10px; overflow:hidden;
+  }
+  /* 🔹 odstępy: pierwsza karta w kolumnie = 0, kolejne = 12px */
+  .mod-tables .mod-belt-item > .mod-table-card:first-child{ margin-top:0; }
+  .mod-tables .mod-belt-item > .mod-table-card + .mod-table-card{ margin-top:12px; }
 
-  /* ░░ TABELA: pełne krawędzie (zewn. i wewn.), zaokrąglone na karcie ░░ */
+  /* ░░ TABELA ░░ */
   .mod-tables .mod-tbl{ width:100%; table-layout:fixed; border-collapse:collapse; background:transparent; }
   .mod-tables .mod-tbl caption{ text-align:left; font:italic 700 var(--fs-cap)/1.2 system-ui; margin:6px 0 10px; color:#2b1e0c; }
-  .mod-tables .mod-tbl thead th{ position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui; padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none; }
+  .mod-tables .mod-tbl thead th{
+    position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui;
+    padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none;
+  }
   .mod-tables .mod-tbl td{ font:400 13px/1.35 system-ui; padding:8px 10px; vertical-align:top; }
   .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:2px solid var(--c-grid); }
 
@@ -919,41 +938,39 @@
   /* ░░ „Chipsy”/dodatki w komórkach ░░ */
   .mod-tables .muted{ opacity:.85; }
   .mod-tables .chips{ display:flex; flex-wrap:wrap; gap:6px; }
-  .mod-tables .chip{ border-radius:999px; padding:2px 8px; background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.06); font:600 12px/1 system-ui; }
+  .mod-tables .chip{
+    border-radius:999px; padding:2px 8px; background:rgba(255,255,255,.6);
+    border:1px solid rgba(0,0,0,.06); font:600 12px/1 system-ui;
+  }
 
-  /* ░░ SORT – tylko dla kolumn z data-sort-col ░░ */
+  /* ░░ SORT ░░ */
   .mod-tables th[data-sort-col]{ cursor:pointer; }
   .mod-tables .mod-sort-btn{ display:inline-flex; align-items:center; gap:8px; width:100%; }
   .mod-tables .mod-sort-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25); border-radius:8px; }
   .mod-tables .mod-sort-ind{ margin-left:auto; font-size:18px; line-height:1; color:#2b1e0c; opacity:1; }
   .mod-tables th[aria-sort="none"] .mod-sort-ind{ color:#4a3a1c; opacity:.45; }
 
-  /* ░░ NAGŁÓWEK (pierwszy wiersz thead): centrowanie + +2px ░░ */
+  /* ░░ NAGŁÓWEK (pierwszy wiersz thead) ░░ */
   .mod-tables .mod-tbl thead tr:first-child th{
-    text-align:center;
-    font-size:calc(var(--fs-head) + 2px);
+    text-align:center; font-size:calc(var(--fs-head) + 2px);
   }
-  /* ░░ NAGŁÓWEK z sortowaniem: wycentrowanie przycisku i strzałki ░░ */
   .mod-tables .mod-tbl thead tr:first-child .mod-sort-btn{ justify-content:center; }
   .mod-tables .mod-tbl thead tr:first-child .mod-sort-btn .mod-sort-ind{ margin-left:8px; }
 
-  /* ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ */
-  .mod-tables .mod-pairs{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  /* ░░ DODATKOWE GRUPY ░░ */
+  .mod-tables .mod-pairs{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   .mod-tables .mod-pair{
     display:inline-flex; align-items:center; gap:6px;
     padding:3px 8px; border-radius:999px; white-space:nowrap;
     background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.10);
   }
 
-  /* ░░ TYLKO TABELA „PROJECTS”: styl komórek w kolumnach 2 i/lub 3 (treść wierszy) ░░
-     — Jeśli „NAZWA” jest w kolumnie 2 → zostaw pierwszy selektor.
-     — Jeśli „NAZWA” jest w kolumnie 3 → zostaw drugi. (Możesz używać obu, jeśli chcesz oba style.) */
+  /* ░░ TYLKO „PROJECTS” — wzmocnienie kolumny nazwy ░░ */
   .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(2){
-    font-weight:700;
-    font-size:15px; /* domyślnie 13px, tu +2 */
+    font-weight:700; font-size:15px;
   }
   .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(3){
-    font-size:13px; /* domyślnie 13px, tu +2; dodaj font-weight jeśli też ma być bold */
+    font-size:13px;
   }
 </style>
 
@@ -3206,7 +3223,97 @@
                 </div> <!-- /.mod-table-body -->
               </div> <!-- /.mod-table-collapsible -->
             </div> <!-- /.mod-table-card -->
-          </div> <!-- /.mod-belt-item -->
+         
+
+
+
+
+
+
+
+  <div class="mod-table-card" style="margin-top:12px">
+
+    <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=exchanges-wallets) ░░░░░░░░░░░░ -->
+    <div class="mod-table-collapsible" data-key="exchanges-wallets">
+      <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+      <div class="mod-table-head">
+        <span class="mod-table-title">GIEŁDY/WALLETY</span>
+        <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+          <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- ░ KORPUS TABELI (zwijany) ░ -->
+      <div class="mod-table-body">
+        <table class="mod-tbl" data-sortable="true">
+          <caption>GIEŁDY/WALLETY</caption>
+
+          <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
+          <colgroup>
+            <col style="width:2%"><col style="width:2%"><col style="width:16%"><col style="width:74%">
+            <col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%">
+          </colgroup>
+
+          <thead>
+            <!-- (colspan) 2 + 1 + 1 + 6 • sort tylko na NAZWA -->
+            <tr>
+              <th colspan="2"></th>
+              <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+              </th>
+              <th colspan="1">SZCZEGÓŁY</th>
+              <th colspan="6"> </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- ---------------------MICRO 3 (WZÓR)------------------------------------- -->
+            <tr>
+              <td colspan="2"> </td>
+              <td colspan="1">MICRO 3</td>
+              <td colspan="1" class="muted">
+                <div class="mod-pairs">
+                  <span class="mod-pair">
+                    <label><input type="checkbox" class="cb daily" data-cb-key="cb-micro3-daily">
+                      <a href="https://micro3.io/">Micro 3</a></label>
+                    <a href="https://micro3.io/" target="_blank" rel="noopener noreferrer">🔗</a>
+                  </span>
+                </div>
+              </td>
+              <td colspan="6"> </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+        <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+          <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+            <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+      </div> <!-- /.mod-table-body -->
+    </div> <!-- /.mod-table-collapsible -->
+  </div> <!-- /.mod-table-card -->
+
+  
+</div> <!-- /.mod-belt-item -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
