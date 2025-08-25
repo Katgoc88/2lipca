@@ -2,8 +2,168 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: ANTY-CLICKJACKING (mod-frame-guard) ░░░░░░░░░░░░░░░░ -->
+<!--
+  CEL:
+  • Uniemożliwia osadzanie Twojej strony w cudzej ramce <iframe> (clickjacking).
+  • Działa IDEALNIE dla frontu: startuje wcześnie w <head>, bez mignięć.
+  • Jeśli strona jednak jest w ramce: próbuje przejąć top (wybić się),
+    a gdy to zablokowane – ukrywa stronę, blokuje kliknięcia i pokazuje jasny komunikat z linkiem.
+
+  UWAGI:
+  • To najlepsze co można zrobić po stronie front-endu.
+  • Docelowo (gdy będzie backend/hosting) ustawimy NAGŁÓWKI:
+      - Content-Security-Policy: frame-ancestors 'none';
+      - X-Frame-Options: DENY;
+    (to jest „beton”, ale wymaga serwera).
+
+  ZASADY PROJEKTU:
+  • Prefiks: mod-frame-guard-*  • brak globalnych zmiennych (IIFE)  • sprzątanie niepotrzebne (guard działa tylko w <head>).
+-->
+
+<!-- 1) Czasowe ukrycie do momentu weryfikacji (bez mignięcia) -->
+<style id="mod-frame-guard-hide">html{opacity:0 !important}</style>
+<!-- Jeśli JS jest wyłączony, nie blokuj widoku -->
+<noscript><style>#mod-frame-guard-hide{display:none !important}</style></noscript>
+
+<!-- 2) UI komunikatu (pokazywane tylko, gdy nie uda się „wybić”) -->
+<style>
+  .mod-frame-guard-overlay{
+    position:fixed; inset:0; z-index:2147483647; display:none;
+    background:#0b1220; color:#e9eef6; padding:24px;
+    font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    align-items:center; justify-content:center;
+  }
+  .mod-frame-guard-overlay[data-show="1"]{ display:flex; }
+  .mod-frame-guard-overlay .box{ max-width:520px; text-align:center }
+  .mod-frame-guard-overlay a{ color:#fff; text-decoration:underline }
+</style>
+
+<!-- 3) Logika: wykryj ramkę, spróbuj uciec, w razie blokady – zablokuj kliki i pokaż komunikat -->
+<script>
+/* ░░ IIFE – zero globali ░░ */
+(function(){
+  var h = document.getElementById('mod-frame-guard-hide');
+  var showPage = function(){ if(h && h.parentNode){ h.parentNode.removeChild(h); h=null; } };
+
+  try{
+    if (window.top === window.self){
+      // Nie w ramce → pokaż stronę normalnie
+      showPage(); return;
+    }
+
+    // W ramce → spróbuj przejąć top (może się nie udać przy sandbox/po CORS)
+    try { window.top.location = window.location.href; } catch(_){}
+
+    // Po krótkiej chwili: jeśli nadal w ramce, pokaż blokadę + link „otwórz bezpośrednio”
+    setTimeout(function(){
+      try{
+        showPage();
+        var ov = document.createElement('div');
+        ov.className = 'mod-frame-guard-overlay';
+        ov.setAttribute('data-show','1');
+        ov.innerHTML =
+          '<div class="box"><b>Ten widok został zablokowany</b><br>' +
+          'Otwórz stronę bezpośrednio: ' +
+          '<a href="'+ String(window.location.href).replace(/"/g,'&quot;') +'" target="_top" rel="noopener noreferrer">kliknij tutaj</a></div>';
+        document.documentElement.appendChild(ov);
+        // Zablokuj interakcje pod spodem, ale pozwól klikać w komunikat
+        document.documentElement.style.pointerEvents = 'none';
+        ov.style.pointerEvents = 'auto';
+      }catch(__){}
+    }, 50);
+
+  }catch(e){
+    // Cross-origin rzucił wyjątek → zachowaj się jak wyżej (blokada + komunikat)
+    setTimeout(function(){
+      showPage();
+      var ov = document.createElement('div');
+      ov.className = 'mod-frame-guard-overlay';
+      ov.setAttribute('data-show','1');
+      ov.innerHTML =
+        '<div class="box"><b>Ten widok został zablokowany</b><br>' +
+        'Otwórz stronę bezpośrednio: ' +
+        '<a href="'+ String(window.location.href).replace(/"/g,'&quot;') +'" target="_top" rel="noopener noreferrer">kliknij tutaj</a></div>';
+      document.documentElement.appendChild(ov);
+      document.documentElement.style.pointerEvents = 'none';
+      ov.style.pointerEvents = 'auto';
+    }, 50);
+  }
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░ KONIEC: MODUŁ ANTY-CLICKJACKING (mod-frame-guard) ░░░░░░░░░░░░░░░░ -->
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: JS SAFETY NET (mod-js-guard) ░░░░░░░░░░░░░░░░ -->
+<!--
+  CEL (po ludzku):
+  • Zatrzymuje „magiczne” drogi uruchamiania JS: eval(), new Function(), setTimeout('...'), setInterval('...'), document.write().
+  • Działa globalnie i wcześnie, zanim wystartują inne skrypty.
+  • Zero globalnych śmieci – kapsuła, zdarzenia namespacowane: app:mod-js-guard:block.
+
+  UWAGA:
+  • Jeśli kiedyś będziesz potrzebować którejś z tych funkcji (mało prawdopodobne) – dam wyjątek.
+-->
+<script>
+(function(){
+  var NS='app:mod-js-guard';
+
+  // helper do blokowania + twarde przypisanie bez możliwości cofnięcia
+  function hardSet(obj, prop, value){
+    Object.defineProperty(obj, prop, { value, configurable:false, writable:false });
+  }
+  function emit(api, extra){
+    try{ document.dispatchEvent(new CustomEvent(NS+':block',{detail:Object.assign({api},extra||{})})); }catch(_){}
+  }
+
+  // 1) eval – CAŁKOWICIE wyłączamy
+  hardSet(window, 'eval', function(){ emit('eval'); throw new Error('[JS Guard] eval() zablokowane'); });
+
+  // 2) Function constructor – CAŁKOWICIE wyłączamy
+  (function(){
+    var OrigFunction = window.Function;
+    function BlockedFunction(){ emit('Function'); throw new Error('[JS Guard] Function() zablokowane'); }
+    BlockedFunction.prototype = OrigFunction.prototype;
+    hardSet(window, 'Function', BlockedFunction);
+  })();
+
+  // 3) setTimeout / setInterval – tylko funkcje, nie stringi
+  (function(){
+    var t = window.setTimeout, i = window.setInterval;
+    function onlyFnTimer(kind, orig){
+      return function(handler){
+        if (typeof handler !== 'function'){
+          emit(kind, {reason:'string-handler'});
+          throw new Error('[JS Guard] '+kind+' z łańcuchem zablokowane – użyj funkcji');
+        }
+        return orig.apply(this, arguments);
+      };
+    }
+    hardSet(window, 'setTimeout',  onlyFnTimer('setTimeout',  t));
+    hardSet(window, 'setInterval', onlyFnTimer('setInterval', i));
+  })();
+
+  // 4) document.write / writeln – wyłączamy (na statycznej stronie niepotrzebne)
+  (function(){
+    function blocked(api){ return function(){ emit(api); throw new Error('[JS Guard] '+api+' zablokowane'); }; }
+    hardSet(Document.prototype, 'write',   blocked('document.write'));
+    hardSet(Document.prototype, 'writeln', blocked('document.writeln'));
+  })();
+
+  // (opcjonalnie) minimalny ślad w konsoli na starcie – zakomentuj jeśli nie chcesz
+  // console.log('[JS Guard] aktywny');
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░ KONIEC: JS SAFETY NET (mod-js-guard) ░░░░░░░░░░░░░░░░ -->
+
+
+
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer">
   <title>RUTYNA KATGO</title>
+
+
+
 
   <!-- ░░░ FUNDAMENT STRONY (mod-app) ░░░ -->
   <style>
@@ -27,7 +187,17 @@
     .mod-hud-btn:hover{ filter:brightness(1.03); }
     .mod-hud-btn:active{ transform:translateY(1px); }
     .mod-hud-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25), inset 0 1px 0 rgba(255,255,255,.7); }
-    .mod-hud-btn.toggle[aria-expanded="false"] svg{ transform:rotate(180deg); }
+    /* ░░ HUD: animacja i stan bazowy (strzałka w dół przy zwiniętym) ░░ */
+.mod-hud-btn.toggle svg{
+  transition: transform .2s ease;
+  transform: rotate(0deg); /* ▼ gdy aria-expanded="false" */
+}
+
+/* ░░ HUD: po rozwinięciu strzałka w górę ░░ */
+.mod-hud-btn.toggle[aria-expanded="true"] svg{
+  transform: rotate(180deg); /* ▲ gdy aria-expanded="true" */
+}
+
     .mod-hud-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .mod-hud-grid[hidden]{ display:none; }
 
@@ -135,6 +305,66 @@
     .mod-calc-btn.eq{ background:var(--mod-key-eq); color:#fff; } .mod-calc-btn.eq:hover{ background:var(--mod-key-eq-h); }
     .mod-calc-btn.span-2{ grid-column:span 2; }
   </style>
+
+
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: ZWIJANIE/ROZWIJANIE TABEL (mod-table-toggle) – WKLEJ JAKO JEDEN BLOK ░░░░░░░░░░░░░░░░ -->
+<!-- █████ OPIS █████
+     • Samowystarczalny moduł (CSS + JS) dla tabel zwijanych/rozwijanych.
+     • Działa na <table class="mod-tbl" data-collapsible="true" data-key="..."> wewnątrz .mod-tables.
+     • Domyślnie: ZWINIĘTA (widoczny tylko <caption>). Stan zapisywany w localStorage (per data-key).
+     • ŻADNYCH globalnych id. A11y przez aria-expanded + aria-controls (opisowe).
+     • Styl przycisku – wykorzystuje Twój przycisk z HUD (klasy: .mod-hud-btn.toggle + .mod-hud-toggle-ico). 
+-->
+<!-- ░░░░░░░░░░░░ [CSS] – wklej w <style> (może być w <head> lub tuż nad </body>) ░░░░░░░░░░░░ -->
+<style>
+  /* ░ Izolacja w obrębie strefy tabel ░ */
+  .mod-tables .mod-table-collapsible{ margin:0; }
+  .mod-tables .mod-table-collapsible[data-state="expanded"]{}
+  .mod-tables .mod-table-collapsible:not([data-state="expanded"]) .mod-table-body{ display:none; }
+
+  /* ░ Belka nad tabelą (tytuł + przycisk HUD) ░ */
+  .mod-tables .mod-table-head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+
+  /* ░ Styl tytułu (większy, pogrubiony, kursywa) ░ */
+  .mod-tables .mod-table-head .mod-table-title{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:22px; font-weight:700; font-style:italic;
+  }
+
+  /* ░ Odstęp między belką a nagłówkiem tabeli ░ */
+  .mod-tables .mod-table-body{ margin-top:6px; }
+
+  /* Rotacja działa dla KAŻDEGO toggle wewnątrz pudełka tabeli */
+.mod-tables .mod-table-collapsible [data-act="toggle"] .mod-hud-toggle-ico{
+  transition: transform .2s ease;
+  will-change: transform;
+}
+
+/* Jawnie opisz oba stany, żeby nadpisać ewentualne style z HUD-a */
+.mod-tables .mod-table-collapsible [data-act="toggle"][aria-expanded="false"] .mod-hud-toggle-ico{
+  transform: rotate(0deg);     /* ▼ (w dół) – stan ZWINIĘTY */
+}
+.mod-tables .mod-table-collapsible [data-act="toggle"][aria-expanded="true"] .mod-hud-toggle-ico{
+  transform: rotate(180deg);   /* ▲ (w górę) – stan ROZWINIĘTY */
+}
+
+  .mod-tables .mod-table-collapsible [data-act="toggle"][aria-expanded="true"] .mod-hud-toggle-ico{
+    transform: rotate(180deg);
+  }
+
+  /* ░ Ukrywamy caption w środku tabeli (semantyka zostaje) ░ */
+  .mod-tables .mod-table-collapsible .mod-tbl caption{
+    position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;
+  }
+</style>
+
+
+
+
+
 
 <!-- ░░░░░░░░░░░░ STYLE: TOOLTIP ✭ (mod-tip-a) – v3 centered/overlay [FINAL CSS] ░░░░░░░░░░░░ -->
 <style>
@@ -521,96 +751,81 @@
       <main class="mod-app-main">
         <div class="mod-app-plate">
 
+        
+        
+        
+        
+        
           <!-- ░░░░░░░░░░░░░░░░░░░░ MODUŁ: BELKA + TABEL(E) (mod-tables-belt24) ░░░░░░░░░░░░░░░░░░░░ -->
           <!-- █████ STYLE MODUŁU (lokalne, bez globali) █████ -->
-          <style>
-            /* ░░ STRUKTURA BELKI 24 SLOTÓW ░░ */
-            .mod-tables{ --slots:24; --gutter:16px; --half:calc(var(--gutter)/2);
-              --c-head-border:rgba(0,0,0,.14); --c-grid:rgba(0,0,0,.16);
-              --radius:14px; --fs-head:14px; --fs-cap:calc(var(--fs-head) * 2);
-              width:98%; margin:0 auto 18px; /* 98% szer. miejsca na zawartość, wycentrowana */
-            }
-            .mod-tables .mod-belt{ display:flex; flex-wrap:wrap; margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half)); }
-            .mod-tables .mod-belt-item{ padding-left:var(--half); padding-right:var(--half); flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots))); box-sizing:border-box; }
+    <!-- █████ STYLE MODUŁU (lokalne, bez globali) — PODMIANA: pogrubienie tylko dla TABELI „PROJECTS” █████ -->
+<style>
+  /* ░░ STRUKTURA BELKI 24 SLOTÓW ░░ */
+  .mod-tables{ --slots:24; --gutter:16px; --half:calc(var(--gutter)/2);
+    --c-head-border:rgba(0,0,0,.14); --c-grid:rgba(0,0,0,.16);
+    --radius:14px; --fs-head:14px; --fs-cap:calc(var(--fs-head) * 2);
+    width:98%; margin:0 auto 18px; /* 98% szer. miejsca na zawartość, wycentrowana */
+  }
+  .mod-tables .mod-belt{ display:flex; flex-wrap:wrap; margin-left:calc(-1*var(--half)); margin-right:calc(-1*var(--half)); }
+  .mod-tables .mod-belt-item{ padding-left:var(--half); padding-right:var(--half); flex:0 0 auto; width:calc(var(--span) * (100% / var(--slots))); box-sizing:border-box; }
 
-            /* ░░ KARTA TABELI (ramka, przezroczyste tło tabeli) ░░ */
-            .mod-tables .mod-table-card{ border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.08); border:1px solid rgba(255,255,255,.38);
-              background:transparent; padding:10px; overflow:hidden; }
+  /* ░░ KARTA TABELI (ramka, przezroczyste tło tabeli) ░░ */
+  .mod-tables .mod-table-card{ border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.08); border:1px solid rgba(255,255,255,.38);
+    background:transparent; padding:10px; overflow:hidden; }
 
-            /* ░░ TABELA: pełne krawędzie (zewn. i wewn.), zaokrąglone na karcie ░░ */
-            .mod-tables .mod-tbl{ width:100%; table-layout:fixed; border-collapse:collapse; background:transparent; }
-            .mod-tables .mod-tbl caption{ text-align:left; font:italic 700 var(--fs-cap)/1.2 system-ui; margin:6px 0 10px; color:#2b1e0c; }
-            .mod-tables .mod-tbl thead th{ position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui; padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none; }
-            .mod-tables .mod-tbl td{ font:400 13px/1.35 system-ui; padding:8px 10px; vertical-align:top; }
-            .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:2px solid var(--c-grid); }
+  /* ░░ TABELA: pełne krawędzie (zewn. i wewn.), zaokrąglone na karcie ░░ */
+  .mod-tables .mod-tbl{ width:100%; table-layout:fixed; border-collapse:collapse; background:transparent; }
+  .mod-tables .mod-tbl caption{ text-align:left; font:italic 700 var(--fs-cap)/1.2 system-ui; margin:6px 0 10px; color:#2b1e0c; }
+  .mod-tables .mod-tbl thead th{ position:relative; text-align:left; font:700 var(--fs-head)/1.2 system-ui; padding:9px 10px; background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.55)); user-select:none; }
+  .mod-tables .mod-tbl td{ font:400 13px/1.35 system-ui; padding:8px 10px; vertical-align:top; }
+  .mod-tables .mod-tbl th, .mod-tables .mod-tbl td{ border:2px solid var(--c-grid); }
 
-            /* ░░ Wiersze ░░ */
-            .mod-tables .mod-tbl tbody tr:hover td{ background:rgba(255,255,255,.4); }
+  /* ░░ Wiersze ░░ */
+  .mod-tables .mod-tbl tbody tr:hover td{ background:rgba(255,255,255,.4); }
 
-            /* ░░ Zawijanie treści ░░ */
-            .mod-tables td{ word-break:break-word; overflow-wrap:anywhere; }
+  /* ░░ Zawijanie treści ░░ */
+  .mod-tables td{ word-break:break-word; overflow-wrap:anywhere; }
 
-            /* ░░ „Chipsy”/dodatki w komórkach ░░ */
-            .mod-tables .muted{ opacity:.85; }
-            .mod-tables .chips{ display:flex; flex-wrap:wrap; gap:6px; }
-            .mod-tables .chip{ border-radius:999px; padding:2px 8px; background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.06); font:600 12px/1 system-ui; }
+  /* ░░ „Chipsy”/dodatki w komórkach ░░ */
+  .mod-tables .muted{ opacity:.85; }
+  .mod-tables .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .mod-tables .chip{ border-radius:999px; padding:2px 8px; background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.06); font:600 12px/1 system-ui; }
 
-            /* ░░ SORT – tylko dla kolumn z data-sort-col ░░ */
-            .mod-tables th[data-sort-col]{ cursor:pointer; }
-            .mod-tables .mod-sort-btn{ display:inline-flex; align-items:center; gap:8px; width:100%; }
-            .mod-tables .mod-sort-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25); border-radius:8px; }
-            .mod-tables .mod-sort-ind{ margin-left:auto; font-size:18px; line-height:1; color:#2b1e0c; opacity:1; }
-            .mod-tables th[aria-sort="none"] .mod-sort-ind{ color:#4a3a1c; opacity:.45; }
+  /* ░░ SORT – tylko dla kolumn z data-sort-col ░░ */
+  .mod-tables th[data-sort-col]{ cursor:pointer; }
+  .mod-tables .mod-sort-btn{ display:inline-flex; align-items:center; gap:8px; width:100%; }
+  .mod-tables .mod-sort-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(212,175,55,.25); border-radius:8px; }
+  .mod-tables .mod-sort-ind{ margin-left:auto; font-size:18px; line-height:1; color:#2b1e0c; opacity:1; }
+  .mod-tables th[aria-sort="none"] .mod-sort-ind{ color:#4a3a1c; opacity:.45; }
 
-            /* ░░ Styl 3. kolumny w TABELI 1 (tylko zawartość wierszy, bez nagłówka) ░░ */
-.mod-tables .mod-tbl tbody td:nth-child(2){
-  font-weight:bold;
-  font-size:15px; /* domyślnie 13px w td, tu +2 */
-}
+  /* ░░ NAGŁÓWEK (pierwszy wiersz thead): centrowanie + +2px ░░ */
+  .mod-tables .mod-tbl thead tr:first-child th{
+    text-align:center;
+    font-size:calc(var(--fs-head) + 2px);
+  }
+  /* ░░ NAGŁÓWEK z sortowaniem: wycentrowanie przycisku i strzałki ░░ */
+  .mod-tables .mod-tbl thead tr:first-child .mod-sort-btn{ justify-content:center; }
+  .mod-tables .mod-tbl thead tr:first-child .mod-sort-btn .mod-sort-ind{ margin-left:8px; }
 
-/* ░░ Styl 4. kolumny w TABELI 1 (tylko zawartość wierszy, bez nagłówka) ░░ */
-.mod-tables .mod-tbl tbody td:nth-child(3){
-    font-size:15px; /* domyślnie 13px w td, tu +2 */
-}
-
-/* ░░ NAGŁÓWEK (pierwszy wiersz thead): centrowanie + +2px ░░ */
-.mod-tables .mod-tbl thead tr:first-child th{
-  text-align:center;
-  font-size:calc(var(--fs-head) + 2px);
-}
-
-/* ░░ NAGŁÓWEK z sortowaniem: wycentrowanie przycisku i strzałki ░░ */
-.mod-tables .mod-tbl thead tr:first-child .mod-sort-btn{
-  justify-content:center; /* label i strzałka pośrodku */
-}
-.mod-tables .mod-tbl thead tr:first-child .mod-sort-btn .mod-sort-ind{
-  margin-left:8px; /* zamiast auto, żeby strzałka nie uciekała na prawo */
-}
-
-
-/* ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ */
-  /* Grupa pigułek w komórce */
+  /* ░░░░░░ DODATEK DO STYLI MODUŁU TABEL (czytelne grupy) ░░░░░░ */
   .mod-tables .mod-pairs{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
-  /* Pojedyncza pigułka: checkbox + nazwa + 🔗, wszystko razem */
   .mod-tables .mod-pair{
     display:inline-flex; align-items:center; gap:6px;
     padding:3px 8px; border-radius:999px; white-space:nowrap;
     background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.10);
   }
-          </style>
 
-          <!-- █████ STRUKTURA: BELKA 24 SLOTY (układ 18 + 6), tabele jako „pasażerowie” █████ -->
-          <section class="mod-tables" data-module="mod-tables-belt24" aria-label="Zestaw tabel (belka 24)">
-            <div class="mod-belt">
-
-
-
-
-
-
-
-
-
+  /* ░░ TYLKO TABELA „PROJECTS”: styl komórek w kolumnach 2 i/lub 3 (treść wierszy) ░░
+     — Jeśli „NAZWA” jest w kolumnie 2 → zostaw pierwszy selektor.
+     — Jeśli „NAZWA” jest w kolumnie 3 → zostaw drugi. (Możesz używać obu, jeśli chcesz oba style.) */
+  .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(2){
+    font-weight:700;
+    font-size:15px; /* domyślnie 13px, tu +2 */
+  }
+  .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(3){
+    font-size:13px; /* domyślnie 13px, tu +2; dodaj font-weight jeśli też ma być bold */
+  }
+</style>
 
 
 
@@ -633,39 +848,49 @@
 
 
 
+         <!-- █████ STRUKTURA: BELKA 24 SLOTY (układ 18 + 6), tabele jako „pasażerowie” █████ -->
+<section class="mod-tables" data-module="mod-tables-belt24" aria-label="Zestaw tabel (belka 24)">
+  <div class="mod-belt">
 
+    <!-- ░░░ TABELA 1 – 18 SLOTÓW ░░░ -->
+    <div class="mod-belt-item" style="--span:18">
+      <div class="mod-table-card">
 
+        <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=projects) ░░░░░░░░░░░░ -->
+        <div class="mod-table-collapsible" data-key="projects">
+          <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+          <div class="mod-table-head">
+            <span class="mod-table-title">PROJECTS</span>
+            <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+              <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
 
+          <!-- ░ KORPUS TABELI (zwijany) ░ -->
+          <div class="mod-table-body">
+            <table class="mod-tbl" data-sortable="true">
+              <caption>PROJECTS</caption>
 
+              <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
+              <colgroup>
+                <col style="width:2%"><col style="width:2%"><col style="width:16%"><col style="width:74%">
+                <col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%">
+              </colgroup>
 
+              <thead>
+                <!-- (colspan) 2 + 1 + 1 + 6 • sort tylko na NAZWA -->
+                <tr>
+                  <th colspan="2"></th>
+                  <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                    <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+                  </th>
+                  <th colspan="1">SZCZEGÓŁY</th> 
+                  <th colspan="6"> </th>
+                </tr>
+              </thead>
 
+              <tbody>
 
-
-              <!-- ░░░ TABELA 1 – 18 SLOTÓW ░░░ -->
-              <div class="mod-belt-item" style="--span:18">
-                <div class="mod-table-card">
-                  <table class="mod-tbl" data-sortable="true">
-                    <caption>PROJECTS</caption>
-
-                    <!-- Kolumn 10: 1% + 2% + 24% + 40% + 3% + 4% + 5% + 6% + 7% + 8% -->
-                    <colgroup>
-                      <col style="width:2%"><col style="width:2%"><col style="width:16%"><col style="width:74%">
-                      <col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%"><col style="width:0,5%">
-                    </colgroup>
-
-                    <thead>
-                      <!-- (colspan) 2 + 1 + 1 + 6 • sort tylko na NAZWA -->
-                      <tr>
-                        <th colspan="2"></th>
-                        <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
-                          <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
-                        </th>
-                        <th colspan="1">SZCZEGÓŁY</th> 
-                        <th colspan="6"> </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
 
 
 <!-- ---------------------MICRO 3------------------------------------- -->
@@ -2838,55 +3063,71 @@
   <td colspan="6"></td>
 </tr>
 
-
-
-
-
-
-
-
                     </tbody>
                   </table>
+
+                  <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+                  <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+                    <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+                      <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
+
+                </div> <!-- /.mod-table-body -->
+              </div> <!-- /.mod-table-collapsible -->
+            </div> <!-- /.mod-table-card -->
+          </div> <!-- /.mod-belt-item -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <!-- ░░░ TABELA 2 – 6 SLOTÓW ░░░ -->
+          <div class="mod-belt-item" style="--span:6">
+            <div class="mod-table-card">
+
+              <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=faucets) ░░░░░░░░░░░░ -->
+              <div class="mod-table-collapsible" data-key="faucets">
+                <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+                <div class="mod-table-head">
+                  <span class="mod-table-title">FAUCETS</span>
+                  <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+                    <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
                 </div>
-              </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              <!-- ░░░ TABELA 2 – 6 SLOTÓW ░░░ -->
-              <div class="mod-belt-item" style="--span:6">
-                <div class="mod-table-card">
+                <!-- ░ KORPUS TABELI (zwijany) ░ -->
+                <div class="mod-table-body">
                   <table class="mod-tbl" data-sortable="true">
                     <caption>FAUCETS</caption>
 
@@ -2907,6 +3148,8 @@
                     </thead>
 
                     <tbody>
+
+
                       
 <!-- -----------------------SEPOLIA-------------------------------- -->
 <tr class="mod-row2" data-module="mod-row2">
@@ -3777,8 +4020,19 @@
 </tr>
 
                           </tbody>
-    </table>
-  </div> <!-- /.mod-table-card (FAUCETY) -->
+                        </table>
+
+    <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+                  <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+                    <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+                      <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
+
+
+                      </div> <!-- /.mod-table-body -->
+                    </div> <!-- /.mod-table-collapsible (FAUCETS) -->
+                  </div> <!-- /.mod-table-card (FAUCETS) -->
 
 
 
@@ -3797,45 +4051,43 @@
 
 
 
+                  <!-- ⬇️ DRUGA TABELA W TYM SAMYM .mod-belt-item: BRIDGES ⬇️ -->
+                  <div class="mod-table-card" style="margin-top:16px">
+
+                    <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=bridges) ░░░░░░░░░░░░ -->
+                    <div class="mod-table-collapsible" data-key="bridges">
+                      <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+                      <div class="mod-table-head">
+                        <span class="mod-table-title">BRIDGES</span>
+                        <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+                          <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                      </div>
+
+                      <!-- ░ KORPUS TABELI (zwijany) ░ -->
+                      <div class="mod-table-body">
+                        <table class="mod-tbl" data-sortable="true">
+                          <caption>BRIDGES</caption>
+
+                          <!-- Kolumn 5: 1% + 2% + 88% + 4% + 5% -->
+                          <colgroup>
+                            <col style="width:1%"><col style="width:1%"><col style="width:96%"><col style="width:1%"><col style="width:1%">
+                          </colgroup>
+
+                          <thead>
+                            <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA -->
+                            <tr>
+                              <th colspan="2"> </th>
+                              <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+                                <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+                              </th>
+                              <th colspan="2"> </th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <!-- ⬇️ DRUGA TABELA W TYM SAMYM .mod-belt-item: BRIDGES ⬇️ -->
-  <div class="mod-table-card" style="margin-top:16px">
-    <table class="mod-tbl" data-sortable="true">
-      <caption>BRIDGES</caption>
-
-      <!-- Kolumn 5: 1% + 2% + 88% + 4% + 5% -->
-      <colgroup>
-        <col style="width:1%"><col style="width:1%"><col style="width:96%"><col style="width:1%"><col style="width:1%">
-      </colgroup>
-
-      <thead>
-        <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA -->
-        <tr>
-          <th colspan="2"> </th>
-          <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
-            <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
-          </th>
-          <th colspan="2"> </th>
-        </tr>
-      </thead>
-
-      <tbody>
         <!-- -----------------------BUNGEE----------------------- -->
 <tr class="mod-row2" data-module="mod-row2">
   <td colspan="2"></td>
@@ -4004,10 +4256,20 @@
   <td colspan="2"></td>
 </tr>
 
-      </tbody>
-    </table>
-  </div>
-  <!-- ⬆️ KONIEC TABELI BRIDGES ⬆️ -->
+              </tbody>
+      </table>
+
+    <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+                  <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+                    <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+                      <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
+
+    </div> <!-- /.mod-table-body -->
+  </div> <!-- /.mod-table-collapsible (BRIDGES) -->
+</div> <!-- /.mod-table-card (BRIDGES) -->
+<!-- ⬆️ KONIEC TABELI BRIDGES ⬆️ -->
 
 
 
@@ -4019,40 +4281,42 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-  <!-- ░░░ TABELA 3 (w tej samej prawej kolumnie) ░░░ -->
+<!-- ░░░ TABELA 3 (w tej samej prawej kolumnie) ░░░ -->
 <div class="mod-table-card" style="margin-top:12px">
-  <table class="mod-tbl" data-sortable="true">
-    <caption>TOOLS </caption>
 
-    <!-- Kolumn 5: 1% + 2% + 88% + 4% + 5% -->
-    <colgroup>
-      <col style="width:1%"><col style="width:1%"><col style="width:96%"><col style="width:1%"><col style="width:1%">
-    </colgroup>
+  <!-- ░░░░░░░░░░░░ BELKA NAD TABELĄ + KONTENER ZWIJANIA (data-key=tools) ░░░░░░░░░░░░ -->
+  <div class="mod-table-collapsible" data-key="tools">
+    <!-- ░ GÓRNA BELKA: tytuł + przycisk HUD (toggle) ░ -->
+    <div class="mod-table-head">
+      <span class="mod-table-title">TOOLS</span>
+      <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false" title="Zwiń/Rozwiń tabelę" aria-label="Zwiń/Rozwiń tabelę">
+        <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
 
-    <thead>
-      <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA (środek) -->
-      <tr>
-        <th colspan="2"> </th>
-        <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
-          <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
-        </th>
-        <th colspan="2"> </th>
-      </tr>
-    </thead>
+    <!-- ░ KORPUS TABELI (zwijany) ░ -->
+    <div class="mod-table-body">
+      <table class="mod-tbl" data-sortable="true">
+        <caption>TOOLS</caption>
 
-    <tbody>
+        <!-- Kolumn 5: 1% + 2% + 88% + 4% + 5% -->
+        <colgroup>
+          <col style="width:1%"><col style="width:1%"><col style="width:96%"><col style="width:1%"><col style="width:1%">
+        </colgroup>
+
+        <thead>
+          <!-- (colspan) 2 + 1 + 2 • sort tylko na NAZWA (środek) -->
+          <tr>
+            <th colspan="2"> </th>
+            <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
+              <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
+            </th>
+            <th colspan="2"> </th>
+          </tr>
+        </thead>
+
+        <tbody>
+
       <!-- -----------------------ONCHAIN GM + DEPLOY--------------------- -->
 <tr class="mod-row2" data-module="mod-row2">
   <td colspan="2"></td>
@@ -4206,32 +4470,21 @@
 </tr>
 
 
-    </tbody>
-  </table>
-</div>
+            </tbody>
+      </table>
 
-<!-- ░░░ TABELA 4 (w tej samej prawej kolumnie) ░░░ -->
-<div class="mod-table-card" style="margin-top:12px">
-  <table class="mod-tbl" data-sortable="true">
-    <caption>TABELA 4 </caption>
+    <!-- 🔹 DODATKOWY PRZYCISK NA DOLE DO ZWIJANIA -->
+                  <div class="mod-table-foot" style="margin-top:6px; text-align:right;">
+                    <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="true" title="Zwiń tabelę" aria-label="Zwiń tabelę">
+                      <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
 
-    <colgroup>
-      <col style="width:1%"><col style="width:1%"><col style="width:96%"><col style="width:1%"><col style="width:1%">
-    </colgroup>
+    </div> <!-- /.mod-table-body -->
+  </div> <!-- /.mod-table-collapsible (TOOLS) -->
+</div> <!-- /.mod-table-card (TOOLS) -->
+<!-- ⬆️ KONIEC TABELI TOOLS ⬆️ -->
 
-    <thead>
-      <tr>
-        <th colspan="2"> </th>
-        <th colspan="1" data-sort-col="3" tabindex="0" aria-sort="none" title="Sortuj po nazwie">
-          <span class="mod-sort-btn">NAZWA<span class="mod-sort-ind" aria-hidden="true">▸</span></span>
-        </th>
-        <th colspan="2"> </th>
-      </tr>
-    </thead>
-
-    <tbody></tbody>
-  </table>
-</div>
 
 
 </div> <!-- TERAZ dopiero zamknij .mod-belt-item (prawa kolumna: FAUCETY + BRIDGES) -->
@@ -4913,6 +5166,83 @@
   })();
   </script>
 
+
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: ZWIJANIE/ROZWIJANIE TABEL (mod-table-toggle) – WKLEJ JAKO JEDEN BLOK ░░░░░░░░░░░░░░░░ -->
+<!-- █████ OPIS █████
+     • Samowystarczalny moduł (CSS + JS) dla tabel zwijanych/rozwijanych.
+     • Działa na <table class="mod-tbl" data-collapsible="true" data-key="..."> wewnątrz .mod-tables.
+     • Domyślnie: ZWINIĘTA (widoczny tylko <caption>). Stan zapisywany w localStorage (per data-key).
+     • ŻADNYCH globalnych id. A11y przez aria-expanded + aria-controls (opisowe).
+     • Styl przycisku – wykorzystuje Twój przycisk z HUD (klasy: .mod-hud-btn.toggle + .mod-hud-toggle-ico). 
+-->
+<!-- ░░░░░░░░░░░░ [JS] – wklej tuż nad </body> (albo razem z CSS powyżej) ░░░░░░░░░░░░ -->
+<script>
+/* ░░ MODUŁ: mod-table-toggle — obsługa wielu przycisków (góra + dół), rotacja strzałki ░░ */
+(function(){
+  'use strict';
+  var NS = 'app:mod-table-toggle:';
+
+  /* ░ localStorage helpers ░ */
+  function getSaved(key){ try{ return localStorage.getItem(NS + key); }catch(e){ return null; } }
+  function setSaved(key, val){ try{ localStorage.setItem(NS + key, val); }catch(e){} }
+
+  /* ░ Zastosuj stan do pudełka + zaktualizuj aria-expanded na WSZYSTKICH toggle ░ */
+  function applyState(box, state){
+    if(state === 'expanded'){ box.setAttribute('data-state','expanded'); }
+    else{ box.removeAttribute('data-state'); state = 'collapsed'; }
+
+    var toggles = box.querySelectorAll('[data-act="toggle"]');
+    toggles.forEach(function(btn){
+      btn.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
+    });
+  }
+
+  /* ░ Przełącz stan + zapisz ░ */
+  function toggle(box){
+    var key = box.getAttribute('data-key'); if(!key) return;
+    var next = box.hasAttribute('data-state') ? 'collapsed' : 'expanded';
+    applyState(box, next); setSaved(key, next);
+    box.dispatchEvent(new CustomEvent('app:mod-table-toggle:change', { detail:{ key:key, state:next } }));
+  }
+
+  /* ░ Inicjalizacja pojedynczego pudełka (tabela) ░ */
+  function initBox(box){
+    var key = box.getAttribute('data-key'); if(!key) return;
+
+    /* Nadaj aria-controls wszystkim toggle’om (góra + dół) */
+    box.querySelectorAll('[data-act="toggle"]').forEach(function(btn){
+      btn.setAttribute('aria-controls', 'tbl-'+key); // informacyjne, bez globalnych id
+    });
+
+    /* Delegacja klików: jeden listener ogarnia każdy toggle w pudełku */
+    box.addEventListener('click', function(ev){
+      var t = ev.target.closest('[data-act="toggle"]');
+      if(!t || !box.contains(t)) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      toggle(box);
+    }, { passive:true });
+
+    /* Przywróć zapisany stan (domyślnie: collapsed) */
+    var saved = getSaved(key);
+    applyState(box, saved === 'expanded' ? 'expanded' : 'collapsed');
+
+    box.setAttribute('data-toggle-inited','true');
+  }
+
+  /* ░ Start modułu ░ */
+  function boot(){
+    var boxes = document.querySelectorAll('.mod-tables .mod-table-collapsible[data-key]:not([data-toggle-inited])');
+    boxes.forEach(initBox);
+  }
+
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot, { once:true }); }
+  else{ boot(); }
+})();
+</script>
+<!-- ░░░░░░░░░░░░ KONIEC MODUŁU: mod-table-toggle ░░░░░░░░░░░░ -->
+
+
   <!-- ░░░ MODUŁ SORTOWANIA TABEL (mod-tables-sort) – JEDEN, REUŻYWALNY ░░░ -->
   <script>
   (function(){
@@ -5337,14 +5667,43 @@ function openList(project, entries){
 
 
 
-<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT ░░░░░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT (WERSJA UTWARDZONA) ░░░░░░░░░░░░░░░░ -->
 <script>
 (function(){
+  /* ─────────────────────────────────────────────────────────────────────────────
+     KONFIG / STALE
+     ───────────────────────────────────────────────────────────────────────────── */
   const SCOPE='[data-module="mod-exporter"]';
-  const APP_ID='mod-exporter'; const VERSION=1; const MAX_SIZE=2*1024*1024; // 2 MB
+  const APP_ID='mod-exporter';
+  const VERSION=1;
+  const MAX_SIZE=2*1024*1024;     // 2 MB – rozmiar pliku
+  const MAX_CB_KEYS=3000;         // maks. liczba kluczy checkboxów
+  const MAX_NOTE_KEYS=1500;       // maks. liczba kluczy notatek
+  const MAX_NOTE_LEN=2000;        // maks. długość pojedynczej notatki (po czyszczeniu)
+  const KEY_RE=/^[a-z0-9._:\-]{1,80}$/i; // dopuszczalne nazwy kluczy (spójne z data-* w projekcie)
 
-  const qs = (r,s)=>r.querySelector(s);
-  const qsa= (r,s)=>Array.from(r.querySelectorAll(s));
+  /* ─────────────────────────────────────────────────────────────────────────────
+     NARZĘDZIA
+     ───────────────────────────────────────────────────────────────────────────── */
+  const qs  = (r,s)=>r.querySelector(s);
+  const qsa = (r,s)=>Array.from(r.querySelectorAll(s));
+  const nowISO = ()=> new Date().toISOString();
+  const isPlain = (x)=> x && typeof x==='object' && !Array.isArray(x);
+  const stripHTML = (s)=> String(s).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+
+  // Bezpieczne iterowanie tylko po własnych właściwościach
+  const ownEntries = (obj)=> Object.entries(obj || {}).filter(([k])=> Object.prototype.hasOwnProperty.call(obj,k));
+
+  // Suma kontrolna SHA-256 (opcjonalna – jeśli brak wsparcia, zwróci null)
+  async function sha256Base64(str){
+    try{
+      if (!crypto?.subtle) return null;
+      const enc = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      return 'sha256-'+b64;
+    }catch{ return null; }
+  }
 
   function toast(root, msg){
     const el=qs(root,'[data-toast]'); if(!el) return;
@@ -5352,12 +5711,16 @@ function openList(project, entries){
     clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('toast--show'), 1300);
   }
   function setStatus(root, msg){ const el=qs(root,'[data-status]'); if(el) el.textContent=msg||''; }
+  function setBusy(root, busy){ qsa(root, '.btn, .filebtn').forEach(b=>b.disabled=!!busy); }
 
+  /* ─────────────────────────────────────────────────────────────────────────────
+     ZBIERANIE DANYCH Z UI (EXPORT)
+     ───────────────────────────────────────────────────────────────────────────── */
   function collectCheckboxes(){
     const map={}; const missing=[];
     document.querySelectorAll('input.cb').forEach(cb=>{
       const key=cb.dataset.cbKey;
-      if(!key){ missing.push(cb); return; }
+      if(!key || !KEY_RE.test(key)){ missing.push(cb); return; }
       map[key]= !!cb.checked;
     });
     return {map, missing};
@@ -5366,15 +5729,18 @@ function openList(project, entries){
     const map={}; const missing=[];
     document.querySelectorAll('.note-card').forEach(card=>{
       const id=card.dataset.noteId;
-      if(!id){ missing.push(card); return; }
+      if(!id || !KEY_RE.test(id)){ missing.push(card); return; }
       const ta=card.querySelector('.note-text');
-      map[id]= ta ? ta.value : '';
+      let val = ta ? String(ta.value||'') : '';
+      val = stripHTML(val).slice(0, MAX_NOTE_LEN);
+      map[id]= val;
     });
     return {map, missing};
   }
 
-  function buildPayload({wantCb, wantNotes}){
-    const out={ app:APP_ID, version:VERSION };
+  async function buildPayload({wantCb, wantNotes}){
+    const meta = { app:APP_ID, version:VERSION, createdAt:nowISO() };
+    const out = { meta };
     if(wantCb){
       const {map,missing}=collectCheckboxes();
       out.checkboxes=map; out._cbMissing=(missing.length||0);
@@ -5383,6 +5749,10 @@ function openList(project, entries){
       const {map,missing}=collectNotes();
       out.notes=map; out._notesMissing=(missing.length||0);
     }
+    // normalizujemy do podpisu: BEZ pola _sig
+    const toSign = JSON.stringify(out);
+    const sig = await sha256Base64(toSign);
+    if (sig) out._sig = { alg:'SHA-256', hash:sig };
     return out;
   }
 
@@ -5391,96 +5761,148 @@ function openList(project, entries){
     const pad=n=>String(n).padStart(2,'0');
     const fname=`${baseName}-${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}.json`;
     const blob=new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=fname;
+    document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 50);
     return fname;
   }
 
+  /* ─────────────────────────────────────────────────────────────────────────────
+     ODCZYT I WALIDACJA IMPORTU
+     ───────────────────────────────────────────────────────────────────────────── */
   function readJsonFile(file){
     return new Promise((resolve,reject)=>{
       const fr=new FileReader();
       fr.onerror=()=>reject(new Error('File read error'));
-      fr.onload=()=>{ try{ resolve(JSON.parse(String(fr.result||''))); }catch(e){ reject(new Error('Invalid JSON')); } };
+      fr.onload =()=>{
+        try{ resolve(JSON.parse(String(fr.result||''))); }
+        catch(e){ reject(new Error('Invalid JSON')); }
+      };
       fr.readAsText(file);
     });
   }
 
-  function isObject(x){ return x && typeof x==='object' && !Array.isArray(x); }
-  function validatePayload(obj){
-    if(!isObject(obj)) throw new Error('Payload is not an object');
-    if(obj.app!==APP_ID) throw new Error('Unexpected app id');
-    if(typeof obj.version!=='number') throw new Error('Missing version');
-    if(obj.checkboxes && !isObject(obj.checkboxes)) throw new Error('Bad "checkboxes" section');
-    if(obj.notes && !isObject(obj.notes)) throw new Error('Bad "notes" section');
-    return true;
+  // twarda walidacja + sanitizacja – zwraca {checkboxes?, notes?}
+  async function sanitizeImportedObject(obj){
+    if(!isPlain(obj)) throw new Error('Payload is not an object');
+
+    // meta
+    if(!isPlain(obj.meta) || obj.meta.app!==APP_ID || typeof obj.meta.version!=='number'){
+      throw new Error('Unexpected meta (app/version)');
+    }
+
+    // opcjonalna weryfikacja integralności
+    if (isPlain(obj._sig) && obj._sig.alg==='SHA-256' && typeof obj._sig.hash==='string' && crypto?.subtle){
+      const clone = Object.assign({}, obj);
+      delete clone._sig;
+      const expect = obj._sig.hash;
+      const actual = await sha256Base64(JSON.stringify(clone));
+      if (!actual || actual!==expect) throw new Error('Integrity check failed (hash mismatch)');
+    }
+
+    const out = {};
+
+    // checkboxes: tylko klucze KEY_RE → boolean
+    if (isPlain(obj.checkboxes)){
+      const safe={}; let count=0;
+      for (const [k,v] of ownEntries(obj.checkboxes)){
+        if (!KEY_RE.test(k)) continue;
+        safe[k] = !!v; // dowolna prawda/fałsz → bool
+        if(++count > MAX_CB_KEYS) break;
+      }
+      out.checkboxes = safe;
+    }
+
+    // notes: tylko klucze KEY_RE → string (stripHTML, cut)
+    if (isPlain(obj.notes)){
+      const safe={}; let count=0;
+      for (const [k,v] of ownEntries(obj.notes)){
+        if (!KEY_RE.test(k)) continue;
+        let txt = stripHTML(v);
+        if (!txt) { safe[k]=''; }
+        else { safe[k] = String(txt).slice(0, MAX_NOTE_LEN); }
+        if(++count > MAX_NOTE_KEYS) break;
+      }
+      out.notes = safe;
+    }
+
+    return out;
   }
 
+  /* ─────────────────────────────────────────────────────────────────────────────
+     ZASTOSOWANIE DANYCH DO UI
+     ───────────────────────────────────────────────────────────────────────────── */
   function applyCheckboxes(map){
     let applied=0, skipped=0;
-    Object.entries(map).forEach(([key,val])=>{
+    for (const [key,val] of ownEntries(map)){
       const cb=document.querySelector(`input.cb[data-cb-key="${CSS.escape(key)}"]`);
-      if(!cb){ skipped++; return; }
+      if(!cb){ skipped++; continue; }
       cb.checked = !!val;
-      // wyzwól 'change', żeby obecny autosave zapisał stan
       cb.dispatchEvent(new Event('change', {bubbles:true}));
       applied++;
-    });
+    }
     return {applied, skipped};
   }
   function applyNotes(map){
     let applied=0, skipped=0;
-    Object.entries(map).forEach(([id,text])=>{
+    for (const [id,text] of ownEntries(map)){
       const card=document.querySelector(`.note-card[data-note-id="${CSS.escape(id)}"]`);
-      if(!card){ skipped++; return; }
-      const ta=card.querySelector('.note-text'); if(!ta){ skipped++; return; }
-      ta.value = String(text||'');
-      // wyzwól 'input', żeby obecny autosave zapisał stan
+      if(!card){ skipped++; continue; }
+      const ta=card.querySelector('.note-text'); if(!ta){ skipped++; continue; }
+      ta.value = String(text||'').slice(0, MAX_NOTE_LEN);
       ta.dispatchEvent(new Event('input', {bubbles:true}));
       applied++;
-    });
+    }
     return {applied, skipped};
   }
 
-  function setBusy(root, busy){
-    qsa(root, '.btn, .filebtn').forEach(b=>b.disabled=!!busy);
-  }
-
+  /* ─────────────────────────────────────────────────────────────────────────────
+     INIT + ZDARZENIA UI
+     ───────────────────────────────────────────────────────────────────────────── */
   function onInit(root){
     const file=qs(root,'#mod-exporter-file');
     const fileName=qs(root,'[data-filename]');
-    file.addEventListener('change', ()=>{ fileName.textContent = file.files?.[0]?.name || 'No file selected.'; });
+    if (file && fileName){
+      file.addEventListener('change', ()=>{ fileName.textContent = file.files?.[0]?.name || 'No file selected.'; });
+    }
 
-    const act = async(kind)=>{
+    async function act(kind){
       try{
         setBusy(root,true);
-        // EXPORTS
+
+        // ── EXPORT ────────────────────────────────────────────────────────────
         if(kind==='export-cb' || kind==='export-notes' || kind==='export-all'){
-          const wantCb=(kind!=='export-notes'), wantNotes=(kind!=='export-cb');
-          const payload=buildPayload({wantCb, wantNotes});
-          const fname=downloadJson(payload);
+          const wantCb   = (kind!=='export-notes');
+          const wantNotes= (kind!=='export-cb');
+          const payload  = await buildPayload({wantCb, wantNotes});
+          const fname    = downloadJson(payload);
           const miss = (payload._cbMissing||0) + (payload._notesMissing||0);
-          setStatus(root, `Exported to "${fname}"` + (miss?` • Missing keys: ${miss}`:''));
+          setStatus(root, `Exported to "${fname}"` + (miss?` • Missing keys: ${miss}`:'')); 
           toast(root, 'Export complete');
           root.dispatchEvent(new CustomEvent('app:mod-exporter:exported',{detail:{kind,payload}}));
         }
 
-        // IMPORTS
+        // ── IMPORT ────────────────────────────────────────────────────────────
         if(kind==='import-cb' || kind==='import-notes' || kind==='import-all'){
-          const f=file.files?.[0];
+          const f=file?.files?.[0];
           if(!f) throw new Error('Choose a JSON file first');
           if(f.size>MAX_SIZE) throw new Error('File too large');
-          if(!(f.type?.includes('json') || f.name.endsWith('.json'))) {
-            // dopuszczamy błędne MIME, jeśli rozszerzenie jest .json – tylko ostrzeż status
+          if(!(f.type?.includes('json') || f.name.toLowerCase().endsWith('.json'))) {
+            // dopuszczamy błędne MIME, jeśli rozszerzenie .json – tylko ostrzegamy statusem
           }
-          const data=await readJsonFile(f);
-          validatePayload(data);
 
-          const doCb=(kind!=='import-notes') && data.checkboxes;
-          const doNotes=(kind!=='import-cb') && data.notes;
+          const raw = await readJsonFile(f);
+          const data = await sanitizeImportedObject(raw);
+
+          const doCb   = (kind!=='import-notes') && isPlain(data.checkboxes);
+          const doNotes= (kind!=='import-cb')    && isPlain(data.notes);
+
           let msg=[];
           if(doCb){ const r=applyCheckboxes(data.checkboxes); msg.push(`checkboxes: ${r.applied} applied, ${r.skipped} skipped`); }
-          if(doNotes){ const r=applyNotes(data.notes); msg.push(`notes: ${r.applied} applied, ${r.skipped} skipped`); }
+          if(doNotes){ const r=applyNotes(data.notes);       msg.push(`notes: ${r.applied} applied, ${r.skipped} skipped`); }
           if(!doCb && !doNotes) msg.push('nothing to apply');
+
           setStatus(root, `Import OK — ${msg.join(' • ')}`);
           toast(root, 'Import complete');
           root.dispatchEvent(new CustomEvent('app:mod-exporter:applied',{detail:{kind,data}}));
@@ -5492,7 +5914,7 @@ function openList(project, entries){
       }finally{
         setBusy(root,false);
       }
-    };
+    }
 
     root.addEventListener('click', (e)=>{
       const b=e.target.closest('.btn'); if(!b) return;
@@ -5504,12 +5926,12 @@ function openList(project, entries){
   function initAll(){
     document.querySelectorAll(SCOPE).forEach(onInit);
   }
-
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', initAll); }
   else { initAll(); }
 })();
 </script>
-<!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT ░░░░░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – SCRIPT (WERSJA UTWARDZONA) ░░░░░░░░░░░░░░░░ -->
+
 
 
 <!-- ░░░░░░░░░░░░░░░░ MODUŁ: STRAŻNIK LINKÓW (mod-link-guard) ░░░░░░░░░░░░░░░░ -->
@@ -5722,8 +6144,475 @@ function openList(project, entries){
 <!-- ░░░░░░░░░░░░░░░░ KONIEC MODUŁU: STRAŻNIK LINKÓW (mod-link-guard) ░░░░░░░░░░░░░░░░ -->
 
 
+<!-- ░░░░░░░░░░░░░░░░ MODUŁ: AUDYT ZASOBÓW – HTTPS + SRI (mod-sri-check) ░░░░░░░░░░░░░░░░ -->
+<!--
+  CEL (po ludzku):
+  • Sprawdza, czy zaciągasz coś z zewnątrz (CDN/obce domeny) i czy leci po HTTPS.
+  • Dla <script src> i <link rel="stylesheet"> z obcych domen sprawdza, czy masz SRI (integrity=…).
+  • NICZEGO nie zmienia – tylko raport (konsola + cichy badge, gdy data-debug="true").
+
+  JAK UŻYĆ:
+  • Wklej CAŁOŚĆ tuż przed </body>.
+  • Domyślnie wymagamy HTTPS i sugerujemy SRI dla zewnętrznych skryptów/CSS.
+  • Wykluczenie pojedynczego elementu: dodaj class="mod-sri-check-skip" do tego <script>/<link>/<img>/<iframe>.
+
+  USTAWIENIA (data-* na sekcji):
+    data-debug="true|false"           → mały badge + logi w konsoli (domyślnie true na start, potem ustaw false)
+    data-require-https="true|false"   → ostrzegaj, gdy protokół nie jest HTTPS (true = twardo)
+    data-check-tags="script,link,img,iframe" → które tagi Audytować (CSV)
+    data-sri-for="script,style"       → dla jakich typów żądać SRI (script = <script src>, style = <link rel=stylesheet>)
+
+  NOTATKA:
+  • SRI działa tylko dla <script> i <link rel="stylesheet">. Dla obrazków/iframe pilnujemy tylko HTTPS.
+  • Gdy będziesz gotowa, podam nagłówki CSP „na serwer”, żeby wymusić HTTPS/SRI polityką.
+-->
+<section class="mod-sri-check-root" data-module="mod-sri-check"
+         data-debug="false"
+         data-require-https="true"
+         data-check-tags="script,link,img,iframe"
+         data-sri-for="script,style"
+         aria-hidden="true"></section>
+
+<style>
+  /* ░░ STYLE MODUŁU (izolowane) ░░ */
+  .mod-sri-check-root{ --mod-bg:#0b1220; --mod-fg:#cfe3ff; --mod-bad:#ff9d9d; --mod-warn:#ffe49a; }
+  .mod-sri-check-root .mod-sri-badge{
+    position:fixed; right:10px; bottom:10px; z-index:50; display:none;
+    background:var(--mod-bg); color:var(--mod-fg); padding:8px 10px; border-radius:10px;
+    font:12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,.25);
+  }
+  .mod-sri-check-root .mod-sri-badge[data-show="1"]{ display:block; }
+  .mod-sri-check-root .bad{ color:var(--mod-bad); } .mod-sri-check-root .warn{ color:var(--mod-warn); }
+</style>
+
+<script type="module">
+/* ░░ SKRYPT: AUDYT ZASOBÓW – HTTPS + SRI (IIFE; zero globali; events: app:mod-sri-check:report) ░░ */
+(() => {
+  const root = document.querySelector('.mod-sri-check-root[data-module="mod-sri-check"]');
+  if (!root) return;
+
+  // ░ Konfiguracja
+  const cfg = {
+    debug: String(root.dataset.debug||'false').toLowerCase()==='true',
+    requireHttps: String(root.dataset.requireHttps||'true').toLowerCase()==='true',
+    checkTags: String(root.dataset.checkTags||'script,link,img,iframe').split(',').map(s=>s.trim().toLowerCase()),
+    sriFor: new Set(String(root.dataset.sriFor||'script,style').split(',').map(s=>s.trim().toLowerCase()))
+  };
+
+  // ░ Badge (opcjonalny)
+  const badge = document.createElement('div');
+  badge.className = 'mod-sri-check-root mod-sri-badge';
+  const setBadge = (html) => { badge.innerHTML = html; };
+  const showBadge = (on) => badge.setAttribute('data-show', on?'1':'0');
+  document.body.appendChild(badge);
+
+  // ░ Narzędzia
+  const sameOrigin = (u) => u.origin === window.location.origin;
+  const toURL = (val) => { try{ return new URL(val, window.location.href); }catch{ return null; } };
+
+  // ░ Zbieramy elementy do audytu
+  const items = [];
+  const addItem = (el, type, urlStr) => {
+    if (!urlStr || el.classList.contains('mod-sri-check-skip')) return;
+    const u = toURL(urlStr); if (!u) return;
+    items.push({ el, type, url: u, isSame: sameOrigin(u) });
+  };
+
+  const shouldCheckLinkAsStyle = (el) => {
+    const rel = (el.getAttribute('rel')||'').toLowerCase();
+    return /\bstylesheet\b/.test(rel);
+  };
+
+  cfg.checkTags.forEach(tag => {
+    if (tag==='script') document.querySelectorAll('script[src]').forEach(el => addItem(el, 'script', el.getAttribute('src')));
+    if (tag==='link')   document.querySelectorAll('link[href]').forEach(el => addItem(el, shouldCheckLinkAsStyle(el)?'style':'link', el.getAttribute('href')));
+    if (tag==='img')    document.querySelectorAll('img[src]').forEach(el => addItem(el, 'img', el.getAttribute('src')));
+    if (tag==='iframe') document.querySelectorAll('iframe[src]').forEach(el => addItem(el, 'iframe', el.getAttribute('src')));
+  });
+
+  // ░ Audyt
+  const report = { total: items.length, external:0, http:0, needSri:0, list:[] };
+  items.forEach(it => {
+    const rec = {
+      tag: it.type, url: it.url.href, origin: it.url.origin, protocol: it.url.protocol.replace(':',''),
+      sameOrigin: it.isSame, https: it.url.protocol==='https:', hasIntegrity: false, needsSri: false
+    };
+
+    // HTTPS
+    if (cfg.requireHttps && !rec.https) { report.http++; }
+
+    // SRI tylko dla zewnętrznych <script> oraz <link rel=stylesheet>
+    if (!it.isSame && ((it.type==='script' && cfg.sriFor.has('script')) || (it.type==='style' && cfg.sriFor.has('style')))) {
+      const integ = it.el.getAttribute('integrity');
+      rec.hasIntegrity = !!(integ && integ.trim());
+      if (!rec.hasIntegrity) { report.needSri++; rec.needsSri = true; }
+    }
+
+    if (!it.isSame) report.external++;
+    report.list.push(rec);
+  });
+
+  // ░ Konsola (szczegóły)
+  const summarize = () => {
+    const headline = `[mod-sri-check] total:${report.total}, external:${report.external}, http:${report.http}, noSRI:${report.needSri}`;
+    if (cfg.debug) {
+      console.groupCollapsed(headline);
+      report.list.forEach(r => {
+        const mark = (!r.https ? 'HTTP!' : (!r.sameOrigin && (r.tag==='script'||r.tag==='style') && !r.hasIntegrity ? 'no SRI' : 'ok'));
+        console.log(`${r.tag.padEnd(6)} | ${mark.padEnd(6)} | ${r.url}`);
+      });
+      if (report.http>0) console.warn('[mod-sri-check] Wykryto zasoby nie-HTTPS. Zmień na https:// lub usuń.');
+      if (report.needSri>0) console.warn('[mod-sri-check] Skrypty/CSS z obcych domen BEZ SRI – dodaj integrity="sha384-…" + crossorigin="anonymous".');
+      console.groupEnd();
+    }
+    // Badge (zwięźle)
+    setBadge(
+      `<b>SRI/HTTPS</b> • total:${report.total} • ext:${report.external} `+
+      (report.http?`• <span class="bad">http:${report.http}</span>`:'')+
+      (report.needSri?` • <span class="warn">noSRI:${report.needSri}</span>`:'')
+    );
+    showBadge(cfg.debug);
+    document.dispatchEvent(new CustomEvent('app:mod-sri-check:report', { detail: report }));
+  };
+
+  // ░ Start po załadowaniu DOM (jesteśmy na końcu, ale na wszelki wypadek)
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', summarize, { once:true });
+  else summarize();
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░ KONIEC MODUŁU: AUDYT ZASOBÓW – HTTPS + SRI (mod-sri-check) ░░░░░░░░░░░░░░░░ -->
 
 
+<!-- ░░░░░░░░░░░░░░░░  MODUŁ: STORAGE GUARD (mod-storage-guard)  ░░░░░░░░░░░░░░░░ -->
+<!--
+  CEL (po ludzku)
+  • Pilnuje localStorage: tylko nasze klucze (z prefiksem), limity rozmiarów, kopie zapasowe (snapshots),
+    opcjonalne „naprawianie” śmieci (tryb ENFORCE), szybkie przywracanie po awarii.
+  • Zero globali. Zdarzenia namespacowane: app:mod-storage-guard:*.
+
+  GDZIE WKLEIĆ
+  • Tuż przed </body> (po wszystkich innych skryptach).
+
+  UŻYCIE (zdarzenia – wpisz w Console lub wywołaj z kodu)
+  • Przeskanuj teraz:  document.dispatchEvent(new CustomEvent('app:mod-storage-guard:scan'));
+  • Zrób snapshot:     document.dispatchEvent(new CustomEvent('app:mod-storage-guard:snapshot'));
+  • Lista snapshotów:  document.addEventListener('app:mod-storage-guard:list', e=>console.log(e.detail)); document.dispatchEvent(new CustomEvent('app:mod-storage-guard:list-request'));
+  • Przywróć snapshot (0 = najnowszy): document.dispatchEvent(new CustomEvent('app:mod-storage-guard:restore', {detail:{index:0}}));
+  • Wyczyść WSZYSTKO z prefiksem (ostrożnie!): document.dispatchEvent(new CustomEvent('app:mod-storage-guard:purge'));
+
+  KONFIGURACJA (data-* na sekcji)
+  • data-prefix="rutyna:"         → tylko takie klucze są „nasze”.
+  • data-mode="report|enforce"    → report = TYLKO raport i snapshoty; enforce = również sanitizacja wartości.
+  • data-max-total="262144"       → limit łączny bajtów dla wszystkich „naszych” kluczy.
+  • data-max-value="16384"        → maksymalny rozmiar POJEDYNCZEJ wartości (w bajtach).
+  • data-max-string="1000"        → cięcie długich stringów podczas ENFORCE.
+  • data-backups="3"              → ile snapshotów trzymać (rolling).
+  • data-debug="false|true"       → mały badge + logi.
+
+  BEZPIECZEŃSTWO
+  • ENFORCE: dla wartości wyglądających na JSON (zaczyna się od „{” lub „[”):
+      – parse → rekurencyjne czyszczenie: stringi bez HTML, cięcie do max-string, odrzucenie kluczy typu "__proto__", "constructor".
+  • Dla zwykłych stringów: tniemy do max-value (ENFORCE), śledzimy całkowitą wagę.
+-->
+<section class="mod-storage-guard-root" data-module="mod-storage-guard"
+         data-prefix="rutyna:"
+         data-mode="report"
+         data-max-total="262144"
+         data-max-value="16384"
+         data-max-string="1000"
+         data-backups="3"
+         data-debug="false"
+         aria-hidden="true"></section>
+
+<style>
+  /* ░░ STYLE (IZOLOWANE) – dyskretny badge diagnostyczny ░░ */
+  .mod-storage-guard-root .mod-sg-badge{
+    position:fixed; right:10px; bottom:10px; z-index:60; display:none;
+    background:#0b1220; color:#e9eef6; padding:8px 10px; border-radius:10px;
+    font:12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,.25);
+  }
+  .mod-storage-guard-root .mod-sg-badge[data-show="1"]{ display:block; }
+  .mod-storage-guard-root .ok{ color:#9fe29f } .mod-storage-guard-root .warn{ color:#ffe49a } .mod-storage-guard-root .bad{ color:#ff9d9d }
+</style>
+
+<script type="module">
+/* ░░ SKRYPT: STORAGE GUARD (IIFE; zero globali; events app:mod-storage-guard:*) ░░ */
+(() => {
+  const root = document.querySelector('.mod-storage-guard-root[data-module="mod-storage-guard"]');
+  if (!root) return;
+
+  // ░ KONFIG
+  const cfg = {
+    prefix: String(root.dataset.prefix||'rutyna:'),
+    mode:   String(root.dataset.mode||'report').toLowerCase(),            // 'report' | 'enforce'
+    maxTotal: parseInt(root.dataset.maxTotal||'262144',10),               // 256 KB
+    maxValue: parseInt(root.dataset.maxValue||'16384',10),                // 16 KB
+    maxString: parseInt(root.dataset.maxString||'1000',10),               // max długość stringów podczas ENFORCE
+    backups: Math.max(0, parseInt(root.dataset.backups||'3',10)),
+    debug: String(root.dataset.debug||'false').toLowerCase()==='true',
+  };
+  const NS = 'app:mod-storage-guard';
+
+  // ░ Badge (opcjonalny)
+  const badge = document.createElement('div');
+  badge.className = 'mod-sg-badge';
+  root.appendChild(badge);
+  const showBadge = (html)=>{ badge.innerHTML = html; badge.setAttribute('data-show','1'); };
+  const hideBadge = ()=> badge.removeAttribute('data-show');
+
+  // ░ UTYL
+  const bsize = (s) => new Blob([String(s)]).size;
+  const isJSONish = (s) => /^\s*[\{\[]/.test(String(s||''));
+  const CLEAN_KEY = (k) => String(k||'').trim();
+  const isDangerKey = (k) => (k==='__proto__' || k==='prototype' || k==='constructor');
+
+  // Rekurencyjna sanitizacja JSON (bez HTML; długości; odrzucenie „złych” kluczy)
+  const sanitizeJSON = (val, depth=0) => {
+    if (depth>10) return null;
+    if (val==null) return null;
+    const t = typeof val;
+    if (t==='string') {
+      return String(val).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim().slice(0, cfg.maxString);
+    }
+    if (t==='number') {
+      const n = Number(val); return Number.isFinite(n) ? n : null;
+    }
+    if (t==='boolean') return !!val;
+    if (Array.isArray(val)) {
+      const out = [];
+      for (const x of val) {
+        const sx = sanitizeJSON(x, depth+1);
+        if (sx!==null && sx!==undefined) out.push(sx);
+        if (bsize(JSON.stringify(out))>cfg.maxValue) break;
+      }
+      return out;
+    }
+    if (t==='object') {
+      const out = {};
+      for (const [k,v] of Object.entries(val)) {
+        const kk = CLEAN_KEY(k);
+        if (!kk || isDangerKey(kk)) continue;
+        const sv = sanitizeJSON(v, depth+1);
+        if (sv!==null && sv!==undefined) {
+          out[kk] = sv;
+          if (bsize(JSON.stringify(out))>cfg.maxValue) break;
+        }
+      }
+      return out;
+    }
+    return null;
+  };
+
+  // Klucze pomocnicze dla snapshotów
+  const SNAP_KEY = (stamp) => `${cfg.prefix}__snapshot__${stamp}`;
+  const SNAP_IDX = `${cfg.prefix}__snap_index__`; // JSON: [stamp1, stamp2, ...] (najnowszy pierwszy)
+
+  // ░ ZEBRANIE naszych kluczy
+  const collect = () => {
+    const keys = [];
+    try {
+      for (let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if (k && k.startsWith(cfg.prefix)) keys.push(k);
+      }
+    } catch(_) {}
+    return keys.sort();
+  };
+
+  // ░ SNAPSHOT – zapis wszystkich „naszych” wartości do jednego klucza
+  const snapshot = () => {
+    const keys = collect();
+    const snap = { t: new Date().toISOString(), items: {} };
+    let total = 0;
+    for (const k of keys) {
+      try {
+        const v = localStorage.getItem(k);
+        snap.items[k] = v;
+        total += (k.length + (v? v.length : 0));
+      } catch(_) {}
+    }
+    const stamp = Date.now().toString(36);
+    try {
+      localStorage.setItem(SNAP_KEY(stamp), JSON.stringify(snap));
+      // zaktualizuj index
+      const idx = JSON.parse(localStorage.getItem(SNAP_IDX) || '[]');
+      idx.unshift(stamp);
+      while (idx.length > cfg.backups) {
+        const old = idx.pop();
+        try { localStorage.removeItem(SNAP_KEY(old)); } catch(_){}
+      }
+      localStorage.setItem(SNAP_IDX, JSON.stringify(idx));
+      if (cfg.debug) console.log(`[${NS}] snapshot saved: ${stamp} (${keys.length} keys, approx ${total} chars)`);
+      return stamp;
+    } catch(e) {
+      if (cfg.debug) console.warn(`[${NS}] snapshot failed`, e);
+      return null;
+    }
+  };
+
+  // ░ LISTA SNAPSHOTÓW
+  const listSnapshots = () => {
+    let idx = [];
+    try { idx = JSON.parse(localStorage.getItem(SNAP_IDX) || '[]'); } catch(_){}
+    const list = idx.map(stamp => {
+      try {
+        const raw = localStorage.getItem(SNAP_KEY(stamp));
+        const snap = raw ? JSON.parse(raw) : null;
+        return { stamp, time: snap?.t || null, keys: snap ? Object.keys(snap.items).length : 0 };
+      } catch(_) { return { stamp, time:null, keys:0 }; }
+    });
+    return list;
+  };
+
+  // ░ PRZYWRACANIE SNAPSHOTA (index: 0 = najnowszy)
+  const restore = (index=0) => {
+    let idx = [];
+    try { idx = JSON.parse(localStorage.getItem(SNAP_IDX) || '[]'); } catch(_){}
+    if (!idx.length || index<0 || index>=idx.length) return false;
+    const stamp = idx[index];
+    let snap = null;
+    try {
+      const raw = localStorage.getItem(SNAP_KEY(stamp));
+      snap = raw ? JSON.parse(raw) : null;
+    } catch(_) { return false; }
+    if (!snap || !snap.items) return false;
+    // nadpisz WSZYSTKO co ma prefiks – czyszczenie:
+    const keys = collect();
+    for (const k of keys) { try { localStorage.removeItem(k); } catch(_){} }
+    // przywróć
+    for (const [k,v] of Object.entries(snap.items)) {
+      try { localStorage.setItem(k, String(v==null ? '' : v)); } catch(_){}
+    }
+    if (cfg.debug) console.log(`[${NS}] restored snapshot ${stamp}`);
+    return true;
+  };
+
+  // ░ SKAN + (opcjonalnie) ENFORCE
+  const scan = () => {
+    const keys = collect();
+    let totalBytes = 0, fixed=0, cut=0, jsonFixed=0, tooBig=0;
+
+    for (const k of keys) {
+      let v = null;
+      try { v = localStorage.getItem(k); } catch(_) { continue; }
+      const before = v==null ? 0 : bsize(v);
+      totalBytes += before;
+
+      // tylko w trybie ENFORCE podejmujemy akcje naprawcze
+      if (cfg.mode==='enforce' && v!=null) {
+        if (isJSONish(v)) {
+          try {
+            const parsed = JSON.parse(v);
+            const clean = sanitizeJSON(parsed);
+            const str = JSON.stringify(clean ?? {});
+            if (bsize(str) > cfg.maxValue) {
+              // tniemy „grubo” do limitu bajtów
+              let cutStr = str;
+              while (bsize(cutStr) > cfg.maxValue) {
+                cutStr = cutStr.slice(0, Math.floor(cutStr.length*0.9));
+              }
+              localStorage.setItem(k, cutStr); cut++; jsonFixed++; fixed++;
+            } else {
+              localStorage.setItem(k, str); jsonFixed++; fixed++;
+            }
+          } catch {
+            // zepsuty JSON → pusty bezpieczny obiekt
+            localStorage.setItem(k, '{}'); jsonFixed++; fixed++;
+          }
+        } else {
+          // zwykły string – utnij jeśli za długi
+          if (before > cfg.maxValue) {
+            let s = String(v);
+            // tniemy do najbliższego słowa w okolicach limitu
+            const lim = cfg.maxValue;
+            s = s.slice(0, lim);
+            s = s.slice(0, s.lastIndexOf(' ')+1 || s.length);
+            localStorage.setItem(k, s);
+            cut++; fixed++;
+          }
+        }
+      }
+
+      if (before > cfg.maxValue) tooBig++;
+    }
+
+    // przekroczenie łącznej wagi → snapshot + ostrzeżenie
+    if (totalBytes > cfg.maxTotal) {
+      snapshot(); // awaryjny snapshot zanim cokolwiek user zrobi
+    }
+
+    // raport
+    const rep = {
+      prefix: cfg.prefix, mode: cfg.mode, keys: keys.length,
+      totalBytes, tooBig, fixed, jsonFixed, cut,
+      maxTotal: cfg.maxTotal, maxValue: cfg.maxValue
+    };
+    if (cfg.debug) {
+      console.groupCollapsed(`[${NS}] scan — keys:${rep.keys}, total:${rep.totalBytes}B, >value:${rep.tooBig}, fixed:${rep.fixed}`);
+      console.table(rep);
+      console.groupEnd();
+      showBadge(
+        `<b>Storage</b> • keys:${rep.keys}`+
+        ` • total:${rep.totalBytes}B`+
+        (rep.tooBig?` • <span class="warn">big:${rep.tooBig}</span>`:'')+
+        (rep.fixed?` • <span class="ok">fixed:${rep.fixed}</span>`:'')
+      );
+      setTimeout(hideBadge, 2000);
+    }
+    document.dispatchEvent(new CustomEvent(`${NS}:report`, { detail: rep }));
+    return rep;
+  };
+
+  // ░ PURGE – usuń wszystkie nasze klucze (ostrożnie)
+  const purge = () => {
+    const keys = collect();
+    for (const k of keys) { try { localStorage.removeItem(k); } catch(_){} }
+    if (cfg.debug) console.log(`[${NS}] purged ${keys.length} keys with prefix "${cfg.prefix}"`);
+    scan();
+  };
+
+  // ░ ZADANIA STARTOWE
+  // 1) Snapshot na zimno (tylko jeśli mamy ustawione backups>0 i nie ma indexu)
+  if (cfg.backups>0 && !localStorage.getItem(SNAP_IDX)) {
+    snapshot();
+  }
+  // 2) Skan od razu (pierwszy raport)
+  scan();
+
+  // ░ NASŁUCH ZDARZEŃ
+  document.addEventListener(`${NS}:scan`,  scan);
+  document.addEventListener(`${NS}:snapshot`, ()=>{ const s=snapshot(); scan(); });
+  document.addEventListener(`${NS}:list-request`, ()=>{
+    const list = listSnapshots();
+    document.dispatchEvent(new CustomEvent(`${NS}:list`, { detail: list }));
+    if (cfg.debug) console.table(list);
+  });
+  document.addEventListener(`${NS}:restore`, (e)=>{
+    const idx = (e.detail && typeof e.detail.index==='number') ? e.detail.index : 0;
+    const ok = restore(idx);
+    scan();
+    if (cfg.debug) console.log(`[${NS}] restore index ${idx}: ${ok?'OK':'FAIL'}`);
+  });
+  document.addEventListener(`${NS}:purge`, purge);
+
+  // ░ Mostki „krótkie” (wygodne aliasy bezpisaniowe)
+  document.addEventListener('app:mod-storage-guard:scan',  scan);
+  document.addEventListener('app:mod-storage-guard:snapshot', ()=>{ const s=snapshot(); scan(); });
+  document.addEventListener('app:mod-storage-guard:list-request', ()=>{
+    const list = listSnapshots();
+    document.dispatchEvent(new CustomEvent('app:mod-storage-guard:list', { detail: list }));
+  });
+  document.addEventListener('app:mod-storage-guard:restore', (e)=>{
+    const idx = (e.detail && typeof e.detail.index==='number') ? e.detail.index : 0;
+    const ok = restore(idx); scan();
+  });
+  document.addEventListener('app:mod-storage-guard:purge', purge);
+
+  // ░ LOG STARTU
+  if (cfg.debug) console.log(`[${NS}] ready — prefix:"${cfg.prefix}", mode:${cfg.mode}, backups:${cfg.backups}`);
+})();
+</script>
+<!-- ░░░░░░░░░░░░░░░░  /MODUŁ: STORAGE GUARD (mod-storage-guard)  ░░░░░░░░░░░░░░░░ -->
 
 
 
