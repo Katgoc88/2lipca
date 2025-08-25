@@ -696,27 +696,7 @@
 <!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – STYLES (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
 
 
-
 </head>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -749,22 +729,6 @@
           <button class="btn-all"   onclick="resetAll()">RESET ALL</button>
         </div>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
           <!-- SLOT 2 -->
           <div class="mod-hud-card">
@@ -965,13 +929,21 @@
     background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.10);
   }
 
-  /* ░░ TYLKO „PROJECTS” — wzmocnienie kolumny nazwy ░░ */
-  .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(2){
-    font-weight:700; font-size:15px;
-  }
-  .mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(3){
-    font-size:13px;
-  }
+  /* ░░ WZMOCNIENIE KOLUMNY NAZWY — PROJECTS + DISCORDS-DETAILS + EXCHANGES-WALLETS ░░ */
+/* ░ kolumna 2 (np. „NAZWA”) ░ */
+.mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(2),
+.mod-tables .mod-table-collapsible[data-key="discords-details"] .mod-tbl tbody > tr > td:nth-child(2),
+.mod-tables .mod-table-collapsible[data-key="exchanges-wallets"] .mod-tbl tbody > tr > td:nth-child(2){
+  font-weight:700; 
+  font-size:15px; /* domyślnie 13px, tu +2 */
+}
+
+/* ░ kolumna 3 (jeśli też chcesz ją podbić / dostroić) ░ */
+.mod-tables .mod-table-collapsible[data-key="projects"] .mod-tbl tbody > tr > td:nth-child(3),
+.mod-tables .mod-table-collapsible[data-key="discords-details"] .mod-tbl tbody > tr > td:nth-child(3),
+.mod-tables .mod-table-collapsible[data-key="exchanges-wallets"] .mod-tbl tbody > tr > td:nth-child(3){
+  font-size:13px; /* zmień na 15px + dodaj font-weight, jeśli ma być tak samo mocne jak kol. 2 */
+}
 </style>
 
 
