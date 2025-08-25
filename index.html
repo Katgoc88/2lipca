@@ -4940,11 +4940,153 @@
 
 
 
+<!-- ░░░░░░░░░░░░ MODUŁ: ZWIJANY PANEL (mod-panels-collapsible) ░░░░░░░░░░░░ -->
+<!-- █████ STYLE (izolowane do .mod-panels) █████ -->
+<style>
+  /* ░ Kapsuła modułu paneli ░ */
+  .mod-panels{
+    --mod-gap:12px;
+    --mod-radius:14px;
+    --mod-shadow:0 6px 18px rgba(0,0,0,.08);
+    --mod-border:rgba(255,255,255,.38);
+  }
+
+  /* ░ Karta panelu (ramka jak przy tabelach) ░ */
+  .mod-panels .mod-panel-card{
+    border-radius:var(--mod-radius);
+    box-shadow:var(--mod-shadow);
+    border:1px solid var(--mod-border);
+    background:transparent;
+    padding:10px;
+    overflow:hidden;
+  }
+
+  /* ░ Kontener zwijania ░ */
+  .mod-panels .mod-panel-collapsible{ margin:0; }
+  .mod-panels .mod-panel-collapsible[data-state="expanded"]{}
+  .mod-panels .mod-panel-collapsible:not([data-state="expanded"]) .mod-panel-body{ display:none; }
+
+  /* ░ Belka: tytuł + przycisk (stylistyka zgodna z tabelami) ░ */
+  .mod-panels .mod-panel-head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .mod-panels .mod-panel-title{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:22px; font-weight:700; font-style:italic;
+  }
+
+  /* ░ Odstęp między belką a korpusem ░ */
+  .mod-panels .mod-panel-body{ margin-top:6px; }
+
+  /* ░ Obrót ikonki strzałki (przycisk HUD) ░ */
+  .mod-panels .mod-panel-collapsible [data-act="toggle"] .mod-hud-toggle-ico{
+    transition:transform .2s ease; will-change:transform;
+  }
+  .mod-panels .mod-panel-collapsible [data-act="toggle"][aria-expanded="false"] .mod-hud-toggle-ico{ transform:rotate(0deg); }
+  .mod-panels .mod-panel-collapsible [data-act="toggle"][aria-expanded="true"]  .mod-hud-toggle-ico{ transform:rotate(180deg); }
+
+  /* ░ Odstęp nad stopką (jeżeli używasz dolnego guzika) ░ */
+  .mod-panels .mod-panel-foot{ margin-top:6px; text-align:right; }
+
+/* ░░░ MOD-PANELS — WYJĄTEK: w panelu EXPORT/IMPORT tytuł + przycisk razem, na środku ░░░ */
+.mod-panels .mod-panel-collapsible[data-key="export-import"] .mod-panel-head{
+  display:flex;                  /* nadpisujemy domyślne space-between */
+  justify-content:center;        /* cała para pośrodku */
+  align-items:center;
+  gap:8px;                       /* odstęp między tytułem a przyciskiem */
+}
+
+.mod-panels .mod-panel-collapsible[data-key="export-import"] .mod-panel-title{
+  text-align:center;             /* ładnie wygląda przy dłuższych tytułach */
+}
+
+/* (opcjonalnie) odrobina luzu po prawej stronie tytułu */
+.mod-panels .mod-panel-collapsible[data-key="export-import"] .mod-panel-head [data-act="toggle"]{
+  margin-left:4px;
+}
+
+
+</style>
 
 
 
 
-<!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – HTML (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+
+
+<!-- █████ SKRYPT (kapsuła, bez zależności, zapis stanu per data-key) █████ -->
+<script>
+/* ░░ MODUŁ: mod-panels-collapsible ░░ */
+(function(){
+  'use strict';
+  var NS = 'app:mod-panels-toggle:';
+
+  function getSaved(key){ try{ return localStorage.getItem(NS + key); }catch(e){ return null; } }
+  function setSaved(key,val){ try{ localStorage.setItem(NS + key, val); }catch(e){} }
+
+  function applyState(box,state){
+    // stan + aria na WSZYSTKICH przyciskach toggle w obrębie tego boxa
+    if(state === 'expanded'){ box.setAttribute('data-state','expanded'); }
+    else{ box.removeAttribute('data-state'); state = 'collapsed'; }
+    box.querySelectorAll('[data-act="toggle"]').forEach(function(btn){
+      btn.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
+    });
+  }
+
+  function toggle(box){
+    var key = box.getAttribute('data-key'); if(!key) return;
+    var next = box.hasAttribute('data-state') ? 'collapsed' : 'expanded';
+    applyState(box,next); setSaved(key,next);
+    box.dispatchEvent(new CustomEvent('app:mod-panels:change',{detail:{key:key,state:next}}));
+  }
+
+  function initBox(box){
+    var key = box.getAttribute('data-key'); if(!key) return;
+    // delegacja na wszystkie guziki w boxie (góra i ewentualnie dół)
+    box.querySelectorAll('[data-act="toggle"]').forEach(function(btn){
+      btn.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation(); toggle(box);
+      }, {passive:true});
+    });
+    // stan startowy: domyślnie collapsed (z pamięcią)
+    var saved = getSaved(key);
+    applyState(box, saved === 'expanded' ? 'expanded' : 'collapsed');
+    box.setAttribute('data-panels-toggle-inited','true');
+  }
+
+  function boot(){
+    document.querySelectorAll('.mod-panels .mod-panel-collapsible[data-key]:not([data-panels-toggle-inited])')
+      .forEach(initBox);
+  }
+
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot, {once:true}); }
+  else{ boot(); }
+})();
+</script>
+
+<!-- █████ SZABLON HTML — WSTAW W MIEJSCE, GDZIE MASZ TEN DUŻY KAFEL █████ -->
+<!-- Uwaga: do .mod-panel-body WKLEJ swój obecny panel eksport/import (NIC nie zmieniasz w środku). -->
+<section class="mod-panels" aria-label="Zwijane panele">
+  <div class="mod-panel-card">
+    <div class="mod-panel-collapsible" data-key="export-import">
+      <!-- ░ Belka ░ -->
+      <div class="mod-panel-head">
+        <span class="mod-panel-title">EXPORT / IMPORT</span>
+        <button type="button" class="mod-hud-btn toggle" data-act="toggle" aria-expanded="false"
+                title="Zwiń/Rozwiń panel" aria-label="Zwiń/Rozwiń panel">
+          <svg class="mod-hud-toggle-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- ░ Korpus (zwijany) — TU WLEJ SWÓJ ISTNIEJĄCY PANEL ░ -->
+      <div class="mod-panel-body">
+
+
+
+
+        <!-- ⬇️ TWÓJ AKTUALNY PANEL EXPORT/IMPORT (bez zmian w środku) ⬇️ -->
+     
+
+        <!-- ░░░░░░░░░░░░░░░░ MODUŁ EXPORT/IMPORT (mod-exporter) – HTML (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
 <section class="mod-exporter" data-module="mod-exporter" aria-label="Export / Import">
   <div class="card">
     <!-- ░ BELKA GÓRNA: EXPORT (układ 2–3–3–2 na 10 kolumnach) ░ -->
@@ -5025,6 +5167,36 @@
   </div>
 </section>
 <!-- ░░░░░░░░░░░░░░░░ /MODUŁ EXPORT/IMPORT (mod-exporter) – HTML (POPRAWIONE) ░░░░░░░░░░░░░░░░ -->
+
+
+
+
+
+        <!-- ⬆️ KONIEC TWOJEGO PANELU ⬆️ -->
+
+
+
+
+      </div>
+
+      
+    </div>
+  </div>
+</section>
+<!-- ░░░ KONIEC MODUŁU: ZWIJANY PANEL ░░░ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
