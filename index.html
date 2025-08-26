@@ -3971,36 +3971,8 @@
     </div>
   </td>
 
-  <!-- ░ LISTA 📑 ░ -->
-  <td colspan="6" class="muted">
-    <button type="button" class="mod-list-btn" aria-label="Show list">📑</button>
-    <script type="application/json" class="mod-info-data" data-project="FRACTION AI">[
-      {
-        "text": "Fraction AI Mainet- wprowadzenie",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1375419555215835256",
-        "search": true,
-        "detail": "Projekt przeszedł, już do fazy mainet, dlatego zaczynamy od rejestracji z linku ososby, z którą współpracujesz:\n\nPatryk https://dapp.fractionai.xyz/?referral=BA4BDFB6\nPołacz wallet EVM a nastepnie po lewej stronie kliknij zakładkę Fractals połacz wallet i wykonaj migracje z testnetu, na mainet zdj.1\n(możesz mieć połaczony Rabby z poprzednich ruchów, wiec najpierw odłacz Fraction w roszerzeniu na Rabby i wtedy się połączysz )\nNatępnie zakładka dashboard i tworzymy swojego agenta:\n-jednak zanim to zrobimy, to najpierw dodamy środki: min 10$ na sieci BASE -> jak klikniesz Create Agent, to pokażą Ci się opcje wpłaty, możesz wybrac Transfer from Wallet, to przerzuci Ci bezpośrednio z salda na Rabby\nhttps://fractionai.xyz/dapp/dashboard\n\njesli już masz środki to wracasz do dasboard i tworzsz pierwszego agenta BTC Trader zdj.2  Nazwę i awatar ustawiam własną, żeby było mi łatwiej ich rozpoznać,\njeżeli później będzie potrzeba stowrzenia kolejnych. Nastomiast Prompt generuje za pomocą AI klikjąc jaskrawy napis po prawej stronie Generate with AI\n\nInformacyjnie\nBTC Tradewars: to agent AI, który handluje kryptowalutami, w Zawodach/bitwie z innymi agentami\n-Łącznie walczą w 5 rundach, \n-Agent podejmuje decyzję LONG/SHORT, na podstawie promptu, jaki wygenerowaliśmy podczas tworzenia\n-Jego celem jest utrzymać pozcyje przez 10 świec, jeżeli mu sie to uda, to podliczane są zyski do strat, a wygrywa ten, który ma najwiecej zysku\n\nCzas na kolejnego Agenta Bid Tac Toe: kliknij po prawej Create new Agent i ta sama zasada co przy poprzednim: nazwe i zdjęcie ustawiam własną, prompt generuje automatycznie:\n-jeżeli klikniesz w automatczne generowanie promptu, to póżniej możesz go poprawić klikając ponownie jaskrawe Improve with AI \nInformacyjnie\nBid Tac Toe: agent grający w coś na wzór kółko krzyżyk\n-Każdy agent AI zaczyna od 100 USD, ale zasady to juz chyba każdy zna \nJak masz już zrobionych dwóch agencików, zdj.3 to teraz wysyłasz ich do gry klikając zielone Enable Automation :alert: zaczynaj od najniższych stawek bo ja wybrałem za 0.25 i nie moge zejsc niżej, a mój trader motherfu.. wyneberował mi strate, wiec po pierwszej sensi byłem 0.5 w plecy :catJAM1:\n\n Plan jest taki, że dodaje to do Daily i krece tymi 10 USDC które dodałem, zobaczę na ile mi to wystarczy \n-jak strace wsyztsko, to podejme decyzje co dalej\nALE zakładam, że mój prompt bedzie kotem handlu i wtedy wypłace zyski :money_logo: bo można "
-      },
-      {
-        "text": "Fraction AI Mainet: nowe bardziej wydajne prompty dla agentów",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1384541928992804965",
-        "search": true,
-        "detail": "Fraction AI Mainet: nowe bardziej wydajne prompty dla agentów\n\nDodali nowego agenta, którego sobie zaraz stworzymy, jednak najpierw poprawimy wydajność naszych starych Agentów, których tworzyliśmy w poprzednim wpisie:\nZaczniemy od Agenta Bid Tac Toe zdjęcie.1\nwejdź w swój dasboard i wybierz agenta Bid Tac Toe czyli tego odpowiedzialnego za gre w kółko krzyżyk\nhttps://fractionai.xyz/dapp/dashboard\n przed poprawieniem promptu miałem poziom ROI -22.96%, a po ok 6/7 sesjach poprawiłem ROI do -11.42% \n-oczywiście nie jest to idealna strategia, nie wszystko jest na plus, ale skoro poprawia wyniki to robimy to \n-jeżeli opisałeś go tak jak sugerowałem w poprzednim wpisie, to prawdopodobnie masz podobną nazwe: zdj.2 \n-kliknij koło zębate a do System Promptu wklei, to co załączam poniżej: \nskopiuj cały teskt:\n\nYou are a bidding strategist and perfect Tic-Tac-Toe player. You play a modified game of Tic-Tac-Toe where before each move, both players secretly submit a bid (from a limited token budget). The highest bidder places their mark (X or O) on the board at the chosen position. \n\nYour goal is to win the game while conserving as much of your bidding budget as possible. If you lose all your budget early, you may lose the game even with better positioning.\n\nFollow these strategic principles:\n\nPrioritize winning: Always bid more aggressively when:\nYou can win in the next move.\nYou must block an opponent’s winning move.\nPredict opponent: Estimate how much the opponent is likely to bid in the current situation.\nIf the opponent is likely to bid low, consider bidding slightly higher to win cheaply.\nIf a bidding war is likely, consider letting the opponent win the bid if the board position isn’t dangerous.\nControl center and forks:\nFavor the center (position 5) early in the game.\nCreate and prevent forks.\nBudget management:\nAvoid overspending early.\nSave your highest bids for critical win/block moments.\nKeep at least 20–30% of your budget for late game.\nDecision output:\nOutput your bid amount (as an integer).\nOutput your intended move (cell 1–9, top-left to bottom-right).\nBriefly explain reasoning (optional, for evaluation).\n\nYou are rational, opportunistic, and budget-conscious. You play to win, not to show off.\nKONIEC promptu to ... You play to win, not to show off.\n\n\n\n\n\n\n\n\nTeraz kolei na BTC Tradewars zdjęcie 3\ntutaj poprawa proptu była juz nieco mniejsza bo z okolicy - 11,11% podniosła sie do -4.29%\n\n(ale po dziejszej sensji znowu nieco spadło :memes_gif_sus:\n-zasada ta sama co przy poprzednim agencie, czyli zakładka dasboard, wybierasz agenta i pod ikoną ustawień wklejasz nowy prompt:\nskopiuj całość:\nRSI, EMA Crossover, MACD, and OBV to determine market conditions and price movements.\nAnalysis Methods:\nDivergence: Identify trend reversals.\nMomentum Comparison: Compare indicator strengths (e.g., RSI vs. MACD).\nTrend Strength Scoring: Use ADX for strong trend validation.\nCapital Allocation:\n90% capital for strong signals, 50% for moderate signals, and 10-30% for weak signals.\nRisk Management:\nNo TP/SL; hold positions for 10 candles.\nExit based on volume divergence or momentum changes.\nOrder Entry:\nLong if indicators show strong bullish conditions, and Short if bearish.\nAvoid Conflicts:\nUse divergence analysis to resolve conflicts between RSI and MACD.\nKONIEC promptu to ..between RSI and MACD..."
-      },
-      {
-        "text": "Fraction AI Mainet: nowy agent do handlu na BTC",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1384543350769844325",
-        "search": true,
-        "detail": "Natomiast teraz stworzymy nowego agenta, którego zadaniem jest handel na BTC:\nWejdz w Dasboard i kliknij po prawej niebieskie: Create new Agent\n-i teraz tak jak na zdjeciu 1 wybierz agenta BTC Tradewars , ustaw nazwe (ja ustawim cos prostego dodaje 1 zeby poźniej wiedzieć co jest co)\n-na razie wybieram dwie pierwsze strategie zdj.2 i srawdze jak działa po 5/10 sesjach: jesli bedzie miernie, to wprowadzę zmiany, ktrymi sie tutaj podziele\nhttps://fractionai.xyz/dapp/dashboard\n jesli nie będzie chciało Ci zapisać i dodać twojej strategii, to zmień dowolny parametr i wtedy pójdzie \nTeraz jak już wiesz wejdź w link, kliknij join space i puść swojego nowego agenta na walke handlowa \n🔗 https://fractionai.xyz/dapp/spaces\n\nPodsumowując:\ndo daily dodaje codzienną aktywność na nowym agencie\n-oraz bedzie ich uruchamiał 2razy dziennie: dlatego podczas robienieautyny jak już wypuszcze wszytie boty, to nie zamykam strony tylko przesuwam ją w zakładkach i wracam za ok 15/20min do ponownego uruchomienia"
-      },
-      {
-        "text": "Fraction AI nowy bot",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1388923313006317750",
-        "search": true,
-        "detail": "Na Fraction AI pojawił sie nowy bot i zrobimy sobie również jego \nInformacyjnie:\nBoty odgrywają symuację meczu piłki nożnej, dzieki temu Agenci AI uczą się pracy zespołowej, pozycjonowania i mądrej strategii.\nWejdz w link i kliknij nowego bota Join Space zdj.1\nhttps://fractionai.xyz/dapp/spaces\nnastępnie Create New Agent, uzupełnij nazwę, a następnie możesz uzyc opcji Autofill Data  i poszukac różnych opcji na ustawinie sił na: obrone, pomoc i atak. Ja na razie zaczynam z takim ustawiniem zdj.2 i zobcze jak pojda pierwsze mecze"
-      }
-    ]</script>
-  </td>
+  <!-- ░ LISTA JSON ░ -->
+  <td colspan="6" class="muted"></td>
 </tr>
 
 <!-- --------------------------ONE BALANCE-------------------------- -->
@@ -4039,18 +4011,8 @@
     </div>
   </td>
 
-  <!-- ░ LISTA 📑 ░ -->
-  <td colspan="6" class="muted">
-    <button type="button" class="mod-list-btn" aria-label="Show list">📑</button>
-    <script type="application/json" class="mod-info-data" data-project="ONE BALANCE">[
-      {
-        "text": "OneBalance beta faza",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1393985627384447067",
-        "search": true,
-        "detail": "OneBalance beta faza\nProjekt jest obecnie w fazie Beta, a przed nami jeszcze 4ry etapy ulepszeń, do tego aby uzyskać finalny produkt do którego dążą :checkmark~1:\nDokąd zmierzają i jakie jest cel projektu?\n Ich celem głównym jest stworzenie systemu, w którym niezależnie od tego na jakiej sieci posiadasz środki, możesz dokonywać transakcji (np zakup NFT) na każdej innej i dowolnej  sieci, bez konieczności używania bridge czy swap.\nPrzykład:\nposiadasz 100$ w USDC na sieci mainet, a chcesz kupić NFT na sieci BASE za ETH i w tym momencie za pomocą konta Onebalance wykonujesz jedna tx, a wszytsko odbywa się natychmiastowo :cooldoge:\n Czy to sie przyjmie?\nTrudno dziś oceniać i choć może nie jest to technologia, której wyczekuję cały świat krypto, to nadal jest potencjał na Airdropa, dlatego to wchodzimy w to!\nZebrali 25 mln$ finansowania, więc mają czym sie podzielić :check: \nWejdź w link i stwórz swoje konto (będzie wymagało dodania konta to pliku kluczy)\nhttps://app.onebalance.io/\n-dalej wejdź w Explore Account, a następnie po prawej stronie skopiuj swój adres konta OneBalace \n-na ten adres wyslij dowolnego tokena USDC/USDT/ETH (ja wysyłam ETH na sieci Base i pierwszą tx robie testową na 1$ ) \n-po jednej z obsługiwanych sieci  Arbitrum, Optimism, Polygon, Linea, Avalanche C-Chain, Ethereum, Base lub BNB Chain.\n-po chwili tokeny mam na koncie więc dosyłam kolejne 5/10$ żeby mieć na ruchy (tutaj wysyłam kawałek BNB po sieci BSC)  :check: \nJak juz masz tokeny na koncie, to teraz kliknij po prawej zakładkę SWAP i zrób 2/3 różne swapy na różne tokeny i sieci\n(o ile Ci sie uda, bo u mnie na razie przeszła jedna tx i na pozostałych pokazuje błędy, ale do tego zaraz wrócimy)\n\n-jeżeli jesteś w zakładce SWAP i klikniesz na tokena którego chcesz swapować, to pojawi CI sie to co na zdjeciu 1\n-przesuwając ten suwak będziesz miał możliwość zmiany sieci i tokenów: przetestuj różne kombinacje, ale na początek 2/3 swapy (dodamy to do rutyny)\nWracając do tematu błędów, to w momencie gdy pojawi się jakikolwiek, to od razu zrób screen najlepiej całego ekranu i dodaj im zdjecie z krótkim opisem na kanał feeback\n:discord: Discord: https://discord.gg/BKUBrQpM\nkanał feeback: ⁠nieznane\n\nPodsumowując: \ndodaj sobie tę stronę do rutyny, jednak na tym etapie zrób ok 2/3tx na tydzień \n-nie ma jeszcze konkretnej kampanii, ani miejsca do mierzenia aktywności, dlatego na razie bez dociskania utrzymajmy sobie aktywność w czasie\notwórz sobie również kanał feeback w zakładce obok, zeby mieć pod ręką w razie błędów "
-      }
-    ]</script>
-  </td>
+  <!-- ░ LISTA JSON ░ -->
+  <td colspan="6" class="muted"></td>
 </tr>
 
 <!-- ----------------------------SEI----------------------------- -->
@@ -4095,18 +4057,8 @@
     </div>
   </td>
 
-  <!-- ░ LISTA 📑 ░ -->
-  <td colspan="6" class="muted">
-    <button type="button" class="mod-list-btn" aria-label="Show list">📑</button>
-    <script type="application/json" class="mod-info-data" data-project="SEI">[
-      {
-        "text": "Sei - Podstawowe ruchy na sieci",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1396248295726256309",
-        "search": true,
-        "detail": "Sei - Podstawowe ruchy na sieci\n\n\nSpis linków -> Soon \n\n\nBardzo prężnie rozwijający się projekt, który cieszy się ogromną popularnością w świecie krypto :fire_gif: \nW tym wpisie zrobimy podstawowe ruchy na sieci, aby zaznaczyć swoją obecność :verify: \nW kolejnych wpisach będziemy wchodzić coraz głębiej w projekt :sei3: \nAby wycisnąć sok, zetrzeć skórkę i na koniec zasadzić nasiona :thinkaboutit_animated: \n\n\n:Discord: Discord\nwejdź i zweryfikuj się na serwerze\nhttps://discord.com/invite/sei\n\n\n:seimetor: Bridge \nwejdź na stronkę -> https://welcome.symph.ag/\npołącz portfel EVM\nwykonaj bridge z dowolnej sieci na sieć Sei\nja wysyłam na początek 30$ z sieci Base zdj1\n\n\n:seiwoah: Swapy\nponiżej na stronce w oknie Swap Sei połacz portfel EVM\nwymień połowę $SEI na $SEIYAN zdj2\nnastępnie połowę $SEIYAN na $USDC zdj3\nteraz wymień całość $SEIYAN oraz $USDC do tokena $SEI\n\n\n:sei3: Staking\nwejdź tutaj -> https://app.sei.io/\npołącz portfel EVM\nwejdź w zakładkę Stake\nwybierz validatora i wrzuć część tokenów $SEI\npamiętaj że trzeba liczyć się z 21-dniową blokadą przy wypłacie tokenów\nja wrzuciłem 60 $SEI czyli 20$ na moment tworzenia wpisu do validatora polkachu.com zdj4\n\n\nNarazie tylo, wrzuć sobie 1-2 dowolne swapy dziennie do ⁠🛎┇rutyna-premium :verify: \nPs. Pamiętaj o tym, aby swapy były różnorodne\nPs2. Ja będę robił 2 totalnie różne swapy, aby finalnie przeklikać wszystkie dostępne tokeny "
-      }
-    ]</script>
-  </td>
+  <!-- ░ LISTA JSON ░ -->
+  <td colspan="6" class="muted"></td>
 </tr>
 
 <!-- ----------------------------ASTRA NOVA------------------------------ -->
@@ -4157,36 +4109,9 @@
     </div>
   </td>
 
-  <!-- ░ LISTA 📑 + DANE (JSON) ░ -->
-  <td colspan="6" class="muted">
-    <button type="button" class="mod-list-btn" aria-label="Show list">📑</button>
-    <script type="application/json" class="mod-info-data" data-project="ASTRA NOVA">[
-      {
-        "text": "Black Pass & Daily",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1286766689664634901",
-        "search": true,
-        "detail": "\n\n\nAstra Nova\n\n\nSpis linków -> https://discord.com/channels/758584467484442695/1317498855973195787/1328721389770768475\nBlack Pass to platforma SocialFI dostępna za pośrednictwem darmowego NFT soulbound, który można wybić w momencie dołączenia. Na tej platformie będziesz wykonywać zadania społecznościowe i zbierać odłamki (punkty), aby zdobyć $RVV, oficjalny token ekosystemu Astra Nova. Wszystko zaczyna się od Sezonu 1, skupionego wokół nadchodzącej wersji demonstracyjnej gry Astra Nova.\nPo sezonie 1 wszystkie Twoje postępy zostaną zresetowane. Odłamki, które zdobyłeś w sezonie 1, przełożą się na nagrody w tokenie $RVV\nWejdź w link osoby z którą współpracujesz: \nPatryk: https://blackpass.astranova.world/?referral_code=7119f013e7e4\n1. Kliknij w środek teraz połącz się kontem : \n2. Połącz portfel MetaMask --> ustwa nazwę --> dodaj e-mail\n3. Dodaj stronkę do https://discord.com/channels/758584467484442695/1103347225930776637 i używaj codziennie Daily Spina oraz wykonuj nowe misje \n4. Z prawej strony w **One-time Quests** wykonaj misje socialowe, wiekszość z nich aktualizuje się po czasie więc polecam robić codziennie po kilka żeby nie zabierały dużo czasu\n5. Poniżej w **Ongoing Quests** interesuje nas misja SEVEN_DAYS_CONSECUTIVE_LOGIN and Earn shards po 7 dniach codziennego logowania możesz odebrać punkty i misja się odnawia\n6. Oraz misja Write a Tweet with @Astra__Nova or $RVV polega na wrzuceniu tweeta z jednym z tych dwóch oznaczeń klikasz i dodajesz od siebie kilka słów i odbierasz SHARDS\n- Każdy post lub tweet, który zostanie polubiony przez @Astra__Nova, przyniesie Ci duży bonus w SHARDS i zostanie uwzględniony w puli nagród. Warto tworzyć jakościowe tweety, memy niż na ilość.\n- Boty i spamowanie są zabronione i będą skutkować odjęciem SHARDS lub banami.\n7. Za holdowanie tych NFT'eków również są SHARDS --> https://opensea.io/collection/deviants-of-astranova --> koszt na ten moment to 0.0031 ETH \n8. Po wykonaniu wszystkich misji i odebraniu punktów możesz kliknąć w **Update Black Pass** wrzucisz wtedy swoje SHARDS do Black Passa i odblokujesz swoją pozycje w tabeli\nUWAGA! mamy 20 darmowych wrzuceń SHARDS do Black Passa więc raczej nie szalej z tym przerzucaniem  \nWracaj tutaj codziennie i wykonuj nowe misje z One-time Quests oraz odnawialne z  Ongoing Quests używaj Daily Spina aby zebrać jak najwięcej SHARDS \n."
-      },
-      {
-        "text": "kiedy TGE & Fight Club apka na telegram",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1318280253860479056",
-        "search": true,
-        "detail": "||@everyone ||\n<:Astranova:1008613037206417468> **Astra Nova - kiedy TGE & Fight Club apka na telegram**\nSpis linków -> https://discord.com/channels/758584467484442695/1317498855973195787/1328721389770768475\n⭐ TGE planowane jest na 30 stycznia 2025, więc mamy czas żeby dociskać ruchy, poza tym za dużo info nie podają\n⭐ Do roboty są daily spiny oraz misje z prawej strony czyli to co dotychczas (dla pewności przeglądnij pierwszy wpis bo tam wsio aktualne)\n⭐ Pograj w gierkę czas do 30 stycznia 2025, tutaj podali info, że spora część tokenów zostanie rozdana pomiędzy graczy również za gierkę telegramową. Także wskakuj w link osoby z którą współpracujesz ->\nPatryk -> https://t.me/Deviants_FightClub_Bot?start=219693766\nKrzychu -> https://t.me/Deviants_FightClub_Bot?start=2002577708\nPaweł Głowacki -> https://t.me/Deviants_FightClub_Bot?start=1355343879\nReszta linków pojawi się wkrótce <:2527_trolldog:1229140398316851230> \n- w gierce połącz portfel -> aby to zrobić kliknij diament w prawym dolnym rogu\n- obok diamentu kliknij na ikonkę teczki -> znajdują się tam proste taski do wykonania -> nagrodą są oczywiście SHARDSy\n- środkowy przycisk losuje gierkę -> klikasz w pola na ekranie ->  kto ma lepszy refleks oraz szybsze palce wygrywa :9171bigbrain1: \n- 2 przyciski w lewej służą do ulepszania osiągnięć czyli wykorzystania zaawansowanej genetyki czy inkubacji <:2527_trolldog:1229140398316851230> \n⭐ Wypełnij formularz po pograniu w gierkę -> https://docs.google.com/forms/d/e/1FAIpQLSfK0l0yi7wKVPBySN8ZQxspms1SxgTFtQYtMKRYVDuFxdNoAQ/viewform\n- Telegram User ID znajdziesz klikając w gierce na swój profil zdj2\n- następnie wpisz ilość SHARDSów jaką posiadasz w gierce\n- zrzut ekranu z potwierdzeniem ilość SHARDS z gierki\n⭐ Tutaj bierz udział w raffles -> https://discord.com/channels/921402513687732275/1295636815755214849\n- wymagania są różne ale zazwyczaj wystarczy zostawić followy i dołączyć do discordów \n**Role do zdobycia za NFTeki**\n⭐ Sprawdź czy jesteś na discordzie -> https://discord.gg/3CJ4bAwkYh\n- Na tym kanale zweryfikujesz role za posiadane NFTeki-> https://discord.com/channels/921402513687732275/1065171125589512272\n⭐  **Rola @Deviants Holder** za posiadanie co najmniej 1 Deviants NFT (floor 0.004 ETH) -> https://opensea.io/collection/deviants-of-astranova\n⭐ **Rola @SuperNova Holder** za posiadanie co najmniej 1 SuperNova Key (floor 10 POL) -> https://magiceden.io/collections/polygon/0xe3a6672029733811440091de2e79ac3fbbac3342\n- tutaj po połączeniu portfela możemy stakować NFTeki (SuperNova Key) i korzystać z bonusów zdj3 -> https://blackpass.astranova.world/supernova\n⭐ Tutaj znajdziesz swój AstraNova BalckPass -> https://tokentrove.com/collection/AstraNovaBlackPass?tab=wallet\n\n."
-      },
-      {
-        "text": "Update farmienie SHARDSów",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1366174172916486174",
-        "search": true,
-        "detail": "\nAstra Nova - Update farmienie SHARDS'ów & zbliża się TGE\nSpis linków -> https://discord.com/channels/758584467484442695/1317498855973195787/1328721389770768475\nNa początek krótko o projekcie Astra Nova w ramach przypomnienia o co tam biega\n Jest to ekosystem gier, który za pomocą AI dostosowuje sie do gracza w realnym czasie\n Współpracują z NVIDIA łączą AI z technologią Web3 i  opierając się na społeczności, aby dostarczać wciągające, dynamiczne doświadczenia z rozgrywki\nW teamie mają 80 byłych pracowników z firm NVIDIA, Ubisoft, Rockstar i innych, twórców takich gier jak GTA 5, Mortal Kombat i Assassin's Creed\n W taskach pojawiły się zadania na większą ilość SHARDS zdj1\nystarczy kliknąć zadanie i wrócić na stronkę zalicza od ręki \nprzeżuć SHARDS'y na swój Black Pass i sprawdź pozycje zdj2 chwilę mieli więc cierpliwości\nDodatkowo warto stworzyć kilka postów promujących Astra Nova na platformie  \nOryginalne treści/memy, powinny zawierać \noznaczenie  @Astra__Nova\ndodaj słowo kluczowe Astranova\nużyj hasztagu $RVV, aby wspomnieć o tagu tokena\noraz hashtagu #Astranova\nDodatkowo Interakcja z tweetami przy użyciu tych słów kluczowych lub oficjalnego konta również przyniesie Ci SHARDSy\n Wyjaśnienie: chodzi o zostawianie sensownych komentarzy pod postami promującymi  \n Każdy post lub tweet, który zostanie polubiony przez @ Astra__Nova, przyniesie Ci duży bonus w odłamkach i zostanie uwzględniony w puli nagród\n Po sezonie 1 wszystkie Twoje postępy zostaną zresetowane. Odłamki, które zdobyłeś/aś w sezonie 1, przełożą się na nagrody w tokenie $RVV\nJakość treści jest ważniejsza niż ilość. Bądź kreatywny i oryginalny nie szalej z ilością mniej znaczy więcej  \n Boty i spamowanie są zabronione i będą skutkować odjęciem odłamków lub banami \n."
-      },
-      {
-        "text": "Whitelista Token Play",
-        "url": "https://discord.com/channels/758584467484442695/1056793384041332746/1377630589737238529",
-        "search": true,
-        "detail": " \n\n\nAstra Nova - Whitelista Token Play\nWskakuj tutaj i zapisz się maile do whitelisty\n https://tokenplay.ai/\nNarazie tylo czekamy na rozwój \n."
-      }
-    ]</script>
-  </td>
+  <!-- ░ LISTA JSON ░ -->
+  <td colspan="6" class="muted"></td>
+    
 </tr>
 
 <!-- ----------------------------GM ON INK------------------------------ -->
